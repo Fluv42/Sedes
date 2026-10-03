@@ -5,8 +5,10 @@
   "type": "module",
   "scripts": {
     "dev": "vite",
-    "build": "tsc -b && vite build",
+    "build": "tsc -b && vite build && vite build --ssr src/entry-server.tsx --outDir .ssr && node scripts/prerender.mjs",
     "lint": "eslint .",
+    "test": "node --test scripts/check-build.test.mjs",
+    "check": "npm run lint && npm run build && npm test",
     "preview": "vite preview"
   },
   "dependencies": {

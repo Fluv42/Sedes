@@ -2,6 +2,7 @@ export const site = {
   name: 'Micah VanEwyk',
   alias: 'Fluv42',
   title: 'Developer & IT Professional',
+  tagline: 'Welcome. This is my home for everything that I make.',
   email: 'micahvanewyk42@gmail.com',
   github: 'https://github.com/Fluv42',
   location: 'Southwestern Ontario, Canada',

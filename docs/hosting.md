@@ -1,5 +1,9 @@
 # Publishing later
 
+**Status, Oct 4 2026:** source is public at https://github.com/Fluv42/Sedes. `sedes.ca` already uses Cloudflare nameservers (`ray`/`sharon.ns.cloudflare.com`, registrar CentralNic/Hexonet, expires 2027-07-17) and has no A record yet, so the zone just needs a Pages project attached. Cloudflare Pages is free for this; nothing needs to be bought.
+
+Quick path (Cloudflare dashboard, logged in as Micah): Workers & Pages → Create → Pages → Connect to Git → `Fluv42/Sedes` → framework preset None, build command `npm run build`, output `dist`, env var `NODE_VERSION=22` (and `VITE_CONTACT_PHONE` if the phone should show) → Deploy. Then Custom domains → add `sedes.ca` (and `www.sedes.ca`). Pushing to `main` redeploys.
+
 The foundation generates static files. It does not need a VPS, database, PM2 process, or application server in production.
 
 Cloudflare Pages can build this existing Vite project without changing frameworks:
@@ -17,7 +21,7 @@ The build produces HTML for Home, About, Projects, eight project pages, Notes, i
 ## Before attaching sedes.ca
 
 1. Complete Claude's visual QA on desktop, a narrow phone and Safari. Re-run `npm run check` after changes.
-2. Create the public GitHub repository and push the prepared source. Do not upload `.env.local`, `dist`, `.ssr`, the résumé, or the offline preview containing the phone number.
+2. ~~Create the public GitHub repository~~ Done. Never commit `.env.local`, `dist`, `.ssr`, the résumé, or an offline preview containing the phone number.
 3. Connect the repository to Cloudflare Pages, use the build settings above, and check a preview deployment.
 4. If showing the phone number, set the build variable in the chosen deployment environment. A `VITE_` variable is included in the public output; it is not secret.
 5. Check a direct project URL, reload it, navigate back/forward, and test the 404 URL on the hosted site. Known pages should respond successfully and unknown pages should return HTTP 404.
@@ -29,6 +33,8 @@ Do not add a blanket rewrite of every path to `index.html`: the build already pr
 Noindex asks compliant search engines not to list the site. It does not provide authentication or hide the phone number from visitors. Before later enabling indexing, remove the phone row or get Micah's approval to make it indexable.
 
 No deployment, DNS change, paid service, or account creation has been performed.
+
+`npm run preview` (Vite) falls back to the home page for paths without a trailing slash, which shows a React hydration warning locally on `/notes` etc. Cloudflare serves `notes/index.html` for `/notes`, so this is a local-preview quirk only; `/notes/` previews correctly.
 
 ## Official references checked
 

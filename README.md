@@ -1,50 +1,37 @@
 # Sedes
 
-Micah VanEwyk’s personal portfolio, built on his existing React, TypeScript and Vite project.
+My home for everything that I make. Built with React, TypeScript and Vite, pre-rendered to static HTML, and headed for [sedes.ca](https://sedes.ca).
 
-The home page follows the supplied desktop/mobile wireframe: a framed page, meadow on the left and introduction on the right, followed by three selected projects. About, the complete project index, eight case studies, Notes and Contact share the same frame. The developer’s day is intentionally deferred.
+The name comes from *Sedes Sapientiae*, the Seat of Wisdom: the site is the seat, and the work is what it holds.
 
-## Start locally
+## Run it
 
-Use Node 22.12 or newer (Node 22 is recorded in `.nvmrc`).
+Node 22.12 or newer (`.nvmrc` says 22).
 
 ```sh
 npm ci
 npm run dev
 ```
 
-## Check and build
+`npm run check` lints, builds every route to `dist/`, and runs the built-output tests (routes, links, assets, noindex, contact). Only `dist/` is deployed; `.ssr/` is a build intermediate.
 
-```sh
-npm run check
-```
+## Where things live
 
-This runs lint, TypeScript and production builds, then seven built-output checks for canonical routes, internal links, assets, headings, project navigation, contact links and noindex instructions.
-
-`npm run build` generates static HTML for every route in `dist`, including a custom 404. `.ssr` holds build-time intermediates and is not deployed. The site is a client application with pre-rendered HTML; no production application server is needed. `npm run preview` serves the production output locally when the environment allows a listening socket.
-
-## Edit the content
-
-- `src/content/site.ts`: identity, navigation and the principles note.
-- `src/content/projects.ts`: canonical project records, summaries, roles and case-study sections. Home selects three records from this list.
-- `src/pages.tsx`: the page components and route selection.
-- `src/components/`: internal links and decorative SVGs.
-- `src/lib/`: location subscription and page titles.
-- `src/App.tsx`: shared frame, navigation, footer, title and focus updates.
-- `src/index.css`: local fonts and shared tokens.
-- `src/App.css`: layouts, component styles and responsive rules.
+- `src/content/site.ts`: name, tagline, contact, navigation, the principles note.
+- `src/content/projects.ts`: every project and its write-up. Home features three of them.
+- `src/pages.tsx`: the pages.
+- `src/App.tsx`: the frame, navigation and footer shared by every page.
+- `src/components/`: the meadow picture, grain arc, sun-print plates, grass, nav underline.
+- `src/index.css`: fonts and colour tokens. `src/App.css`: layout.
+- `public/media/`: the meadow footage and poster, the dissolve mask, project images.
 
 ## Contact and indexing
 
-The number is optional. Copy `.env.example` to `.env.local` and set `VITE_CONTACT_PHONE` to show a phone row. Keep the value out of the public Git repository. The build embeds it in the public website; it is not secret.
+A phone row appears only when `VITE_CONTACT_PHONE` is set (in `.env.local` or the host's build settings). It is never committed. While the phone is shown, the site stays out of search engines: every page has a noindex meta tag and `public/_headers` sends the matching header on Cloudflare.
 
-The user authorized the number only while the website is excluded from search indexing. The HTML contains noindex meta tags, and `public/_headers` adds an equivalent response header for Cloudflare. Preserve those instructions until the user changes that decision. Noindex is not access control.
+## More
 
-## More context
-
-- `CLAUDE_HANDOFF.md`: what is done, what is blocked, and the remaining visual review.
-- `docs/content-sources.md`: evidence and limits for project descriptions.
-- `docs/asset-credits.md`: stock footage, course screenshot and local font licenses.
-- `docs/hosting.md`: later Cloudflare build and verification settings.
-
-No accounts, tracking scripts, paid services or form backend are required by the foundation.
+- `CLAUDE_HANDOFF.md`: current state and next steps.
+- `docs/content-sources.md`: what each project description is based on.
+- `docs/asset-credits.md`: footage, screenshot and font licences.
+- `docs/hosting.md`: Cloudflare Pages settings and launch checklist.

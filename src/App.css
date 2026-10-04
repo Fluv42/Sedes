@@ -366,6 +366,15 @@ a:hover .arrow {
   margin-top: 6px;
 }
 
+.project-row:has(a:focus-visible) {
+  outline: 2px solid var(--rust);
+  outline-offset: 10px;
+}
+
+.project-row a:focus-visible {
+  outline: none;
+}
+
 .project-row:hover .sun-print {
   filter: brightness(1.12) saturate(1.1);
   transform: rotate(-1.5deg);

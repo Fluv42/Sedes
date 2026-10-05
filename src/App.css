@@ -62,7 +62,8 @@
   scale: 1 1;
 }
 
-.site-header nav a:hover:not([aria-current])::after {
+/* Faint on the other pages, and it stays faint while it shrinks away after hover. */
+.site-header nav a:not([aria-current])::after {
   opacity: .45;
 }
 

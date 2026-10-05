@@ -7,7 +7,7 @@ import { Intro } from './components/Intro'
 import { usePath } from './lib/router'
 import { scrollToTop, startSmoothScroll, watchParallax, watchReveals } from './lib/motion'
 import { PageRoute } from './pages'
-import { nextSoundMode, setHomePage, soundLabels, startMusic, useSoundMode } from './lib/music'
+import { nextSoundMode, setHomePage, soundLabel, startMusic, useSound } from './lib/music'
 import { toggleTheme, useTheme } from './lib/theme'
 import { getPageTitle } from './lib/routes'
 import './App.css'
@@ -23,7 +23,7 @@ export default function App({ initialPath = '/' }: { initialPath?: string }) {
   const title = getPageTitle(path)
   const previousPath = useRef(path)
   const main = useRef<HTMLElement>(null)
-  const sound = useSoundMode()
+  const sound = useSound()
   const theme = useTheme()
 
   useEffect(() => startSmoothScroll(), [])
@@ -70,20 +70,22 @@ export default function App({ initialPath = '/' }: { initialPath?: string }) {
           <span className="footer-credits">
             <span>© {new Date().getFullYear()} {site.name} <span className="alias">/ {site.alias}</span></span>
             <span className="music-credit">
-              <button className="music-toggle" type="button" onClick={nextSoundMode} title={`Sound: ${soundLabels[sound]} (click to change)`}>
-                <span aria-hidden="true">{sound === 'off' ? '♪̸' : '♪'}</span><span className="visually-hidden">Sound: {soundLabels[sound]}. Change</span>
+              <button className="music-toggle" type="button" onClick={nextSoundMode} title={`Sound: ${soundLabel(sound)}`}>
+                <span aria-hidden="true">{sound.mode === 'off' ? '♪̸' : '♪'}</span><span className="visually-hidden">Sound: {soundLabel(sound)}</span>
               </button>
               Music by <a href={site.musicBy.href}>{site.musicBy.name}</a>
               <a className="credit-note" href={site.musicBy.songHref} title={site.musicBy.original}>♪ {site.musicBy.song}</a>
             </span>
           </span>
           <span className="footer-links">
-            <a href={site.linkedin} aria-label="LinkedIn"><LinkedInIcon /></a>
-            <a href={site.github} aria-label="GitHub"><GitHubIcon /></a>
-            <a href={site.instagram} aria-label="Instagram"><InstagramIcon /></a>
-            <a href={`mailto:${site.email}`} aria-label="Email"><MailIcon /></a>
-            <button className="theme-toggle" type="button" onClick={toggleTheme} aria-label={theme === 'dark' ? 'Switch to light mode' : 'Switch to dark mode'} title={theme === 'dark' ? 'Light mode' : 'Dark mode'}>
+            {/* Each icon shows where it goes in a small note above it, on hover or keyboard focus. */}
+            <a href={site.linkedin} aria-label="LinkedIn"><LinkedInIcon /><span className="link-hint" aria-hidden="true">LinkedIn</span></a>
+            <a href={site.github} aria-label="GitHub"><GitHubIcon /><span className="link-hint" aria-hidden="true">github.com/{site.alias}</span></a>
+            <a href={site.instagram} aria-label="Instagram"><InstagramIcon /><span className="link-hint" aria-hidden="true">@micah.vanewyk</span></a>
+            <a href={`mailto:${site.email}`} aria-label="Email"><MailIcon /><span className="link-hint" aria-hidden="true">{site.email}</span></a>
+            <button className="theme-toggle" type="button" onClick={toggleTheme} aria-label={theme === 'dark' ? 'Switch to light mode' : 'Switch to dark mode'}>
               {theme === 'dark' ? <SunIcon /> : <MoonIcon />}
+              <span className="link-hint" aria-hidden="true">{theme === 'dark' ? 'Light mode' : 'Dark mode'}</span>
             </button>
           </span>
         </div>

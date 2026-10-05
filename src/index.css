@@ -124,6 +124,13 @@ body {
   background: var(--paper);
 }
 
+/* Switching light/dark: every colour eases across together for a moment, then the page's own
+   transitions take over again. */
+html.theme-fading, html.theme-fading *, html.theme-fading *::before, html.theme-fading *::after {
+  transition: background-color 1.5s ease, color 1.5s ease, border-color 1.5s ease, fill 1.5s ease,
+    stroke 1.5s ease, box-shadow 1.5s ease, outline-color 1.5s ease, opacity 1.5s ease !important;
+}
+
 /* A little paper texture over everything: the same grain as the hero picture's edges. */
 body::after {
   content: '';

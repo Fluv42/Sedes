@@ -360,7 +360,8 @@ video.meadow-source.is-playing {
   background: rgb(var(--paper-rgb) / .92);
 }
 
-.motion-control button.sound-both, .motion-control button.sound-music, .motion-control button.sound-ambient {
+.motion-control button.sound-both, .motion-control button.sound-music, .motion-control button.sound-ambient,
+.motion-control button.sound-waiting {
   color: var(--on-accent);
   background: var(--walnut);
   border-color: var(--walnut);
@@ -965,6 +966,34 @@ video.meadow-source.is-playing {
   width: 28px;
   height: 28px;
   color: var(--ink);
+}
+
+.footer-links a, .footer-links .theme-toggle {
+  position: relative;
+}
+
+/* The small note above each footer icon; anchored to the right so it never runs off the page. */
+.link-hint {
+  position: absolute;
+  right: 0;
+  bottom: calc(100% + 6px);
+  padding: 3px 8px;
+  font-size: .78rem;
+  white-space: nowrap;
+  color: var(--ink);
+  background: var(--paper-deep);
+  border: 1px solid var(--rule);
+  border-radius: 6px;
+  opacity: 0;
+  translate: 0 4px;
+  pointer-events: none;
+  transition: opacity .2s ease, translate .3s var(--ease);
+}
+
+.footer-links a:hover .link-hint, .footer-links a:focus-visible .link-hint,
+.footer-links .theme-toggle:hover .link-hint, .footer-links .theme-toggle:focus-visible .link-hint {
+  opacity: 1;
+  translate: 0 0;
 }
 
 .footer-links .theme-toggle:hover, .footer-links a:hover {

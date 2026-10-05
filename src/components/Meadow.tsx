@@ -259,6 +259,8 @@ export interface Photo {
   // A wide photo can be shown in a narrower, taller frame (height ÷ width); it's cropped at the
   // sides, centred between the faces.
   frame?: number
+  // How much larger than the fitted oval to show (1.3 = 30% more), where the photo has room.
+  grow?: number
 }
 
 // The frame's proportions, and where the photo's sides are cropped to fit it (0 = left, 1 = right).
@@ -294,8 +296,9 @@ function ovalFor(photo: Photo) {
     const half = Math.hypot(x2 - x1, y2 - y1) / 2
     // The middle 62% of the oval is fully clear: both faces, with room around them. Generous, as
     // the frame's own edges fade softly anyway.
-    rx = Math.min((half + face * 1.7) / 0.62, 86)
-    ry = Math.max((face * 2.6) / 0.62, rx * 0.84)
+    const grow = photo.grow ?? 1
+    rx = Math.min((half + face * 1.7) / 0.62 * grow, 86 * grow)
+    ry = Math.max((face * 2.6) / 0.62, rx * 0.84 / grow) * grow
     angle = Math.atan2(y2 - y1, x2 - x1) * 180 / Math.PI
   }
   const pct = (value: number) => `${value.toFixed(2)}%`
@@ -362,8 +365,11 @@ export function Meadow({ still = false, alt, alternate }: { still?: boolean; alt
     if (!value) advance.current = window.setTimeout(pickNext, 1200)
   }
   // The first one is picked once the page is running (the server can't pick at random).
+  // ?photo=1 (to the number of photos) previews one in particular.
   useEffect(() => {
-    advance.current = window.setTimeout(pickNext, 0)
+    const asked = Number(new URLSearchParams(location.search).get('photo'))
+    const preview = alternate && asked >= 1 && asked <= alternate.photos.length
+    advance.current = window.setTimeout(preview ? () => setShown(asked - 1) : pickNext, 0)
     return () => window.clearTimeout(advance.current)
   // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [])

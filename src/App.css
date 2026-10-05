@@ -322,17 +322,29 @@ video.meadow-source.is-playing {
   left: 50%;
   bottom: 9%;
   translate: -50% 0;
+  display: flex;
+  gap: 18px;
+}
+
+.motion-control button {
   padding: 4px 2px;
+  font: inherit;
   font-size: .85rem;
+  white-space: nowrap;
   color: var(--muted);
   background: none;
   border: 0;
   border-bottom: 1px solid currentColor;
   opacity: .7;
-  transition: opacity .2s;
+  transition: opacity .2s, color .2s;
 }
 
-.motion-control:hover {
+.motion-control button:hover {
+  opacity: 1;
+}
+
+.motion-control button[aria-pressed='true'] {
+  color: var(--walnut);
   opacity: 1;
 }
 
@@ -828,6 +840,19 @@ video.meadow-source.is-playing {
 
 .music-credit {
   position: relative;
+}
+
+.music-toggle {
+  display: inline-grid;
+  place-items: center;
+  width: 1.5em;
+  margin-right: .35em;
+  padding: 0;
+  font: inherit;
+  font-size: .8rem;
+  color: var(--walnut);
+  background: none;
+  border: 0;
 }
 
 .music-credit a {

@@ -1,4 +1,5 @@
 import { useEffect, useRef, useState } from 'react'
+import { toggleMusic, useMusic } from '../lib/music'
 
 const poster = '/media/farm-poster.jpg'
 const motionQuery = '(prefers-reduced-motion: reduce)'
@@ -9,6 +10,7 @@ const motionQuery = '(prefers-reduced-motion: reduce)'
 export function Meadow({ still = false, alt }: { still?: boolean; alt: string }) {
   const [playing, setPlaying] = useState(false)
   const [unavailable, setUnavailable] = useState(false)
+  const music = useMusic()
   const video = useRef<HTMLVideoElement>(null)
   const still_ = useRef<HTMLImageElement>(null)
   const ambient = useRef<HTMLCanvasElement>(null)
@@ -84,8 +86,13 @@ export function Meadow({ still = false, alt }: { still?: boolean; alt: string })
       <div className="tint" aria-hidden="true" />
       <div className="grain" aria-hidden="true" />
     </div>
-    {showVideo && <button className="motion-control" type="button" onClick={() => setPlaying(value => !value)}>
-      {playing ? 'Pause' : 'Play'}<span className="visually-hidden"> the meadow video</span>
-    </button>}
+    {!still && <div className="motion-control">
+      {showVideo && <button type="button" onClick={() => setPlaying(value => !value)}>
+        {playing ? 'Pause' : 'Play'}<span className="visually-hidden"> the meadow video</span>
+      </button>}
+      <button type="button" aria-pressed={music} onClick={toggleMusic}>
+        {music ? 'Sound off' : 'Sound on'}<span className="visually-hidden"> (background music)</span>
+      </button>
+    </div>}
   </figure>
 }

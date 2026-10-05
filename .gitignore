@@ -33,3 +33,5 @@ dist-ssr
 
 # Résumé files carry a home address and phone number; kept out of the public repo for now
 public/resume/
+# The music is credited on the site but not re-posted in a public repo
+public/media/music/

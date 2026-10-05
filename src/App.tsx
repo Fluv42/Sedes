@@ -6,6 +6,7 @@ import { Intro } from './components/Intro'
 import { usePath } from './lib/router'
 import { scrollToTop, startSmoothScroll, watchParallax, watchReveals } from './lib/motion'
 import { PageRoute } from './pages'
+import { toggleMusic, useMusic } from './lib/music'
 import { getPageTitle } from './lib/routes'
 import './App.css'
 
@@ -24,6 +25,7 @@ export default function App({ initialPath = '/' }: { initialPath?: string }) {
   const title = getPageTitle(path)
   const previousPath = useRef(path)
   const main = useRef<HTMLElement>(null)
+  const music = useMusic()
 
   useEffect(() => startSmoothScroll(), [])
 
@@ -66,6 +68,9 @@ export default function App({ initialPath = '/' }: { initialPath?: string }) {
           <span className="footer-credits">
             <span>© {new Date().getFullYear()} {site.name} <span className="alias">/ {site.alias}</span></span>
             <span className="music-credit">
+              <button className="music-toggle" type="button" aria-pressed={music} onClick={toggleMusic} title={music ? 'Turn the music off' : 'Turn the music on'}>
+                <span aria-hidden="true">{music ? '❚❚' : '♪'}</span><span className="visually-hidden">{music ? 'Turn the music off' : 'Turn the music on'}</span>
+              </button>
               Music by <a href={site.musicBy.href}>{site.musicBy.name}</a>
               <a className="credit-note" href={site.musicBy.songHref} title={site.musicBy.original}>♪ {site.musicBy.song}</a>
             </span>

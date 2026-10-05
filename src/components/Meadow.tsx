@@ -24,7 +24,7 @@ const clips: Record<Daypart, Field[]> = {
   day: [
     field('field-day', 'Low sun shining through birch trees onto long green grass'),
     field('field-day-2', 'Trees and long grass around a sunny lawn under a blue sky'),
-    field('field-day-3', 'A wide green meadow with a line of trees and drifting clouds'),
+    field('field-day-3', 'A line of tall trees across a green field under soft white clouds'),
   ],
   evening: [
     field('field-sunset', 'Rows of green wheat under a soft sunset', undefined, true),

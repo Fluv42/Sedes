@@ -80,8 +80,10 @@ function tintEdges(frame: HTMLElement) {
       root.style.setProperty('--edge-top', top)
     } catch { /* leave the paper */ }
   }
-  apply()
-  const timer = window.setInterval(apply, 400)
+  // Only phones have bars to match; on a computer the picture simply meets the window's edge.
+  const phone = window.matchMedia('(pointer: coarse)').matches
+  if (phone) apply()
+  const timer = phone ? window.setInterval(apply, 400) : 0
   return {
     // As the page comes back, the strips fade and the bars take the page's own colour.
     fade: () => { window.clearInterval(timer); strips.forEach(strip => strip.classList.add('is-gone')) },

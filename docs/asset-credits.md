@@ -9,7 +9,7 @@
   - Morning 2: `field-morning-2.mp4`, [Pexels #18089236](https://www.pexels.com/video/18089236/), the first 51 s, a 49 s loop
   - Morning 3: `field-morning-3.mp4`, [Pexels #28972729](https://www.pexels.com/video/28972729/), the first 47.5 s, a 45.5 s loop
   - Day 2: `field-day-2.mp4`, [Pexels #33743576](https://www.pexels.com/video/33743576/), the first 60.5 s, a 58.5 s loop
-  - Day 3: `field-day-3.mp4`, [Pexels #13517421](https://www.pexels.com/video/13517421/), 0:40 to 1:40 of a 6-minute shot, a 58 s loop
+  - Day 3: `field-day-3.mp4`, [Pexels #36718371](https://www.pexels.com/video/36718371/), the first 62 s, a 60 s loop (replaced a sped-up cloud shot)
   - Evening 2: `field-sunset-2.mp4`, [Pexels #17422808](https://www.pexels.com/video/17422808/), the first 60 s, a 58 s loop
   - Evening 3: `field-sunset-3.mp4`, [Pexels #27496045](https://www.pexels.com/video/27496045/), the first 44 s slowed to 1.3× (frame blending), a 54 s loop
   - Night 2: `field-night-2.mp4`, [Pexels #20603938](https://www.pexels.com/video/20603938/), a timelapse slowed to 1.45× (frame blending), a 57 s loop
@@ -41,7 +41,7 @@ licence and treatment; the short ones loop sooner (25–35 s):
 - Morning 2 (mist and sunbeams through trees), `morning-2.m4a`: [Avon dawn chorus](https://pixabay.com/sound-effects/avon-dawn-chorus-26592/)
 - Morning 3 (sunrise over a misty field), `morning-3.m4a`: [Morning breeze and birds](https://pixabay.com/sound-effects/morning-breeze-and-birds-35105/)
 - Day 2 (a sunny lawn and trees), `day-2.m4a`: [Birds, insects, breeze by DBSound](https://pixabay.com/sound-effects/birds-insects-breeze-596116/), from 0:20
-- Day 3 (a wide meadow), `day-3.m4a`: [Wind rustling grass by Dragon Studio](https://pixabay.com/sound-effects/wind-rustling-grass-339094/)
+- Day 3 (trees along a field), `day-3.m4a`: [Wind rustling grass by Dragon Studio](https://pixabay.com/sound-effects/wind-rustling-grass-339094/)
 - Evening 2 (grasses against the setting sun), `evening-2.m4a`: [Evening crickets and birds with cuckoo, part 1, by Eryliaa](https://pixabay.com/sound-effects/evening-crickets-and-birds-with-cuckoo-part-1-445151/), from 0:30
 - Evening 3 (clouds over farm fields), `evening-3.m4a`: [Blackbird evening](https://pixabay.com/sound-effects/blackbird-evening-64822/)
 - Night 2 (moonlit trees), `night-2.m4a`: [Countryside night ambience by Alex Jauk](https://pixabay.com/sound-effects/countryside-night-ambience-234022/)

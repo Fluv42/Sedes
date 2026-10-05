@@ -1,3 +1,4 @@
+import { createHash } from 'node:crypto'
 import { mkdir, readFile, writeFile } from 'node:fs/promises'
 import { resolve } from 'node:path'
 import { paths, render } from '../.ssr/entry-server.js'
@@ -21,4 +22,12 @@ for (const path of [...paths, '/404']) {
   await mkdir(resolve(destination, '..'), { recursive: true })
   await writeFile(destination, html)
 }
+// The Content-Security-Policy in _headers allows exactly the inline scripts in the page template.
+const hashes = [...template.matchAll(/<script>([\s\S]*?)<\/script>/g)]
+  .map(([, body]) => `'sha256-${createHash('sha256').update(body).digest('base64')}'`)
+const headersFile = resolve(root, '_headers')
+const headers = await readFile(headersFile, 'utf8')
+if (!headers.includes('INLINE_SCRIPT_HASHES')) throw new Error('_headers is missing the INLINE_SCRIPT_HASHES placeholder')
+await writeFile(headersFile, headers.replace('INLINE_SCRIPT_HASHES', hashes.join(' ')))
+
 console.log(`Pre-rendered ${paths.length} routes and the 404 page.`)

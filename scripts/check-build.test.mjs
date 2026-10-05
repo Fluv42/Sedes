@@ -101,3 +101,11 @@ test('the résumé is offered on About and Contact in both formats', () => {
     assert.match(html, /href="\/resume\/Micah-VanEwyk-Resume\.docx"/, `${path}: Word`)
   }
 })
+
+test('the security policy allows the inline head script by its fingerprint', async () => {
+  const headers = await readFile(resolve(root, '_headers'), 'utf8')
+  assert.doesNotMatch(headers, /INLINE_SCRIPT_HASHES/)
+  assert.match(headers, /Content-Security-Policy: default-src 'self'; script-src 'self' 'sha256-[A-Za-z0-9+/=]+'/)
+  assert.match(headers, /Strict-Transport-Security: max-age=\d+/)
+  await assert.doesNotReject(access(resolve(root, '.well-known/security.txt')))
+})

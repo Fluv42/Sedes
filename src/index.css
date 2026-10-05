@@ -40,6 +40,11 @@
   --sage: #6c7752;
   --wheat: #b38a46;
   --walnut: #6b4428;
+  /* The same paper and ink as channels, for translucent washes; text on walnut/sage fills. */
+  --paper-rgb: 246 242 231;
+  --ink-rgb: 45 43 36;
+  --on-accent: #f6f2e7;
+  --selection: #e3d6b6;
   /* Libron (OFL) everywhere: headings and reading text share one face. */
   --heading: 'Libron', Georgia, serif;
   --body: 'Libron', Georgia, serif;
@@ -61,6 +66,48 @@
   -webkit-font-smoothing: antialiased;
   -moz-osx-font-smoothing: grayscale;
   color-scheme: light;
+}
+
+/* Dark mode: night-time paper and lamplit ink. Follows the device unless the visitor picks one
+   with the Light / Dark button (stored as data-theme on <html> before the page paints). */
+:root[data-theme='dark'] {
+  --paper: #1a1915;
+  --paper-deep: #24221c;
+  --ink: #ebe5d5;
+  --muted: #a49d8a;
+  --rule: #3a362d;
+  --rust: #d27c52;
+  --sage: #98a578;
+  --wheat: #d3ad67;
+  --walnut: #c99a70;
+  --paper-rgb: 26 25 21;
+  --ink-rgb: 235 229 213;
+  --on-accent: #1a1915;
+  --selection: #4a3f2c;
+  --ambient: .55;
+  --grain: .09;
+  color-scheme: dark;
+}
+
+@media (prefers-color-scheme: dark) {
+  :root:not([data-theme='light']) {
+    --paper: #1a1915;
+    --paper-deep: #24221c;
+    --ink: #ebe5d5;
+    --muted: #a49d8a;
+    --rule: #3a362d;
+    --rust: #d27c52;
+    --sage: #98a578;
+    --wheat: #d3ad67;
+    --walnut: #c99a70;
+    --paper-rgb: 26 25 21;
+    --ink-rgb: 235 229 213;
+    --on-accent: #1a1915;
+    --selection: #4a3f2c;
+    --ambient: .55;
+    --grain: .09;
+    color-scheme: dark;
+  }
 }
 
 * {
@@ -88,6 +135,13 @@ body::after {
   /* Dark specks with their own transparency rather than a multiply blend, so scrolling doesn't
      make the browser re-blend the whole page under it every frame. */
   background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='180' height='180'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='.85' numOctaves='3' stitchTiles='stitch'/%3E%3CfeColorMatrix values='0 0 0 0 .16 0 0 0 0 .14 0 0 0 0 .1 -1.6 0 0 0 1.25'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)'/%3E%3C/svg%3E");
+}
+
+/* On dark paper the grain is pale specks instead of dark ones. */
+:root[data-theme='dark'] body::after { background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='180' height='180'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='.85' numOctaves='3' stitchTiles='stitch'/%3E%3CfeColorMatrix values='0 0 0 0 .95 0 0 0 0 .92 0 0 0 0 .84 1.6 0 0 0 -.35'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)'/%3E%3C/svg%3E"); }
+
+@media (prefers-color-scheme: dark) {
+  :root:not([data-theme='light']) body::after { background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='180' height='180'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='.85' numOctaves='3' stitchTiles='stitch'/%3E%3CfeColorMatrix values='0 0 0 0 .95 0 0 0 0 .92 0 0 0 0 .84 1.6 0 0 0 -.35'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)'/%3E%3C/svg%3E"); }
 }
 
 h1, h2, h3, p, figure, dl, dd, ul {
@@ -144,7 +198,7 @@ img, video, svg {
 }
 
 ::selection {
-  background: #e3d6b6;
+  background: var(--selection);
   color: var(--ink);
 }
 

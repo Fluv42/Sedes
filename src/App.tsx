@@ -1,13 +1,14 @@
 import { useEffect, useRef } from 'react'
 import { navigation, site } from './content/site'
 import { Link } from './components/Link'
-import { GitHubIcon, InstagramIcon, LinkedInIcon, MailIcon } from './components/Icons'
+import { GitHubIcon, InstagramIcon, LinkedInIcon, MailIcon, MoonIcon, SunIcon } from './components/Icons'
 import { Cursor } from './components/Cursor'
 import { Intro } from './components/Intro'
 import { usePath } from './lib/router'
 import { scrollToTop, startSmoothScroll, watchParallax, watchReveals } from './lib/motion'
 import { PageRoute } from './pages'
-import { startMusic, toggleMusic, useMusic } from './lib/music'
+import { nextSoundMode, setHomePage, soundLabels, startMusic, useSoundMode } from './lib/music'
+import { toggleTheme, useTheme } from './lib/theme'
 import { getPageTitle } from './lib/routes'
 import './App.css'
 
@@ -22,9 +23,12 @@ export default function App({ initialPath = '/' }: { initialPath?: string }) {
   const title = getPageTitle(path)
   const previousPath = useRef(path)
   const main = useRef<HTMLElement>(null)
-  const music = useMusic()
+  const sound = useSoundMode()
+  const theme = useTheme()
 
   useEffect(() => startSmoothScroll(), [])
+  // The field sound plays under the home page's picture only; the song carries on everywhere.
+  useEffect(() => setHomePage(path === '/'), [path])
   useEffect(() => startMusic(), [])
 
   useEffect(() => {
@@ -66,8 +70,8 @@ export default function App({ initialPath = '/' }: { initialPath?: string }) {
           <span className="footer-credits">
             <span>© {new Date().getFullYear()} {site.name} <span className="alias">/ {site.alias}</span></span>
             <span className="music-credit">
-              <button className="music-toggle" type="button" aria-pressed={music} onClick={toggleMusic} title={music ? 'Turn the music off' : 'Turn the music on'}>
-                <span aria-hidden="true">{music ? '❚❚' : '♪'}</span><span className="visually-hidden">{music ? 'Turn the music off' : 'Turn the music on'}</span>
+              <button className="music-toggle" type="button" onClick={nextSoundMode} title={`Sound: ${soundLabels[sound]} (click to change)`}>
+                <span aria-hidden="true">{sound === 'off' ? '♪̸' : '♪'}</span><span className="visually-hidden">Sound: {soundLabels[sound]}. Change</span>
               </button>
               Music by <a href={site.musicBy.href}>{site.musicBy.name}</a>
               <a className="credit-note" href={site.musicBy.songHref} title={site.musicBy.original}>♪ {site.musicBy.song}</a>
@@ -78,6 +82,9 @@ export default function App({ initialPath = '/' }: { initialPath?: string }) {
             <a href={site.github} aria-label="GitHub"><GitHubIcon /></a>
             <a href={site.instagram} aria-label="Instagram"><InstagramIcon /></a>
             <a href={`mailto:${site.email}`} aria-label="Email"><MailIcon /></a>
+            <button className="theme-toggle" type="button" onClick={toggleTheme} aria-label={theme === 'dark' ? 'Switch to light mode' : 'Switch to dark mode'} title={theme === 'dark' ? 'Light mode' : 'Dark mode'}>
+              {theme === 'dark' ? <SunIcon /> : <MoonIcon />}
+            </button>
           </span>
         </div>
       </footer>

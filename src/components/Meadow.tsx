@@ -1,5 +1,6 @@
 import { useEffect, useRef, useState, useSyncExternalStore } from 'react'
-import { toggleMusic, useMusic } from '../lib/music'
+import { nextSoundMode, soundLabels, useSoundMode } from '../lib/music'
+import { toggleTheme, useTheme } from '../lib/theme'
 import { daypartNow } from '../lib/daypart'
 import type { Daypart } from '../lib/daypart'
 
@@ -22,7 +23,8 @@ const motionQuery = '(prefers-reduced-motion: reduce)'
 export function Meadow({ still = false, alt }: { still?: boolean; alt: string }) {
   const [playing, setPlaying] = useState(false)
   const [unavailable, setUnavailable] = useState(false)
-  const music = useMusic()
+  const sound = useSoundMode()
+  const theme = useTheme()
   // The server can't know the visitor's time, so the page is built with the evening clip and
   // switches during hydration to the one for their clock.
   const clip = useSyncExternalStore(noSubscription, daypartNow, () => 'evening' as Clip)
@@ -106,8 +108,11 @@ export function Meadow({ still = false, alt }: { still?: boolean; alt: string })
       {showVideo && <button type="button" onClick={() => setPlaying(value => !value)}>
         {playing ? 'Pause' : 'Play'}<span className="visually-hidden"> the meadow video</span>
       </button>}
-      <button type="button" aria-pressed={music} onClick={toggleMusic}>
-        {music ? 'Sound off' : 'Sound on'}<span className="visually-hidden"> (background music)</span>
+      <button type="button" className={`sound-${sound}`} onClick={nextSoundMode} title="Sound on, music only, ambient only, or muted">
+        <span className="visually-hidden">Sound: </span>{soundLabels[sound]}
+      </button>
+      <button type="button" onClick={toggleTheme} aria-label={theme === 'dark' ? 'Switch to light mode' : 'Switch to dark mode'}>
+        {theme === 'dark' ? 'Light' : 'Dark'}
       </button>
     </div>}
   </figure>

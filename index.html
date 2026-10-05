@@ -9,10 +9,15 @@
     <meta name="description" content="Projects and a little about Micah VanEwyk, a developer and IT guy in Southwestern Ontario." />
     <meta name="theme-color" content="#f6f2e7" />
     <script>
-      // Runs before paint: enables scroll reveals, and plays the intro on every load of the home page.
+      // Runs before paint: enables scroll reveals, applies a chosen light/dark theme (so there is no
+      // flash of the wrong one), and plays the intro on every load of the home page.
       (function () {
         var root = document.documentElement
         root.classList.add('js')
+        try {
+          var theme = localStorage.getItem('sedes:theme')
+          if (theme === 'light' || theme === 'dark') root.setAttribute('data-theme', theme)
+        } catch (error) {}
         try {
           var calm = window.matchMedia('(prefers-reduced-motion: reduce)').matches
           if (location.pathname === '/' && !calm) {

@@ -2,7 +2,12 @@
 // ambient sound under the music.
 export type Daypart = 'morning' | 'day' | 'evening' | 'night'
 
+const dayparts: Daypart[] = ['morning', 'day', 'evening', 'night']
+
 export function daypartNow(): Daypart {
+  // ?time=morning (or day, evening, night) previews another time of day.
+  const asked = new URLSearchParams(window.location.search).get('time') as Daypart | null
+  if (asked && dayparts.includes(asked)) return asked
   const hour = new Date().getHours()
   if (hour >= 5 && hour < 11) return 'morning'
   if (hour >= 11 && hour < 17) return 'day'

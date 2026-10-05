@@ -35,3 +35,6 @@ dist-ssr
 public/resume/
 # The music is credited on the site but not re-posted in a public repo
 public/media/music/
+
+# Private working notes (applications etc.), not part of the site
+notes/

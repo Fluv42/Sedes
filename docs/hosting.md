@@ -25,3 +25,16 @@ Wrangler must be signed in (`npx wrangler login`, once). `npx wrangler whoami` c
 - `html_handling: drop-trailing-slash` serves `/about` from `about/index.html` without a redirect.
 - Missing pages get `404.html`.
 - The free plan covers this site: static files are served without per-request charges.
+
+## Making the site searchable later
+
+It's hidden from search engines on purpose while the phone number is on the Contact page.
+When that should change:
+
+1. Remove `VITE_CONTACT_PHONE` from `.env.local` (the phone row disappears).
+2. Delete the `X-Robots-Tag` line in `public/_headers`, and the `robots` and `googlebot` meta
+   tags in `index.html`.
+3. Update the "noindex" test in `scripts/check-build.test.mjs`, then `npm run check` and
+   `npm run deploy`.
+4. Optionally add the site to Google Search Console (the domain is already on Cloudflare, so
+   verification is a DNS record).

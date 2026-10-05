@@ -29,10 +29,7 @@
   padding: 8px 0;
   text-decoration: none;
   font-size: .98rem;
-  color: var(--muted);
-}
-
-.site-header nav a[aria-current] {
+  /* Every page name in full ink; the walnut underline alone marks where you are. */
   color: var(--ink);
 }
 

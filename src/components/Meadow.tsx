@@ -1,12 +1,12 @@
 import { useEffect, useRef, useState } from 'react'
 import { toggleMusic, useMusic } from '../lib/music'
 
-// Three fields, chosen by the visitor's own clock: a foggy sunrise in the morning, green farmland
-// under a big sky through the day, and wheat at sunset in the evening and overnight. Each file's last 2 s crossfade into its
+// Three fields, chosen by the visitor's own clock: a foggy sunrise in the morning, sun through the
+// trees onto green grass through the day, and wheat at sunset in the evening and overnight. Each file's last 2 s crossfade into its
 // first frame, so the plain loop has no visible jump.
 const clips = {
   morning: { video: '/media/field-morning.mp4', poster: '/media/field-morning.jpg' },
-  day: { video: '/media/field-barn.mp4', poster: '/media/field-barn.jpg' },
+  day: { video: '/media/field-day.mp4', poster: '/media/field-day.jpg' },
   evening: { video: '/media/field-sunset.mp4', poster: '/media/field-sunset.jpg' },
 }
 type Clip = keyof typeof clips

@@ -419,7 +419,9 @@ video.meadow-source.is-playing {
 
 .meadow-alternate {
   position: absolute;
-  inset: -5%;
+  /* A little past the frame, more at the sides, so the photo uses the room beside it (its soft
+     edges still fade out before the text). */
+  inset: -6% -9%;
   --hole: 30%;
   /* Four gradient masks, all needed: a fade towards each pair of edges (so no edge of the photo
      ever shows as a line), a round one that softens the corners where those meet, and the hole

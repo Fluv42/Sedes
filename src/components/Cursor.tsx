@@ -19,16 +19,27 @@ export function Cursor() {
     const position = { x: -100, y: -100 }
     let frame = 0
     let visible = false
+    let last = 0
 
-    const tick = () => {
-      const ease = still ? 1 : 0.22
+    // Frame-rate independent easing: the dot closes about 45% of the gap every 1/60 s, so it
+    // feels the same on 60 Hz and 120 Hz screens. The loop only runs while the dot is moving.
+    const tick = (time: number) => {
+      const step = last ? Math.min((time - last) / (1000 / 60), 4) : 1
+      last = time
+      const ease = still ? 1 : 1 - Math.pow(1 - 0.45, step)
       position.x += (target.x - position.x) * ease
       position.y += (target.y - position.y) * ease
+      if (Math.abs(target.x - position.x) < 0.1 && Math.abs(target.y - position.y) < 0.1) {
+        position.x = target.x
+        position.y = target.y
+      }
       // Position goes on `translate`, so the press `scale` shrinks the dot in place rather than
       // scaling its distance from the corner (which flung it towards the top left).
       element.style.translate = `${position.x}px ${position.y}px`
-      frame = requestAnimationFrame(tick)
+      if (position.x === target.x && position.y === target.y) { frame = 0; last = 0 }
+      else frame = requestAnimationFrame(tick)
     }
+    const wake = () => { if (!frame) frame = requestAnimationFrame(tick) }
     const show = () => { if (!visible) { position.x = target.x; position.y = target.y; visible = true; element.classList.add('is-visible') } }
     const hide = () => { visible = false; element.classList.remove('is-visible') }
     const move = (event: PointerEvent) => {
@@ -36,6 +47,7 @@ export function Cursor() {
       target.x = event.clientX
       target.y = event.clientY
       show()
+      wake()
       const under = event.target as Element | null
       // A marked area (a project row, the hero) wins over the plain link inside it.
       const mark = under?.closest?.('[data-cursor]')?.getAttribute('data-cursor') ?? ''
@@ -53,9 +65,9 @@ export function Cursor() {
     window.addEventListener('blur', hide)
     window.addEventListener('pointerdown', press)
     window.addEventListener('pointerup', release)
-    frame = requestAnimationFrame(tick)
     return () => {
       cancelAnimationFrame(frame)
+      frame = 0
       root.classList.remove('has-cursor')
       window.removeEventListener('pointermove', move)
       document.removeEventListener('mouseout', out)

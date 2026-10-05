@@ -39,6 +39,7 @@
   --rust: #a24f2c;
   --sage: #6c7752;
   --wheat: #b38a46;
+  --walnut: #6b4428;
   /* Libron (OFL) everywhere: headings and reading text share one face. */
   --heading: 'Libron', Georgia, serif;
   --body: 'Libron', Georgia, serif;
@@ -82,8 +83,9 @@ body::after {
   z-index: 390;
   pointer-events: none;
   opacity: var(--grain);
-  mix-blend-mode: multiply;
-  background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='180' height='180'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='.85' numOctaves='3' stitchTiles='stitch'/%3E%3CfeColorMatrix type='saturate' values='0'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)'/%3E%3C/svg%3E");
+  /* Dark specks with their own transparency rather than a multiply blend, so scrolling doesn't
+     make the browser re-blend the whole page under it every frame. */
+  background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='180' height='180'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='.85' numOctaves='3' stitchTiles='stitch'/%3E%3CfeColorMatrix values='0 0 0 0 .16 0 0 0 0 .14 0 0 0 0 .1 -1.6 0 0 0 1.25'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)'/%3E%3C/svg%3E");
 }
 
 h1, h2, h3, p, figure, dl, dd, ul {

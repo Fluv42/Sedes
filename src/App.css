@@ -42,38 +42,40 @@
   white-space: nowrap;
 }
 
-.squiggle {
+.site-header nav a::after {
+  content: '';
   position: absolute;
-  left: -3px;
-  right: -3px;
-  bottom: 0;
-  width: calc(100% + 6px);
-  height: 7px;
-  overflow: visible;
-  fill: none;
-  stroke: var(--rust);
-  stroke-width: 1.3;
-  stroke-linecap: round;
-  stroke-dasharray: 1;
-  stroke-dashoffset: 1;
-  animation: draw .7s .1s var(--ease) forwards;
-  vector-effect: non-scaling-stroke;
+  left: 0;
+  right: 0;
+  bottom: 2px;
+  height: 3px;
+  border-radius: 2px;
+  background: var(--walnut);
+  scale: 0 1;
+  transform-origin: left;
+  transition: scale .45s var(--ease);
 }
 
-@keyframes draw {
-  to { stroke-dashoffset: 0; }
+/* A walnut underline under the current page, and drawn in on hover. */
+.site-header nav a[aria-current]::after,
+.site-header nav a:hover::after {
+  scale: 1 1;
+}
+
+.site-header nav a:hover:not([aria-current])::after {
+  opacity: .45;
 }
 
 main {
   display: block;
   min-height: 60vh;
-  animation: page-in .55s var(--ease) both;
+  animation: page-in .45s var(--ease) both;
 }
 
 html.is-leaving main {
   opacity: 0;
   translate: 0 -10px;
-  transition: opacity .28s ease, translate .28s ease;
+  transition: opacity .2s ease, translate .2s ease;
 }
 
 @keyframes page-in {
@@ -85,13 +87,17 @@ html.is-leaving main {
 html.js [data-reveal] {
   opacity: 0;
   translate: 0 28px;
-  transition: opacity 1s var(--ease), translate 1s var(--ease);
+  transition: opacity .8s var(--ease), translate .8s var(--ease);
+  will-change: opacity, translate;
 }
 
 html.js [data-reveal].is-in {
   opacity: 1;
   translate: 0 0;
 }
+
+/* Once settled, let the browser drop the extra layers. */
+html.js [data-reveal].is-done { will-change: auto; }
 
 /* Neighbours arrive one after another. */
 html.js [data-reveal]:nth-child(2) { transition-delay: .08s; }
@@ -666,6 +672,80 @@ video.meadow-source.is-playing {
   margin-top: 1em;
 }
 
+/* Résumé: a small dropdown with the two formats. */
+.resume {
+  position: relative;
+  /* Above the paragraphs after it, which are their own layers while they rise in. */
+  z-index: 5;
+  justify-self: start;
+  width: fit-content;
+  margin: 6px 0 14px;
+}
+
+.resume summary {
+  display: inline-flex;
+  align-items: baseline;
+  gap: .45em;
+  padding: 7px 14px;
+  list-style: none;
+  border: 1px solid var(--walnut);
+  border-radius: 999px;
+  color: var(--walnut);
+  font-size: 1rem;
+  transition: background-color .2s, color .2s;
+}
+
+.resume summary::-webkit-details-marker { display: none; }
+
+.resume summary:hover, .resume[open] summary {
+  background: var(--walnut);
+  color: var(--paper);
+}
+
+.resume summary:focus-visible {
+  outline: 2px solid var(--walnut);
+  outline-offset: 3px;
+}
+
+.resume .caret {
+  display: inline-block;
+  font-size: .8em;
+  transition: rotate .25s var(--ease);
+}
+
+.resume[open] .caret { rotate: 180deg; }
+
+.resume ul {
+  position: absolute;
+  z-index: 5;
+  top: calc(100% + 6px);
+  left: 0;
+  min-width: 170px;
+  margin: 0;
+  padding: 6px;
+  white-space: nowrap;
+  list-style: none;
+  background: var(--paper);
+  border: 1px solid var(--rule);
+  border-radius: 10px;
+  box-shadow: 0 10px 28px rgb(45 43 36 / .12);
+  animation: settle .25s var(--ease) both;
+}
+
+.resume li a {
+  display: flex;
+  justify-content: space-between;
+  gap: 24px;
+  padding: 7px 10px;
+  border-radius: 6px;
+  text-decoration: none;
+  color: var(--ink);
+}
+
+.resume li a span { color: var(--muted); font-size: .85rem; }
+
+.resume li a:hover { background: var(--paper-deep); }
+
 .about .cta {
   margin-top: 28px;
 }
@@ -721,35 +801,14 @@ video.meadow-source.is-playing {
   margin: 0 calc(-1 * var(--gutter));
 }
 
-.grass {
-  width: 100%;
-  height: 44px;
-  fill: var(--sage);
-}
-
-.clump {
-  transform-box: fill-box;
-  transform-origin: 50% 100%;
-  animation: sway 7s ease-in-out infinite alternate;
-}
-
-.clump-1 { animation-duration: 5.6s; animation-delay: -2s; fill: #7f8961; }
-.clump-2 { animation-duration: 8.2s; animation-delay: -4s; fill: #5d6845; }
-.clump-3 { animation-duration: 6.4s; animation-delay: -1s; fill: #8b8a5e; }
-
-@keyframes sway {
-  from { transform: skewX(2deg); }
-  to { transform: skewX(-3deg); }
-}
-
 .footer-meta {
   display: flex;
   flex-wrap: wrap;
   align-items: center;
   justify-content: space-between;
   gap: 8px 24px;
-  padding: 14px var(--gutter) 18px;
-  border-top: 1px solid var(--sage);
+  padding: 18px var(--gutter) 20px;
+  border-top: 1px solid var(--rule);
   color: var(--muted);
   font-size: .88rem;
 }
@@ -809,6 +868,7 @@ html.has-cursor .cursor-dot {
   box-shadow: inset 0 0 0 1.5px var(--sage);
   pointer-events: none;
   opacity: 0;
+  will-change: translate;
   transition: background-color .25s, opacity .2s, scale .2s;
 }
 
@@ -1099,6 +1159,6 @@ html.intro-writing .intro-title text {
 
 /* With motion reduced, everything shows in its finished state. */
 @media (prefers-reduced-motion: reduce) {
-  .squiggle { stroke-dashoffset: 0; }
+  .site-header nav a::after { transition: none; }
   html.js [data-reveal] { opacity: 1; translate: none; }
 }

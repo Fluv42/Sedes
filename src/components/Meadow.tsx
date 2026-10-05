@@ -39,11 +39,20 @@ export function Meadow({ still = false, alt }: { still?: boolean; alt: string })
     if (!canvas || !context) return
     let handle = 0
     let stopped = false
+    let onScreen = true
+    let painted = 0
     const paint = (source: CanvasImageSource) => { try { context.drawImage(source, 0, 0, canvas.width, canvas.height) } catch { /* not ready yet */ } }
     const element = video.current
+    // The glow is heavily blurred, so ten updates a second look the same as thirty and cost a
+    // third as much; while the hero is scrolled away it isn't repainted at all.
+    const watcher = 'IntersectionObserver' in window
+      ? new IntersectionObserver(([entry]) => { onScreen = entry.isIntersecting })
+      : null
+    watcher?.observe(canvas)
     const loop = () => {
       if (stopped) return
-      if (element && element.readyState >= 2 && !element.paused) paint(element)
+      const now = performance.now()
+      if (onScreen && now - painted > 100 && element && element.readyState >= 2 && !element.paused) { paint(element); painted = now }
       if (element && 'requestVideoFrameCallback' in element) handle = element.requestVideoFrameCallback(loop)
       else handle = window.setTimeout(loop, 66)
     }
@@ -52,6 +61,7 @@ export function Meadow({ still = false, alt }: { still?: boolean; alt: string })
     if (element) loop()
     return () => {
       stopped = true
+      watcher?.disconnect()
       if (element && 'cancelVideoFrameCallback' in element) element.cancelVideoFrameCallback(handle)
       else window.clearTimeout(handle)
     }

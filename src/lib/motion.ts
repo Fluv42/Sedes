@@ -8,7 +8,8 @@ let lenis: Lenis | null = null
 
 export function startSmoothScroll() {
   if (reduced() || lenis) return () => {}
-  lenis = new Lenis({ duration: 1.15, anchors: true })
+  // A lerp follows the wheel as it moves rather than gliding for a fixed time, so it answers sooner.
+  lenis = new Lenis({ lerp: 0.13, anchors: true })
   // The home intro holds the page still until it has pulled back.
   if (document.documentElement.classList.contains('intro')) lenis.stop()
   let frame = requestAnimationFrame(function raf(time) { lenis?.raf(time); frame = requestAnimationFrame(raf) })
@@ -28,7 +29,13 @@ export function watchReveals(root: ParentNode) {
   const items = [...root.querySelectorAll<HTMLElement>('[data-reveal]')]
   if (reduced() || !('IntersectionObserver' in window)) { items.forEach(item => item.classList.add('is-in')); return () => {} }
   const observer = new IntersectionObserver(entries => {
-    for (const entry of entries) if (entry.isIntersecting) { entry.target.classList.add('is-in'); observer.unobserve(entry.target) }
+    for (const entry of entries) if (entry.isIntersecting) {
+      const item = entry.target
+      item.classList.add('is-in')
+      // Settled: drop the will-change layer so long pages don't keep dozens of them alive.
+      item.addEventListener('transitionend', () => item.classList.add('is-done'), { once: true })
+      observer.unobserve(item)
+    }
   }, { rootMargin: '0px 0px -8% 0px', threshold: 0.12 })
   items.forEach(item => observer.observe(item))
   return () => observer.disconnect()
@@ -46,8 +53,13 @@ export function watchParallax(root: ParentNode) {
     for (const item of items) item.style.translate = `0 ${(y * Number(item.dataset.speed)).toFixed(1)}px`
   }
   const onScroll = () => { if (!frame) frame = requestAnimationFrame(update) }
-  window.addEventListener('scroll', onScroll, { passive: true })
   update()
+  // With Lenis running, update in the same frame it moves the page, not a frame later.
+  if (lenis) {
+    const off = lenis.on('scroll', () => { frame = 0; update() })
+    return () => { off(); cancelAnimationFrame(frame) }
+  }
+  window.addEventListener('scroll', onScroll, { passive: true })
   return () => { window.removeEventListener('scroll', onScroll); cancelAnimationFrame(frame) }
 }
 
@@ -58,5 +70,5 @@ export function leaveThen(go: () => void) {
   // After the home intro, the first page skipped its arrival animation; later pages should have it.
   root.classList.remove('intro-played')
   root.classList.add('is-leaving')
-  window.setTimeout(() => { go(); root.classList.remove('is-leaving') }, 280)
+  window.setTimeout(() => { go(); root.classList.remove('is-leaving') }, 200)
 }

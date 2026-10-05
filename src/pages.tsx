@@ -1,7 +1,7 @@
 import { Link } from './components/Link'
 import { Meadow } from './components/Meadow'
 import { ProjectMark } from './components/ProjectMark'
-import { useMemo, useState } from 'react'
+import { useEffect, useMemo, useRef, useState } from 'react'
 import type { CSSProperties } from 'react'
 import { categories, featuredProjects, projects } from './content/projects'
 import type { Category, Project } from './content/projects'
@@ -60,7 +60,24 @@ function Home() {
   </>
 }
 
+// Closes the résumé menu on a click elsewhere or Escape, like any other dropdown.
+function useDismiss() {
+  const menu = useRef<HTMLDetailsElement>(null)
+  useEffect(() => {
+    const close = (event: Event) => {
+      const element = menu.current
+      if (!element?.open) return
+      if (event instanceof KeyboardEvent ? event.key === 'Escape' : !element.contains(event.target as Node)) element.open = false
+    }
+    document.addEventListener('pointerdown', close)
+    document.addEventListener('keydown', close)
+    return () => { document.removeEventListener('pointerdown', close); document.removeEventListener('keydown', close) }
+  }, [])
+  return menu
+}
+
 function About() {
+  const resume = useDismiss()
   return <section className="split-page about">
     <div className="split-media" data-reveal>
       <Meadow still alt="Sunlight across a quiet meadow" />
@@ -68,6 +85,13 @@ function About() {
     <div className="prose">
       <h1 data-reveal>About</h1>
       <p className="lede" data-reveal>I’m Micah, an IT specialist and developer. I live on a farm in Southwestern Ontario.</p>
+      <details className="resume" ref={resume} data-reveal>
+        <summary>My résumé <span className="caret" aria-hidden="true">▾</span></summary>
+        <ul>
+          <li><a href="/resume/Micah-VanEwyk-Resume.pdf" download>PDF <span>86 KB</span></a></li>
+          <li><a href="/resume/Micah-VanEwyk-Resume.docx" download>Word <span>11 KB</span></a></li>
+        </ul>
+      </details>
       <p data-reveal>I’m the IT specialist for five dealerships and a body shop, looking after logins, printers and software for about 210 people. I’m also building LotFlow, an app that tracks their vehicles from reconditioning to delivery.</p>
       <p data-reveal>I finished my Bachelor of Information Technology at Carleton in 2025, in Information Resource Management, done jointly with Algonquin College. Along the way I did co-ops in IT support at Bluewater Health and in information management at Agriculture and Agri-Food Canada.</p>
       <p data-reveal>How I work: talk to the people who’ll use the thing, build something they can try, then fix what breaks. AI writes a lot of my code. My job is knowing what to build, checking what it wrote, testing it, and sticking around to support it.</p>

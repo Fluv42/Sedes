@@ -3,8 +3,6 @@ import { navigation, site } from './content/site'
 import { Link } from './components/Link'
 import { Cursor } from './components/Cursor'
 import { Intro } from './components/Intro'
-import { Grass } from './components/Grass'
-import { Squiggle } from './components/Squiggle'
 import { usePath } from './lib/router'
 import { scrollToTop, startSmoothScroll, watchParallax, watchReveals } from './lib/motion'
 import { PageRoute } from './pages'
@@ -55,17 +53,15 @@ export default function App({ initialPath = '/' }: { initialPath?: string }) {
             const current = isCurrent(item.path, path)
             return <Link key={item.path} href={item.path} aria-current={current ? 'page' : undefined}>
               {item.label}
-              {current && <Squiggle key={path} />}
             </Link>
           })}
         </nav>
-        <Link className="wordmark" href="/">{site.name}</Link>
+        <Link className="wordmark" href="/about">{site.name}</Link>
       </header>
       <main ref={main} id="main" tabIndex={-1} key={path}>
         <PageRoute path={path} />
       </main>
       <footer className="site-footer">
-        <Grass />
         <div className="footer-meta">
           <span>© {new Date().getFullYear()} {site.name} <span className="alias">/ {site.alias}</span></span>
           <span className="footer-links">

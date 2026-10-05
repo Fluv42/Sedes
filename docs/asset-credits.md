@@ -20,6 +20,7 @@
 
 No remote font service, analytics, external image runtime, generated social card or paid asset service is required.
 
+- Not-found page one-liners (`src/content/quips.ts`): a selection from [funnies by Ryan Gaus](https://github.com/1egoman/funnies), MIT License.
 - LotFlow app icon and logo: Micah's own LotFlow logo pack (October 2026), `public/media/lotflow/`.
 
 ## Ambient sound

@@ -9,6 +9,7 @@ import type { CSSProperties } from 'react'
 import { categories, featuredProjects, projects } from './content/projects'
 import type { Category, Project } from './content/projects'
 import { site } from './content/site'
+import { quips } from './content/quips'
 
 const projectHref = (project: Project) => `/projects/${project.slug}`
 const Arrow = () => <span className="arrow" aria-hidden="true">→</span>
@@ -220,9 +221,28 @@ function Contact() {
   </section>
 }
 
+// A one-liner under the heading, like the comment a game prints when it crashes: picked once the
+// page is running (the built page can't know which), and another on each click.
+function Quip() {
+  const [index, setIndex] = useState<number | null>(null)
+  const pick = (current: number | null) => {
+    const next = Math.floor(Math.random() * quips.length)
+    return next === current ? (next + 1) % quips.length : next
+  }
+  const another = () => setIndex(pick)
+  useEffect(() => {
+    const frame = requestAnimationFrame(() => setIndex(pick))
+    return () => cancelAnimationFrame(frame)
+  }, [])
+  return <button type="button" className={`quip${index === null ? '' : ' is-in'}`} onClick={another} title="Another one">
+    <span aria-hidden="true">// </span>{index === null ? '\u00a0' : quips[index]}
+  </button>
+}
+
 function NotFound() {
   return <section className="not-found">
     <h1>Nothing here, yet.</h1>
+    <Quip />
     <p>That page doesn’t exist. <Link href="/">Back to Sedes</Link>, or look through the <Link href="/projects">projects</Link>.</p>
   </section>
 }

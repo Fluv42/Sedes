@@ -1,6 +1,9 @@
 /* Page ------------------------------------------------------------------- */
 
 .site-frame {
+  /* At least the screen's height, so on a short page (the 404) the root's colour, which is set
+     for Safari's bars (index.css), doesn't show below the footer. */
+  min-height: 100lvh;
   padding: 0 var(--gutter);
   background: var(--paper);
   overflow: clip;
@@ -1221,6 +1224,24 @@ video.meadow-source.is-playing {
   color: var(--muted);
 }
 
+/* The one-liner (pages.tsx Quip): a walnut aside, written like a comment in code. */
+.quip {
+  display: inline-block;
+  margin-top: 14px;
+  padding: 4px 8px;
+  color: var(--walnut);
+  font: italic 1.12rem var(--body);
+  background: none;
+  border: 0;
+  cursor: pointer;
+  opacity: 0;
+  transition: opacity .5s ease;
+}
+
+.quip.is-in { opacity: 1; }
+.quip span { opacity: .55; }
+.quip:hover { text-decoration: underline; text-decoration-thickness: 1px; text-underline-offset: 4px; }
+
 /* Footer ------------------------------------------------------------------ */
 
 .site-footer {
@@ -1660,6 +1681,17 @@ html .intro-actions .control.is-on {
 .edge-strip.bottom { bottom: 0; }
 .edge-strip.bottom::after { bottom: 100%; background: linear-gradient(transparent, var(--edge)); }
 .edge-strip.is-gone { opacity: 0; pointer-events: none; }
+
+/* Preview of the "window" alternative (?bars=window): the picture set into the paper with round
+   corners, so it never has to meet Safari's bars. */
+html.bars-window:not(.intro-out) .intro-title::before {
+  content: '';
+  position: fixed;
+  inset: 10px 10px 10px;
+  border-radius: 30px;
+  box-shadow: 0 0 0 60px var(--paper);
+  pointer-events: none;
+}
 
 /* A down arrow near the bottom, nudging gently: the way in. */
 .intro-next {

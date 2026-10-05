@@ -69,8 +69,14 @@ function tintEdges(frame: HTMLElement) {
     const source = video && video.readyState >= 2 ? video : image?.naturalWidth ? image : null
     if (!source) return
     try {
-      const top = band(source, 0, 10)
-      const bottom = band(source, window.innerHeight - 10, 10)
+      // ?bars= previews the alternatives (temporary): the whole picture's colour, cinema black, or
+      // the paper with the picture set in as a window.
+      const style = new URLSearchParams(location.search).get('bars')
+      const paper = getComputedStyle(root).getPropertyValue('--paper').trim()
+      const whole = style === 'average' ? band(source, 0, window.innerHeight) : null
+      const top = style === 'letterbox' ? '#12110e' : style === 'window' ? paper : whole ?? band(source, 0, 10)
+      const bottom = style === 'letterbox' ? '#12110e' : style === 'window' ? paper : whole ?? band(source, window.innerHeight - 10, 10)
+      if (style === 'window') root.classList.add('bars-window')
       if (!top || !bottom) return
       strips[0].style.setProperty('--edge', top)
       strips[1].style.setProperty('--edge', bottom)
@@ -87,6 +93,7 @@ function tintEdges(frame: HTMLElement) {
     fade: () => { window.clearInterval(timer); strips.forEach(strip => strip.classList.add('is-gone')) },
     restore: () => {
       window.clearInterval(timer)
+      root.classList.remove('bars-window')
       strips.forEach(strip => strip.remove())
       root.style.removeProperty('--edge-top')
       meta?.setAttribute('content', getComputedStyle(root).getPropertyValue('--paper').trim())

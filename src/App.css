@@ -206,10 +206,10 @@ a:hover .arrow {
 
 .hero {
   display: grid;
-  grid-template-columns: minmax(0, 43vw) minmax(0, 1fr);
+  grid-template-columns: minmax(0, 54vw) minmax(0, 1fr);
   align-items: center;
   margin: 0 calc(-1 * var(--gutter));
-  padding: 24px var(--gutter) 64px 15vw;
+  padding: 8px var(--gutter) 56px 6vw;
 }
 
 .hero-media {
@@ -218,7 +218,7 @@ a:hover .arrow {
 
 .meadow {
   position: relative;
-  aspect-ratio: 1.15;
+  aspect-ratio: 1.2;
 }
 
 /* The stage fades to nothing at its edges, so the picture becomes the page. */
@@ -226,19 +226,20 @@ a:hover .arrow {
   position: absolute;
   inset: 0;
   overflow: hidden;
-  -webkit-mask-image: radial-gradient(closest-side, #000 52%, rgb(0 0 0 / .6) 78%, transparent 100%);
-  mask-image: radial-gradient(closest-side, #000 52%, rgb(0 0 0 / .6) 78%, transparent 100%);
+  -webkit-mask: radial-gradient(closest-side, #000 58%, rgb(0 0 0 / .6) 80%, transparent 100%) center / 100% 100% no-repeat;
+  mask: radial-gradient(closest-side, #000 58%, rgb(0 0 0 / .6) 80%, transparent 100%) center / 100% 100% no-repeat;
 }
 
-/* Everything starts half-blurred... */
+/* The centre stays sharp... */
 .meadow-source {
   position: absolute;
   inset: -6%;
   width: 112%;
+  max-width: none;
   height: 112%;
   object-fit: cover;
   object-position: 45% 60%;
-  filter: blur(calc(var(--blur) * .5)) saturate(.95);
+  filter: saturate(.95);
 }
 
 video.meadow-source {
@@ -250,7 +251,7 @@ video.meadow-source.is-playing {
   opacity: 1;
 }
 
-/* ...outside the central oval it reaches full blur... */
+/* ...blur begins outside the central oval... */
 .frost {
   position: absolute;
   inset: 0;
@@ -259,24 +260,24 @@ video.meadow-source.is-playing {
 .frost-outer {
   -webkit-backdrop-filter: blur(calc(var(--blur) * .5));
   backdrop-filter: blur(calc(var(--blur) * .5));
-  -webkit-mask-image: radial-gradient(closest-side, transparent 34%, #000 64%);
-  mask-image: radial-gradient(closest-side, transparent 34%, #000 64%);
+  -webkit-mask-image: radial-gradient(closest-side, transparent 48%, #000 74%);
+  mask-image: radial-gradient(closest-side, transparent 48%, #000 74%);
 }
 
 /* ...and keeps building towards the edges. */
 .frost-edge {
   -webkit-backdrop-filter: blur(var(--blur));
   backdrop-filter: blur(var(--blur));
-  -webkit-mask-image: radial-gradient(closest-side, transparent 60%, #000 92%);
-  mask-image: radial-gradient(closest-side, transparent 60%, #000 92%);
+  -webkit-mask-image: radial-gradient(closest-side, transparent 66%, #000 94%);
+  mask-image: radial-gradient(closest-side, transparent 66%, #000 94%);
 }
 
-/* Tint: a wash of paper, light in the middle, full at the edges. */
+/* Tint: a wash of paper that only starts outside the centre and is full at the edges. */
 .tint {
   position: absolute;
   inset: 0;
   opacity: var(--tint);
-  background: radial-gradient(closest-side, rgb(246 242 231 / .3) 0%, rgb(246 242 231 / .45) 50%, var(--paper) 100%);
+  background: radial-gradient(closest-side, transparent 45%, rgb(246 242 231 / .5) 72%, var(--paper) 100%);
 }
 
 /* Grain: fine noise, a little in the middle and more where it meets the page. */
@@ -286,8 +287,8 @@ video.meadow-source.is-playing {
   opacity: var(--grain);
   mix-blend-mode: overlay;
   background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='180' height='180'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='.85' numOctaves='3' stitchTiles='stitch'/%3E%3CfeColorMatrix type='saturate' values='0'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)'/%3E%3C/svg%3E");
-  -webkit-mask-image: radial-gradient(closest-side, rgb(0 0 0 / .45) 30%, #000 85%);
-  mask-image: radial-gradient(closest-side, rgb(0 0 0 / .45) 30%, #000 85%);
+  -webkit-mask-image: radial-gradient(closest-side, transparent 45%, #000 85%);
+  mask-image: radial-gradient(closest-side, transparent 45%, #000 85%);
 }
 
 .motion-control {
@@ -315,7 +316,7 @@ video.meadow-source.is-playing {
   position: absolute;
   top: -4%;
   left: -4%;
-  width: 40%;
+  width: 34%;
   overflow: visible;
   pointer-events: none;
 }
@@ -784,42 +785,117 @@ html.has-cursor .cursor-dot {
 
 .cursor-dot.has-label span { opacity: 1; }
 
-/* Intro: once per visit, the arc of grain is laid down, then the page is uncovered */
+/* Intro: the meadow full screen, "Sedes" written across it, then it pulls back into its window */
 
-.intro-overlay {
+.intro-title {
   display: none;
 }
 
-html.intro .intro-overlay {
-  position: fixed;
-  inset: 0;
-  z-index: 300;
-  display: grid;
-  place-content: center;
-  justify-items: center;
-  gap: 18px;
-  background: var(--paper);
-  animation: uncover .9s 1.5s cubic-bezier(.7, 0, .2, 1) forwards;
+html.intro {
+  overflow: hidden;
 }
 
-.intro-arc {
-  width: 140px;
+/* Hold the page back while the picture fills the screen. */
+html.intro .site-header,
+html.intro main > :not(.hero),
+html.intro .hero-copy,
+html.intro .grain-arc,
+html.intro .motion-control,
+html.intro .site-footer {
+  opacity: 0;
+}
+
+html.intro.intro-out .site-header,
+html.intro.intro-out main > :not(.hero),
+html.intro.intro-out .hero-copy,
+html.intro.intro-out .grain-arc,
+html.intro.intro-out .site-footer {
+  opacity: 1;
+  transition: opacity 1s .5s ease;
+}
+
+/* The words settle in as the picture pulls back, not before. */
+html.intro:not(.intro-out) .hero-copy > *,
+html.intro:not(.intro-out) .grain-arc ellipse {
+  animation-play-state: paused;
+}
+
+/* Fixed elements need no transformed or filtered ancestors to cover the screen. */
+html.intro main, html.intro .hero .meadow {
+  animation: none;
+}
+
+html.intro .hero .meadow-stage {
+  position: fixed;
+  inset: auto;
+  top: 0;
+  left: 0;
+  z-index: 250;
+  width: 100vw;
+  height: 100vh;
+  -webkit-mask-size: 220% 220%;
+  mask-size: 220% 220%;
+}
+
+html.intro:not(.intro-out) .meadow-stage :is(.frost, .tint, .grain) {
+  opacity: 0;
+}
+
+html.intro .intro-title {
+  position: fixed;
+  inset: 0;
+  z-index: 260;
+  display: grid;
+  place-items: center;
+  pointer-events: none;
+  transition: opacity .6s ease, scale 1.2s cubic-bezier(.65, 0, .2, 1);
+}
+
+html.intro.intro-out .intro-title {
+  opacity: 0;
+  scale: .82;
+}
+
+.intro-title svg {
+  width: min(78vw, 760px);
   overflow: visible;
 }
 
-.intro-word {
+.intro-title text {
   font-family: var(--heading);
-  font-size: 2rem;
-  letter-spacing: .04em;
-  animation: settle .8s .6s var(--ease) both;
+  font-size: 168px;
+  fill: #fbf8ef;
+  fill-opacity: 0;
+  stroke: #fbf8ef;
+  stroke-width: 1.4;
+  stroke-dasharray: 700;
+  stroke-dashoffset: 700;
+  filter: drop-shadow(0 2px 14px rgb(30 34 20 / .35));
 }
 
-@keyframes uncover {
-  to { clip-path: inset(0 0 100% 0); }
+/* The hand: a soft-edged wipe moving left to right while the strokes trace and fill. */
+.intro-hand {
+  transform: translateX(-100%);
 }
 
-html.intro .hero, html.intro .hero * {
-  animation-play-state: paused !important;
+html.intro-writing .intro-hand {
+  animation: write 2.2s cubic-bezier(.45, .05, .35, 1) forwards;
+}
+
+html.intro-writing .intro-title text {
+  animation: trace 2.2s ease-out forwards, ink 1s 1.3s ease forwards;
+}
+
+@keyframes write {
+  to { transform: translateX(0); }
+}
+
+@keyframes trace {
+  to { stroke-dashoffset: 0; }
+}
+
+@keyframes ink {
+  to { fill-opacity: 1; }
 }
 
 /* Development-only tuning panel ------------------------------------------- */
@@ -1001,8 +1077,8 @@ html.intro .hero, html.intro .hero * {
 .hero-copy > :nth-child(6) { animation-delay: .54s; }
 
 @keyframes develop {
-  from { opacity: 0; filter: blur(10px) brightness(1.15); }
-  to { opacity: 1; filter: none; }
+  from { opacity: 0; }
+  to { opacity: 1; }
 }
 
 @keyframes settle {

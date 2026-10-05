@@ -15,9 +15,13 @@
         root.classList.add('js')
         try {
           var calm = window.matchMedia('(prefers-reduced-motion: reduce)').matches
-          if (location.pathname === '/' && !calm && !sessionStorage.getItem('sedes:intro')) {
+          // Every load while developing; once per visit on the real site.
+          var local = /^(localhost|127\.0\.0\.1)$/.test(location.hostname)
+          if (location.pathname === '/' && !calm && (local || !sessionStorage.getItem('sedes:intro'))) {
             root.classList.add('intro')
             sessionStorage.setItem('sedes:intro', '1')
+            // If the page script never takes over the intro, show the page anyway.
+            setTimeout(function () { if (!root.classList.contains('intro-owned')) root.classList.remove('intro') }, 4000)
           }
         } catch (error) {}
       })()

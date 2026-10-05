@@ -9,9 +9,14 @@ let lenis: Lenis | null = null
 export function startSmoothScroll() {
   if (reduced() || lenis) return () => {}
   lenis = new Lenis({ duration: 1.15, anchors: true })
+  // The home intro holds the page still until it has pulled back.
+  if (document.documentElement.classList.contains('intro')) lenis.stop()
   let frame = requestAnimationFrame(function raf(time) { lenis?.raf(time); frame = requestAnimationFrame(raf) })
   return () => { cancelAnimationFrame(frame); lenis?.destroy(); lenis = null }
 }
+
+export function stopSmoothScroll() { lenis?.stop() }
+export function resumeSmoothScroll() { lenis?.start() }
 
 export function scrollToTop() {
   if (lenis) lenis.scrollTo(0, { immediate: true, force: true })

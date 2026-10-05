@@ -24,7 +24,10 @@ function WorkList({ items, heading: Heading, live = false }: { items: Project[];
       style={live ? { '--i': index } as CSSProperties : undefined}
       data-cursor="view"
     >
-      <Heading className="work-title"><Link href={projectHref(project)}>{project.title}</Link></Heading>
+      <Heading className="work-title">
+        {/* The stalk grows under the title while the row is hovered or focused. */}
+        <span className="work-name"><Link href={projectHref(project)}>{project.title}</Link><Stalk className="work-stalk" /></span>
+      </Heading>
       <p className="work-summary">{project.summary}</p>
       <p className="work-meta"><span>{project.year}</span> <span>{project.status}</span></p>
     </li>)}
@@ -48,7 +51,7 @@ function Home() {
     </section>
 
     <section className="featured" aria-labelledby="featured-title">
-      <h2 id="featured-title" data-reveal>What I make</h2>
+      <h2 id="featured-title" data-reveal>Recent projects</h2>
       <Stalk className="section-stalk" data-reveal />
       <WorkList items={featuredProjects} heading="h3" />
       <p className="more" data-reveal>{others} more in the <Link href="/projects">full list</Link>, and a few I haven’t written up yet.</p>

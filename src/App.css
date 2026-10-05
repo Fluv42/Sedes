@@ -89,9 +89,9 @@
 
 /* Grown: the line first, then the stem into the ear, then each grain from the base to the tip.
    (Under the current page in the menu, on hover there, or once revealed by scrolling.) */
-:is(.stalk.is-grown, .stalk.is-in, .site-header nav a:hover .stalk, .site-header nav a:focus-visible .stalk) .stalk-line { transform: none; }
-:is(.stalk.is-grown, .stalk.is-in, .site-header nav a:hover .stalk, .site-header nav a:focus-visible .stalk) .stalk-stem { transform: none; transition-delay: .4s; }
-:is(.stalk.is-grown, .stalk.is-in, .site-header nav a:hover .stalk, .site-header nav a:focus-visible .stalk) .stalk-grain {
+:is(.stalk.is-grown, .stalk.is-in, .site-header nav a:hover .stalk, .site-header nav a:focus-visible .stalk, .work-item:hover .stalk, .work-item:has(a:focus-visible) .stalk) .stalk-line { transform: none; }
+:is(.stalk.is-grown, .stalk.is-in, .site-header nav a:hover .stalk, .site-header nav a:focus-visible .stalk, .work-item:hover .stalk, .work-item:has(a:focus-visible) .stalk) .stalk-stem { transform: none; transition-delay: .4s; }
+:is(.stalk.is-grown, .stalk.is-in, .site-header nav a:hover .stalk, .site-header nav a:focus-visible .stalk, .work-item:hover .stalk, .work-item:has(a:focus-visible) .stalk) .stalk-grain {
   transform: none;
   transition: transform .42s cubic-bezier(.3, 1.45, .55, 1) calc(.55s + var(--g) * 65ms);
 }
@@ -644,6 +644,19 @@ video.meadow-source.is-playing {
 
 .work-title a {
   text-decoration: none;
+}
+
+/* The title and its stalk: the stalk is as wide as the title, just under it. */
+.work-name {
+  display: inline-flex;
+  flex-direction: column;
+  align-items: stretch;
+}
+
+.work-stalk {
+  --stalk: 3px;
+  margin-top: .12em;
+  margin-bottom: -.3em;
 }
 
 /* The whole row is the link's target. */

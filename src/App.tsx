@@ -66,7 +66,8 @@ export default function App({ initialPath = '/' }: { initialPath?: string }) {
           <span className="footer-credits">
             <span>© {new Date().getFullYear()} {site.name} <span className="alias">/ {site.alias}</span></span>
             <span className="music-credit">
-              Music by <a href={site.musicBy.href}>{site.musicBy.name}<span className="credit-note" aria-hidden="true">Go support him! ♪</span></a>
+              Music by <a href={site.musicBy.href}>{site.musicBy.name}</a>
+              <a className="credit-note" href={site.musicBy.songHref} title={site.musicBy.original}>♪ {site.musicBy.song}</a>
             </span>
           </span>
           <span className="footer-links">

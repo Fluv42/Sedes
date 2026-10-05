@@ -826,20 +826,26 @@ video.meadow-source.is-playing {
   color: var(--rule);
 }
 
-.music-credit a {
+.music-credit {
   position: relative;
+}
+
+.music-credit a {
   color: var(--walnut);
   text-decoration: none;
   border-bottom: 1px solid currentColor;
 }
 
-/* A note that slides out beside his name on hover. */
-.credit-note {
+/* The song slides out beside his name on hover. Its padding bridges the gap, so the pointer
+   can travel across to click it without the hover dropping. */
+.music-credit .credit-note {
   position: absolute;
-  left: calc(100% + 10px);
+  left: 100%;
   bottom: 0;
+  padding-left: 10px;
+  border: 0;
   white-space: nowrap;
-  color: var(--walnut);
+  font-size: .8rem;
   font-style: italic;
   opacity: 0;
   translate: -6px 0;
@@ -847,10 +853,15 @@ video.meadow-source.is-playing {
   transition: opacity .25s ease, translate .35s var(--ease);
 }
 
-.music-credit a:hover .credit-note,
-.music-credit a:focus-visible .credit-note {
+.music-credit:hover .credit-note,
+.music-credit:focus-within .credit-note {
   opacity: 1;
   translate: 0 0;
+  pointer-events: auto;
+}
+
+.music-credit .credit-note:hover {
+  text-decoration: underline;
 }
 
 .footer-meta .alias {

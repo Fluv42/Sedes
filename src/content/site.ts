@@ -8,7 +8,11 @@ export const site = {
   instagram: 'https://www.instagram.com/micah.vanewyk/',
   location: 'Southwestern Ontario, Canada',
   // The music's composer, credited in the footer as he asks.
-  musicBy: { name: 'DM DOKURO', href: 'https://www.youtube.com/@DMDOKURO' },
+  musicBy: {
+    name: 'DM DOKURO', href: 'https://www.youtube.com/@DMDOKURO',
+    song: 'For the Time We’ve Spent', songHref: 'https://www.youtube.com/watch?v=SMX6UE2a-IA',
+    original: 'Klonoa: Door to Phantomile arrangement; original by Eriko Imura',
+  },
 }
 
 export const navigation = [

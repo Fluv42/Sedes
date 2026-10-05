@@ -1174,7 +1174,18 @@ html.intro .site-frame {
 html.intro.intro-owned .site-frame {
   opacity: 1;
   transition: opacity .7s ease;
-  will-change: transform;
+}
+
+/* While the intro waits, the page is zoomed about 2.7×, so anything it doesn't show still costs
+   memory at that size (Safari on an iPhone ran out). Until the pull-back starts: only one screen
+   of the page exists, and the glow, frosted edges and everything below the hero are switched off
+   rather than merely transparent. They come back the moment the visitor moves on. */
+html.intro:not(.intro-out) .site-frame {
+  height: 100svh;
+}
+
+html.intro:not(.intro-out) :is(.meadow-ambient, .meadow-stage .frost, .meadow-stage .tint, .meadow-stage .grain, main > :not(.hero), .site-footer, .hero-copy, .motion-control) {
+  visibility: hidden;
 }
 
 html.intro .hero .meadow-stage {

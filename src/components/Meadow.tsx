@@ -51,12 +51,17 @@ export function Meadow({ still = false, alt }: { still?: boolean; alt?: string }
     const resume = () => element.play().catch((error: DOMException) => { if (error.name !== 'AbortError') setPlaying(false) })
     if (!playing) { element.pause(); return }
     resume()
-    // Scrolled out of view, the video stops decoding (saving battery); it carries on when it returns.
+    // Scrolled out of view or in a background tab, the video stops decoding (saving battery and
+    // graphics memory, which Safari is strict about); it carries on when it's seen again.
+    let inView = true
+    const update = () => { if (inView && !document.hidden) resume(); else element.pause() }
+    document.addEventListener('visibilitychange', update)
     const figure = element.closest('figure')
-    if (!figure || !('IntersectionObserver' in window)) return
-    const watcher = new IntersectionObserver(([entry]) => { if (entry.isIntersecting) resume(); else element.pause() })
-    watcher.observe(figure)
-    return () => watcher.disconnect()
+    const watcher = figure && 'IntersectionObserver' in window
+      ? new IntersectionObserver(([entry]) => { inView = entry.isIntersecting; update() })
+      : null
+    if (figure) watcher?.observe(figure)
+    return () => { watcher?.disconnect(); document.removeEventListener('visibilitychange', update) }
   }, [playing, clip])
 
   // Ambient light, like YouTube's ambient mode: a tiny copy of each frame, blown up and blurred

@@ -23,6 +23,8 @@ export function Intro() {
   // Offered only if sound still hasn't been allowed a moment after load (browsers that trust the
   // site start it on their own). Once offered it stays, as "Sound on" after it's pressed.
   const [offer, setOffer] = useState(false)
+  // Set once the intro is actually running, so other pages don't carry its heading.
+  const [live, setLive] = useState(false)
   const soundButton = useRef<HTMLButtonElement>(null)
   const next = useRef<HTMLButtonElement>(null)
 
@@ -109,7 +111,9 @@ export function Intro() {
     // Write the name once the typeface is in, so it's drawn in Libron rather than a fallback; then wait.
     const fonts = document.fonts?.load('400 120px "Libron"') ?? Promise.resolve()
     Promise.race([fonts, new Promise(resolve => setTimeout(resolve, 700))]).then(() => {
-      if (!cancelled) root.classList.add('intro-writing')
+      if (cancelled) return
+      root.classList.add('intro-writing')
+      setLive(true)
     })
 
     // Moving on is the visitor's choice: scrolling or swiping down, a "down" key, or the arrow.
@@ -141,7 +145,13 @@ export function Intro() {
     }
   }, [])
 
-  return <div className="intro-title">
+  // While it's showing, the page behind is inert, so the intro carries the page's heading and a
+  // hint for screen readers; it disappears (display: none) once the page is shown.
+  return <div className="intro-title" {...(live ? { role: 'main', 'aria-labelledby': 'intro-heading' } : {})}>
+    {live && <>
+      <h1 id="intro-heading" className="visually-hidden">Sedes, the site of Micah VanEwyk</h1>
+      <p className="visually-hidden">Scroll down, press the down arrow key, or use the button below to enter.</p>
+    </>}
     <svg viewBox="0 0 640 220" aria-hidden="true">
       <defs>
         <linearGradient id="intro-wipe" x1="0" x2="1" y1="0" y2="0">

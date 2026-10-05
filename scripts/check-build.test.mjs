@@ -72,3 +72,32 @@ test('contact links work without a form service and private phone data is not ha
     assert.doesNotMatch(await readFile(file, 'utf8'), /\b\d{3}-\d{3}-\d{4}\b/, file)
   }
 })
+
+test('every page has its own link-preview title, description, address and image', async () => {
+  const descriptions = new Set()
+  for (const { path, html } of pages) {
+    const url = `https://sedes.ca${path === '/' ? '/' : path}`
+    assert.match(html, new RegExp(`<link rel="canonical" href="${url}"`), `${path}: canonical`)
+    assert.match(html, new RegExp(`<meta property="og:url" content="${url}"`), `${path}: og:url`)
+    assert.match(html, /<meta property="og:title" content="[^"]+\| Sedes"/, `${path}: og:title`)
+    assert.match(html, /<meta property="og:image" content="https:\/\/sedes\.ca\/og-image\.jpg"/, `${path}: og:image`)
+    descriptions.add(html.match(/<meta name="description" content="([^"]+)"/)[1])
+  }
+  assert.equal(descriptions.size, pages.length, 'each page describes itself')
+  for (const file of ['og-image.jpg', 'apple-touch-icon.png']) await assert.doesNotReject(access(resolve(root, file)))
+})
+
+test('the theme and time of day are set before the page paints', async () => {
+  const html = pages.find(page => page.path === '/').html
+  const head = html.slice(0, html.indexOf('</head>'))
+  assert.match(head, /data-daypart/)
+  assert.match(head, /data-theme', daypart === 'night' \? 'dark' : 'light'/)
+})
+
+test('the résumé is offered on About and Contact in both formats', () => {
+  for (const path of ['/about', '/contact']) {
+    const html = pages.find(page => page.path === path).html
+    assert.match(html, /href="\/resume\/Micah-VanEwyk-Resume\.pdf"/, `${path}: PDF`)
+    assert.match(html, /href="\/resume\/Micah-VanEwyk-Resume\.docx"/, `${path}: Word`)
+  }
+})

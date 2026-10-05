@@ -77,8 +77,19 @@ function useDismiss() {
   return menu
 }
 
+// The résumé in both formats, as a small dropdown (About and Contact).
+function ResumeMenu() {
+  const menu = useDismiss()
+  return <details className="resume" ref={menu} data-reveal>
+    <summary>My résumé <span className="caret" aria-hidden="true">▾</span></summary>
+    <ul>
+      <li><a href="/resume/Micah-VanEwyk-Resume.pdf" download>PDF <span>86 KB</span></a></li>
+      <li><a href="/resume/Micah-VanEwyk-Resume.docx" download>Word <span>11 KB</span></a></li>
+    </ul>
+  </details>
+}
+
 function About() {
-  const resume = useDismiss()
   return <section className="split-page about">
     <div className="split-media" data-reveal>
       <Meadow still />
@@ -86,15 +97,13 @@ function About() {
     <div className="prose">
       <h1 data-reveal>About</h1>
       <p className="lede" data-reveal>I’m Micah, an IT specialist and developer. I live on a farm in Southwestern Ontario.</p>
-      <details className="resume" ref={resume} data-reveal>
-        <summary>My résumé <span className="caret" aria-hidden="true">▾</span></summary>
-        <ul>
-          <li><a href="/resume/Micah-VanEwyk-Resume.pdf" download>PDF <span>86 KB</span></a></li>
-          <li><a href="/resume/Micah-VanEwyk-Resume.docx" download>Word <span>11 KB</span></a></li>
-        </ul>
-      </details>
-      <p data-reveal>I’m the IT specialist for five dealerships and a body shop, looking after logins, printers and software for about 210 people. I’m also building LotFlow, an app that tracks their vehicles from reconditioning to delivery.</p>
-      <p data-reveal>I finished my Bachelor of Information Technology at Carleton in 2025, in Information Resource Management, done jointly with Algonquin College. Along the way I did co-ops in IT support at Bluewater Health and in information management at Agriculture and Agri-Food Canada.</p>
+      <ResumeMenu />
+      <p data-reveal>I’m the IT specialist for five dealerships and a body shop, about 210 people. Day to day that means logins, printers, VPN access and software, sorted in person, over Teams or on the phone, and working with our outside IT providers when something is bigger. I’m also building <Link href="/projects/lotflow">LotFlow</Link>, an app that tracks their vehicles from reconditioning to delivery.</p>
+      <p data-reveal>I finished my Bachelor of Information Technology at Carleton in 2025, in Information Resource Management, done jointly with Algonquin College. Along the way I did a co-op in IT support at Bluewater Health, and worked as an information management assistant at Agriculture and Agri-Food Canada, where I built the <Link href="/projects/server-cleanup">server cleanup tool</Link>.</p>
+      <dl className="toolkit" data-reveal>
+        <div><dt>Support</dt><dd>Windows and macOS, Microsoft 365 and Teams, VPN and network printers, Cloudflare DNS, NAS setup, Cherwell</dd></div>
+        <div><dt>Building</dt><dd>React and TypeScript, Python, Django, Express, SQLite, Git</dd></div>
+      </dl>
       <p data-reveal>Outside of work I play a lot of Soulslikes (Elden Ring, Sekiro, Lies of P), mostly for the builds and the lore, and modded Minecraft. I like tinkering with computers, my Steam Deck and smart-home gear, and building or refinishing things around the house. Lately I’ve been customizing my Kobo e-reader with the font you’re now reading. Libron!<a className="inline-icon" href="https://github.com/nicoverbruggen/libron" aria-label="Libron on GitHub" title="Libron on GitHub"><GitHubIcon /></a></p>
       <p data-reveal>The site’s name comes from <em>Sedes Sapientiae</em>, the Seat of Wisdom. The site is the seat, and the work is what it holds.</p>
       <Link className="cta" href="/projects" data-reveal>See the projects <Arrow /></Link>
@@ -180,6 +189,7 @@ function Contact() {
       <h1 data-reveal>Contact</h1>
       <p className="lede" data-reveal>Want to work together, or have a question about something here? Send me an email.</p>
       <p className="contact-email" data-reveal><a href={`mailto:${site.email}`}>{site.email}</a></p>
+      <ResumeMenu />
       <ul className="contact-other" data-reveal>
         <li><a href={site.linkedin}>LinkedIn</a></li>
         <li><a href={site.github}>GitHub</a></li>

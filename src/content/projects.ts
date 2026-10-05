@@ -40,8 +40,11 @@ export const projects: Project[] = [
     sections: [
       { title: 'The idea', paragraphs: ['I wanted somewhere for my work that felt like a place rather than a template: warm and quiet, a bit like home. The site is the seat, and the work is what it holds.'] },
       { title: 'What’s on it', paragraphs: ['A home page, a list of projects with a write-up for each, a bit about me, and a way to reach me. The words live apart from the layout, so I can add things without rebuilding the site.'] },
-      { title: 'How it’s made', paragraphs: ['It’s a small React and TypeScript site, set in Libron, with a field at the top that changes with the time of day.'] },
-      { title: 'Where it stands', paragraphs: ['Still being built. Next comes my own footage from the farm, and more write-ups.'] },
+      { title: 'How it works', paragraphs: [
+        'The field at the top follows your clock: a foggy sunrise in the morning, sun through the trees in the afternoon, wheat at sunset in the evening and stars at night, with the site in dark mode overnight. A tiny copy of each video frame is blurred behind the picture so its colour spills onto the page, and a quiet field recording plays under the music, matched to the time of day.',
+        'Under that it’s a small React and TypeScript site, pre-rendered to plain HTML so it loads fast and works without JavaScript, then hosted on Cloudflare. It respects reduced-motion settings, works from the keyboard, and pauses video and sound when you can’t see or hear them.',
+      ] },
+      { title: 'Where it stands', paragraphs: ['Live at sedes.ca. Next comes my own footage from the farm, and more write-ups.'] },
     ],
   },
   {
@@ -62,7 +65,7 @@ export const projects: Project[] = [
     summary: 'A desktop tool that helped clear about 2.2 TB of old files off a server, with a record of everything removed.',
     stack: 'Python · PyQt5 · Excel', role: 'My idea; I designed it, built it, wrote the guides and showed people how to use it',
     sections: [
-      { title: 'The job', paragraphs: ['On my information management co-op there was an old server full of files nobody needed. Going through them one at a time would have taken forever, and anything deleted had to follow an approved process and be written down.'] },
+      { title: 'The job', paragraphs: ['In my information management job at Agriculture and Agri-Food Canada there was an old server full of files nobody needed. Going through them one at a time would have taken forever, and anything deleted had to follow an approved process and be written down.'] },
       { title: 'What I built', paragraphs: ['It started as a PowerShell script. I rebuilt it in Python as a proper desktop app: point it at a folder, it sorts the files into Delete or Verify, and anything marked Verify needs a person’s initials before it goes.', 'Every removal is logged to an Excel sheet with the file’s name, location, type, size, date and who checked it. I packaged it as a normal Windows program, wrote a guide and training material, and demoed it to supervisors and the people who’d be using it.'] },
       { title: 'What went wrong', paragraphs: ['It worked on my machine and then didn’t on the server. There was no Recycle Bin to fall back on, and everyone had the shared drive mapped to a different letter. I had to build for how other people’s computers were set up, not how mine was.'] },
       { title: 'How I fixed it', paragraphs: ['Instead of deleting files outright, the tool moves them to a separate folder that works as its own recycle bin. If something was removed by mistake, it can be put back.'] },
@@ -104,7 +107,6 @@ export const projects: Project[] = [
     sections: [
       { title: 'The project', paragraphs: ['A website made for IRM 3007 in Django: a library catalogue, accounts, settings and a contact page.'] },
       { title: 'The idea', paragraphs: ['Get people borrowing more from the Ottawa Public Library by letting them earn points for it. Rewards were grouped by age, for kids, adults and seniors, and several rewards pages had French versions too.'] },
-      { title: 'My part', paragraphs: ['I’m going back through the original coursework before writing up exactly which parts were mine.'] },
       { title: 'Where it stands', paragraphs: ['It was a class prototype, never a real library service. The code is saved on my computer.'] },
     ],
   },

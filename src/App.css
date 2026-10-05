@@ -789,6 +789,38 @@ video.meadow-source.is-playing {
 
 .resume li a:hover { background: var(--paper-deep); }
 
+/* What I work with: two short labelled lines. */
+.toolkit {
+  display: grid;
+  gap: 10px;
+  margin: 1.2em 0 0;
+  padding: 16px 0 0;
+  border-top: 1px solid var(--rule);
+}
+
+.toolkit div {
+  display: grid;
+  grid-template-columns: 6.5em 1fr;
+  gap: 12px;
+}
+
+.toolkit dt {
+  color: var(--muted);
+  font-size: .9rem;
+}
+
+.toolkit dd {
+  margin: 0;
+}
+
+.toolkit + p {
+  margin-top: 1.2em;
+}
+
+.contact .resume {
+  margin: 18px 0 22px;
+}
+
 .about .cta {
   margin-top: 28px;
 }

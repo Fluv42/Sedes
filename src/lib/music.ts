@@ -9,7 +9,7 @@ import type { Daypart } from './daypart'
 // on from page to page. Every visit starts with both on.
 //
 // Browsers only allow sound once the visitor has clicked, tapped or pressed a key, so until then
-// the button reads "Enable music" (and any click on the page does the same). If the browser
+// the button reads "Enable sound", and pressing it is what starts it. If the browser
 // already trusts the site, sound starts on load. The field sound fades in first and the song
 // rises in over it; both fade rather than cut, and go quiet while the tab is hidden.
 //
@@ -202,22 +202,19 @@ function tryStart() {
   })
 }
 
-// Browsers differ in which events count as "the visitor asked for it" (Safari wants click or
-// touchend, Chrome also takes pointerdown and keydown), so listen for all of them and keep
-// listening until one of them actually starts the sound.
-const gestures = ['pointerdown', 'mousedown', 'click', 'keydown', 'touchend'] as const
-const stopWaiting = () => gestures.forEach(name => window.removeEventListener(name, startOnGesture, true))
+// Sound starts from the Enable sound button (or the footer's heart): that click is the visitor
+// asking for it, which is what the browser needs. Any other click on the page (the intro's arrow,
+// a link) just does its own job.
 let starting: Promise<void> | null = null
 function startOnGesture() {
   if (allowed || starting || mode === 'off') return
-  starting = tryStart().then(stopWaiting, () => {}).finally(() => { starting = null })
+  starting = tryStart().catch(() => {}).finally(() => { starting = null })
 }
 
-// Called once when the site loads.
+// Called once when the site loads: if the browser already trusts the site, sound starts now.
 export function startMusic() {
   if (allowed) return
-  gestures.forEach(name => window.addEventListener(name, startOnGesture, { capture: true, passive: true }))
-  tryStart().then(stopWaiting, () => {})
+  tryStart().catch(() => {})
 }
 
 // Called by the app whenever the page changes: the field sound belongs to the home page.

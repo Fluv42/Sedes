@@ -768,7 +768,7 @@ video.meadow-source.is-playing {
   text-decoration: none;
 }
 
-/* The title and its stalk: the stalk is as wide as the title, just under it. */
+/* The title and its stalk: the stalk runs under the title's last line, just below it. */
 .work-name {
   display: inline-flex;
   flex-direction: column;
@@ -777,6 +777,8 @@ video.meadow-source.is-playing {
 
 .work-stalk {
   --stalk: 3px;
+  /* The title's last line (pages.tsx WorkName); the whole title until that's measured. */
+  width: var(--line, auto);
   margin-top: .12em;
   margin-bottom: -.3em;
 }
@@ -1681,17 +1683,6 @@ html .intro-actions .control.is-on {
 .edge-strip.bottom { bottom: 0; }
 .edge-strip.bottom::after { bottom: 100%; background: linear-gradient(transparent, var(--edge)); }
 .edge-strip.is-gone { opacity: 0; pointer-events: none; }
-
-/* Preview of the "window" alternative (?bars=window): the picture set into the paper with round
-   corners, so it never has to meet Safari's bars. */
-html.bars-window:not(.intro-out) .intro-title::before {
-  content: '';
-  position: fixed;
-  inset: 10px 10px 10px;
-  border-radius: 30px;
-  box-shadow: 0 0 0 60px var(--paper);
-  pointer-events: none;
-}
 
 /* A down arrow near the bottom, nudging gently: the way in. */
 .intro-next {

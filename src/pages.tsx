@@ -14,6 +14,29 @@ import { quips } from './content/quips'
 const projectHref = (project: Project) => `/projects/${project.slug}`
 const Arrow = () => <span className="arrow" aria-hidden="true">→</span>
 
+// A title and the stalk under it. When the title wraps, the stalk is as long as its last line (the
+// one it sits under), not the longest; measured again whenever the title's box changes size.
+function WorkName({ project }: { project: Project }) {
+  const name = useRef<HTMLSpanElement>(null)
+  useEffect(() => {
+    const element = name.current
+    const link = element?.querySelector('a')
+    if (!element || !link) return
+    const measure = () => {
+      const range = document.createRange()
+      range.selectNodeContents(link)
+      const lines = range.getClientRects()
+      const last = lines[lines.length - 1]
+      if (last) element.style.setProperty('--line', `${last.right - element.getBoundingClientRect().left}px`)
+    }
+    measure()
+    const watch = new ResizeObserver(measure)
+    watch.observe(element)
+    return () => watch.disconnect()
+  }, [])
+  return <span ref={name} className="work-name"><Link href={projectHref(project)}>{project.title}</Link><Stalk className="work-stalk" /></span>
+}
+
 // An editorial list rather than cards: big titles, one line each, year and status to the side.
 // On Home rows rise in as they scroll into view; on Projects they rise in as filters bring them back.
 function WorkList({ items, heading: Heading, live = false }: { items: Project[]; heading: 'h2' | 'h3'; live?: boolean }) {
@@ -27,7 +50,7 @@ function WorkList({ items, heading: Heading, live = false }: { items: Project[];
     >
       <Heading className="work-title">
         {/* The stalk grows under the title while the row is hovered or focused. */}
-        <span className="work-name"><Link href={projectHref(project)}>{project.title}</Link><Stalk className="work-stalk" /></span>
+        <WorkName project={project} />
       </Heading>
       <p className="work-summary">{project.summary}</p>
       <p className="work-meta"><span>{project.year}</span> <span>{project.status}</span></p>

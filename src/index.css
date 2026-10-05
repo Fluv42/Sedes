@@ -49,6 +49,8 @@
   --blur: 3px;
   --tint: .07;
   --grain: .11;
+  /* Strength of the video's colour glowing out around it. */
+  --ambient: .62;
 
   font-family: var(--body);
   font-size: 17px;

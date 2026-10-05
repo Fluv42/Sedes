@@ -7,7 +7,7 @@ import { Intro } from './components/Intro'
 import { usePath } from './lib/router'
 import { scrollToTop, startSmoothScroll, watchParallax, watchReveals } from './lib/motion'
 import { PageRoute } from './pages'
-import { toggleMusic, useMusic } from './lib/music'
+import { startMusic, toggleMusic, useMusic } from './lib/music'
 import { getPageTitle } from './lib/routes'
 import './App.css'
 
@@ -25,6 +25,7 @@ export default function App({ initialPath = '/' }: { initialPath?: string }) {
   const music = useMusic()
 
   useEffect(() => startSmoothScroll(), [])
+  useEffect(() => startMusic(), [])
 
   useEffect(() => {
     document.title = `${title} | Sedes`

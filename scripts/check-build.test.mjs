@@ -27,7 +27,7 @@ test('all internal links and referenced media exist in the deployable output', a
       await assert.doesNotReject(access(destination), `${path}: ${target}`)
     }
   }
-  for (const file of ['fonts/Libron-Regular.woff2', 'fonts/Libron-Bold.woff2', 'fonts/Libron-Italic.woff2', ...['morning', 'day', 'sunset', 'night'].flatMap(part => ['', '-2', '-3'].flatMap(turn => [`media/field-${part}${turn}.mp4`, `media/field-${part}${turn}.jpg`])), ...['morning', 'day', 'evening', 'night'].flatMap(part => ['', '-2', '-3'].map(turn => `media/ambience/${part}${turn}.m4a`))]) await assert.doesNotReject(access(resolve(root, file)))
+  for (const file of ['fonts/Libron-Regular.woff2', 'fonts/Libron-Bold.woff2', 'fonts/Libron-Italic.woff2', ...['morning', 'day', 'sunset', 'night'].flatMap(part => ['', '-2', '-3'].flatMap(turn => ['.mp4', '.av1.mp4', '.540.mp4', '.jpg'].map(kind => `media/field-${part}${turn}${kind}`))), ...['morning', 'day', 'evening', 'night'].flatMap(part => ['', '-2', '-3'].map(turn => `media/ambience/${part}${turn}.m4a`))]) await assert.doesNotReject(access(resolve(root, file)))
 })
 
 test('noindex is present on every page and in Cloudflare response headers', async () => {

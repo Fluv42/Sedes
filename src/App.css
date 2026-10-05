@@ -324,8 +324,7 @@ a:hover .arrow {
   height: 250%;
   max-width: none;
   opacity: min(1, calc(var(--ambient) * var(--glow-strength, 1)));
-  -webkit-mask-image: radial-gradient(closest-side, #000 26%, rgb(0 0 0 / .75) 48%, rgb(0 0 0 / .35) 74%, transparent 100%);
-  mask-image: radial-gradient(closest-side, #000 26%, rgb(0 0 0 / .75) 48%, rgb(0 0 0 / .35) 74%, transparent 100%);
+  /* Its round fade is in the canvas's own pixels (glowMask in Meadow.tsx), not a CSS mask. */
   pointer-events: none;
 }
 
@@ -347,7 +346,7 @@ a:hover .arrow {
   animation: firefly-wander var(--wander) ease-in-out var(--delay) infinite alternate, firefly-blink var(--blink) ease-in-out var(--delay) infinite;
 }
 
-.fireflies.is-paused span { animation-play-state: paused; }
+.fireflies.is-paused span, .meadow[data-away] .fireflies span { animation-play-state: paused; }
 
 @keyframes firefly-wander {
   33% { translate: calc(var(--dx) * .6) calc(var(--dy) * -.4); }

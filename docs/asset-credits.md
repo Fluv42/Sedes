@@ -5,6 +5,7 @@
   - Day: `field-day.mp4`, [Landscape nature sunset summer, Pexels #28291393](https://www.pexels.com/video/landscape-nature-sunset-summer-28291393/), 540p (lots of moving leaves), 52 s loop
   - Night: `field-night.mp4`, [The night sky with stars and trees in the distance, Pexels #25649447](https://www.pexels.com/video/the-night-sky-with-stars-and-trees-in-the-distance-25649447/), a timelapse slowed to 1.6× its length (frame blending) for a 57 s loop
   - Evening: `field-sunset.mp4`, [Vibrant sunset over lush wheat field landscape, Pexels #32548262](https://www.pexels.com/video/vibrant-sunset-over-lush-wheat-field-landscape-32548262/)
+- Every hero clip also ships as `.av1.mp4` (AV1, bitrate-capped, about half the size; played only where the device decodes AV1 in hardware) and `.540.mp4` (960 × 540 H.264, for phones), made from the 720p file with ffmpeg. `src/components/Meadow.tsx` picks one per device.
 - More hero clips, three for each part of the day, one a day in turn (the cycle repeats every three days; days turn over at 5:00). Same licence and treatment (720p, a 2 s crossfade loop; 3 s for the drifting clouds), October 2026:
   - Morning 2: `field-morning-2.mp4`, [Pexels #18089236](https://www.pexels.com/video/18089236/), the first 51 s, a 49 s loop
   - Morning 3: `field-morning-3.mp4`, [Pexels #28972729](https://www.pexels.com/video/28972729/), the first 47.5 s, a 45.5 s loop

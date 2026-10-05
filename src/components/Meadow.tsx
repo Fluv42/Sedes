@@ -90,9 +90,10 @@ function cover(source: CanvasImageSource, width: number, height: number) {
 
 // Pretty mode: the soft edge (a small copy of the frame, stretched, shown only towards the edges)
 // and the glow (an even smaller copy, saturated, smoothed and blended with the frames before it).
-// Both are redrawn once per video frame, and not at all while the picture is off screen or still.
-// How much of the glow shows at a point, from its mask in App.css (.meadow-ambient): a radial
-// gradient whose stops are these, by distance from the middle (1 = the edge of the ellipse).
+// The soft edge is redrawn once per video frame, the glow eight times a second, and neither while
+// the picture is off screen or still.
+// How much of the glow shows at a point: a round fade with these stops, by distance from the
+// middle (1 = the edge of the ellipse), baked into the glow's pixels.
 const glowMask: [number, number][] = [[0, 1], [0.26, 1], [0.48, 0.75], [0.74, 0.35], [1, 0]]
 
 function maskAt(distance: number) {
@@ -130,13 +131,20 @@ function topEdge(glow: HTMLCanvasElement, colours: Float32Array) {
 function startEffects(video: HTMLVideoElement | null, still: HTMLImageElement, soft: HTMLCanvasElement, glow: HTMLCanvasElement, saturation = glowSaturation) {
   const none = { stop: () => {}, paint: () => {} }
   const softContext = soft.getContext('2d', { alpha: false })
-  const glowContext = glow.getContext('2d', { alpha: false })
+  // With transparency: the glow's round fade (once a CSS mask, redrawn by the browser over a
+  // layer three times the picture's size on every frame) is baked into its own pixels instead.
+  const glowContext = glow.getContext('2d')
   const sample = document.createElement('canvas')
   sample.width = glowWidth
   sample.height = glowHeight
   const sampleContext = sample.getContext('2d', { willReadFrequently: true })
   if (!softContext || !glowContext || !sampleContext) return none
   const output = glowContext.createImageData(glowWidth, glowHeight)
+  const fade = new Uint8ClampedArray(glowWidth * glowHeight)
+  for (let y = 0; y < glowHeight; y++) for (let x = 0; x < glowWidth; x++) {
+    const u = (x + 0.5) / glowWidth, v = (y + 0.5) / glowHeight
+    fade[y * glowWidth + x] = Math.round(255 * maskAt(Math.hypot((u - 0.5) * 2, (v - 0.5) * 2)))
+  }
   const mixed = new Float32Array(glowWidth * glowHeight * 3)
   const smoothed = new Float32Array(mixed.length)
   let first = true
@@ -165,6 +173,7 @@ function startEffects(video: HTMLVideoElement | null, still: HTMLImageElement, s
     try {
       softContext.drawImage(source, ...crop, 0, 0, soft.width, soft.height)
       if (!withGlow) return
+      glowAt = performance.now()
       sampleContext.drawImage(soft, 0, 0, glowWidth, glowHeight)
       const pixels = sampleContext.getImageData(0, 0, glowWidth, glowHeight).data
       // The glow sits behind text, so it's kept to tones the text stays readable on: never darker
@@ -194,7 +203,7 @@ function startEffects(video: HTMLVideoElement | null, still: HTMLImageElement, s
         output.data[i] = smoothed[j]
         output.data[i + 1] = smoothed[j + 1]
         output.data[i + 2] = smoothed[j + 2]
-        output.data[i + 3] = 255
+        output.data[i + 3] = fade[j / 3]
       }
       glowContext.putImageData(output, 0, 0)
       edgeSoon()
@@ -212,6 +221,12 @@ function startEffects(video: HTMLVideoElement | null, still: HTMLImageElement, s
   }
   window.addEventListener('scroll', edgeSoon, { passive: true })
 
+  // The soft edge follows every frame of the video; the glow (blurred into a few colours anyway)
+  // only a few times a second, like a game updating distant scenery less often than the player.
+  // Reading pixels back from the graphics card is the costly part, and it's now an eighth as often.
+  let glowAt = 0
+  const glowEvery = 125
+
   let onScreen = true
   let stopped = false
   let handle = 0
@@ -222,7 +237,11 @@ function startEffects(video: HTMLVideoElement | null, still: HTMLImageElement, s
   const showing = () => video && video.classList.contains('is-playing') && video.readyState >= 2
   const loop = () => {
     if (stopped) return
-    if (onScreen && video && showing() && !video.paused) paint(video)
+    if (onScreen && video && showing() && !video.paused) {
+      const since = performance.now() - glowAt
+      // Each update blends in as much as the per-frame blend would have over the same time.
+      paint(video, since >= glowEvery, 1 - (1 - glowBlend) ** Math.min(since / (1000 / 30), 8))
+    }
     if (video && 'requestVideoFrameCallback' in video) handle = video.requestVideoFrameCallback(loop)
     else handle = window.setTimeout(loop, 1000 / 30)
   }
@@ -320,8 +339,50 @@ export interface Alternate { label: string; photos: Photo[] }
 // until it becomes the page (like Monocle or Arc), and its colours glow out around it (like
 // YouTube's ambient mode). Strengths come from --tint, --grain and --ambient in index.css.
 // The hero describes whichever field is showing; a still (About) can pass its own description.
+// Each clip comes in three files: the original (H.264, 720p), a much smaller AV1 copy, and a 540p
+// copy for phones. Like a game shipping textures per platform, each device gets the one it plays
+// best: AV1 only where the browser says it decodes it in hardware (software AV1 would cost more
+// than it saves), 540p on a phone without that, and the original otherwise (and as a fallback).
+type Variant = 'av1' | '540' | 'h264'
+async function bestVariant(): Promise<Variant> {
+  try {
+    const info = await navigator.mediaCapabilities?.decodingInfo({
+      type: 'file',
+      video: { contentType: 'video/mp4; codecs="av01.0.05M.08"', width: 1280, height: 720, bitrate: 1_500_000, framerate: 30 },
+    })
+    if (info?.supported && info.smooth && info.powerEfficient) return 'av1'
+  } catch { /* no answer: the plain file */ }
+  return window.matchMedia('(pointer: coarse) and (max-width: 900px)').matches ? '540' : 'h264'
+}
+
+function sourcesFor(video: string, variant: Variant) {
+  const base = video.replace(/\.mp4$/, '')
+  const original = { src: video, type: 'video/mp4' }
+  if (variant === 'av1') return [{ src: `${base}.av1.mp4`, type: 'video/mp4; codecs="av01.0.05M.08"' }, original]
+  if (variant === '540') return [{ src: `${base}.540.mp4`, type: 'video/mp4' }, original]
+  return [original]
+}
+
 export function Meadow({ still = false, alt, alternate }: { still?: boolean; alt?: string; alternate?: Alternate }) {
   const [playing, setPlaying] = useState(false)
+  // Off screen, the picture's decorative animations (fireflies) stop, like a game not animating
+  // what the camera can't see. The video and its effects already pause on their own.
+  const figure = useRef<HTMLElement>(null)
+  useEffect(() => {
+    const element = figure.current
+    if (!element || !('IntersectionObserver' in window)) return
+    const watcher = new IntersectionObserver(([entry]) => element.toggleAttribute('data-away', !entry.isIntersecting))
+    watcher.observe(element)
+    return () => watcher.disconnect()
+  }, [])
+  // Which file to play is decided once the page is running (the server can't know the device); the
+  // still shows until then.
+  const [variant, setVariant] = useState<Variant | null>(null)
+  useEffect(() => {
+    let live = true
+    bestVariant().then(best => { if (live) setVariant(best) })
+    return () => { live = false }
+  }, [])
   // The clip whose video couldn't be loaded (the still shows instead), and how many times the
   // still itself has been retried.
   const [failed, setFailed] = useState<Clip | null>(null)
@@ -375,7 +436,7 @@ export function Meadow({ still = false, alt, alternate }: { still?: boolean; alt
   }, [])
   // Hover opens it with a mouse; a tap or the (keyboard-reachable) button toggles it.
   const lastPointer = useRef('mouse')
-  const showVideo = !still && failed !== clip
+  const showVideo = !still && failed !== clip && variant !== null
 
   useEffect(() => {
     if (still) return
@@ -443,7 +504,8 @@ export function Meadow({ still = false, alt, alternate }: { still?: boolean; alt
     }
     resume()
     const timer = window.setInterval(check, 2000)
-    const sourceElement = element.querySelector('source')
+    // The browser moves on to the next file by itself; only the last failing is a real failure.
+    const sourceElement = element.querySelector('source:last-of-type')
     element.addEventListener('error', reload)
     sourceElement?.addEventListener('error', reload)
     // Scrolled out of view or in a background tab, the video stops decoding (saving battery and
@@ -532,6 +594,7 @@ export function Meadow({ still = false, alt, alternate }: { still?: boolean; alt
     onClick: () => { if (lastPointer.current !== 'mouse') open(!opened) },
   } : {}
   return <figure
+    ref={figure}
     className={`meadow${alternate ? ' has-alternate' : ''}${opened ? ' is-opened' : ''}`}
     style={photo ? { '--open-ratio': frameOf(photo).frame } as React.CSSProperties : undefined}
     {...hover}
@@ -546,7 +609,7 @@ export function Meadow({ still = false, alt, alternate }: { still?: boolean; alt
         key={clip} ref={video} className={`meadow-source${playing ? ' is-playing' : ''}`}
         muted loop playsInline preload="metadata" poster={poster} aria-hidden="true"
       >
-        <source src={source} type="video/mp4" />
+        {sourcesFor(source, variant ?? 'h264').map(file => <source key={file.src} src={file.src} type={file.type} />)}
       </video>}
       <canvas ref={soft} className="meadow-soft" aria-hidden="true" />
       <div className="tint" aria-hidden="true" />

@@ -26,7 +26,7 @@ export const projects: Project[] = [
     sections: [
       { title: 'The job', paragraphs: ['A vehicle passes through several departments before it is ready for sale or delivery. I wanted a clearer way for people to see where it was, what it needed next, and who was working on it.'] },
       { title: 'What I built', paragraphs: ['LotFlow has separate Recon and Delivery boards, with vehicle details, tasks, assignments and activity history. Store and role permissions keep people in the right workspace, while feedback, notifications and reporting support the day-to-day work.', 'I design the experience, direct AI-assisted implementation, review changes and test the workflows. Documentation, a guided practice flow, and backup and recovery processes are part of the same work.'] },
-      { title: 'What I’m learning', paragraphs: ['A board is only useful if it matches how staff actually work. Much of the development has been about making handoffs clearer, keeping the interface usable on phones, and helping people get started without a long explanation.'] },
+      { title: 'What I’m learning', paragraphs: ['A board is only useful if it matches how staff work. Much of the development has been about making handoffs clearer, keeping the interface usable on phones, and helping people get started without a long explanation.'] },
       { title: 'Where it stands', paragraphs: ['The application is in development. Pilot preparation includes checking real roles, devices, stored data and staff workflows. A wider rollout has not been confirmed.'] },
     ],
   },

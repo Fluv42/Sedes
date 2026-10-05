@@ -9,6 +9,8 @@
 /* Header: pages on the left, name on the right (after Matthew Encina's site) */
 
 .site-header {
+  position: relative;
+  z-index: 2;
   display: flex;
   align-items: center;
   justify-content: space-between;
@@ -26,9 +28,7 @@
   position: relative;
   padding: 8px 0;
   text-decoration: none;
-  text-transform: uppercase;
-  letter-spacing: .16em;
-  font-size: .78rem;
+  font-size: .98rem;
   color: var(--muted);
 }
 
@@ -37,8 +37,7 @@
 }
 
 .wordmark {
-  font-size: 1.05rem;
-  letter-spacing: .22em;
+  font-size: 1.15rem;
   color: var(--ink);
   white-space: nowrap;
 }
@@ -221,6 +220,21 @@ a:hover .arrow {
   aspect-ratio: 1.2;
 }
 
+/* Ambient light: the picture's own colours, blurred far past its edges and up the page. */
+.meadow-ambient {
+  position: absolute;
+  top: -40%;
+  left: -30%;
+  width: 175%;
+  height: 165%;
+  max-width: none;
+  opacity: .5;
+  filter: blur(64px) saturate(1.25);
+  -webkit-mask-image: radial-gradient(closest-side, #000 25%, rgb(0 0 0 / .5) 60%, transparent 100%);
+  mask-image: radial-gradient(closest-side, #000 25%, rgb(0 0 0 / .5) 60%, transparent 100%);
+  pointer-events: none;
+}
+
 /* The stage fades to nothing at its edges, so the picture becomes the page.
    It reaches 8% past its frame so the fade has room to be long and gentle. */
 .meadow-stage {
@@ -313,7 +327,7 @@ video.meadow-source.is-playing {
 
 .hero-copy {
   position: relative;
-  padding-left: 1vw;
+  padding-left: 5vw;
 }
 
 .hello {
@@ -705,42 +719,44 @@ html.has-cursor .cursor-dot {
   z-index: 400;
   display: grid;
   place-items: center;
-  width: 12px;
-  height: 12px;
-  margin: -6px 0 0 -6px;
+  width: 16px;
+  height: 16px;
+  margin: -8px 0 0 -8px;
   border-radius: 50%;
   background: var(--sage);
+  box-shadow: inset 0 0 0 1.5px var(--sage);
   pointer-events: none;
   opacity: 0;
-  transition: width .5s var(--ease), height .5s var(--ease), margin .5s var(--ease), background-color .25s, opacity .25s, scale .2s;
+  transition: background-color .25s, opacity .2s, scale .2s;
 }
 
 html.has-cursor .cursor-dot.is-visible { opacity: 1; }
-html.has-cursor .cursor-dot.is-pressed { scale: .75; }
+html.has-cursor .cursor-dot.is-pressed { scale: .8; }
 
+/* Same size in every state; only what's inside changes. */
 html.has-cursor .cursor-dot.is-link {
-  width: 36px;
-  height: 36px;
-  margin: -18px 0 0 -18px;
-  background: rgb(108 119 82 / .28);
+  background: transparent;
 }
 
-html.has-cursor .cursor-dot.has-label {
-  width: 68px;
-  height: 68px;
-  margin: -34px 0 0 -34px;
-  background: var(--ink);
-}
-
-.cursor-dot span {
-  color: var(--paper);
-  font-size: .8rem;
-  font-style: italic;
+.cursor-dot svg {
+  grid-area: 1 / 1;
+  width: 10px;
+  height: 10px;
+  fill: none;
+  stroke: var(--paper);
+  stroke-width: 1.3;
+  stroke-linecap: round;
+  stroke-linejoin: round;
   opacity: 0;
-  transition: opacity .2s .1s;
+  scale: .6;
+  transition: opacity .2s, scale .25s var(--ease);
 }
 
-.cursor-dot.has-label span { opacity: 1; }
+.cursor-dot.mark-view .cursor-view,
+.cursor-dot.mark-scroll .cursor-scroll {
+  opacity: 1;
+  scale: 1;
+}
 
 /* Intro: the meadow full screen, "Sedes" written across it, then it pulls back into its window */
 
@@ -757,6 +773,7 @@ html.intro .site-header,
 html.intro main > :not(.hero),
 html.intro .hero-copy,
 html.intro .motion-control,
+html.intro .meadow-ambient,
 html.intro .site-footer {
   opacity: 0;
 }
@@ -772,6 +789,11 @@ html.intro.intro-out .site-footer {
   opacity: 1;
   translate: 0 0;
   transition: opacity 1.2s .15s ease, translate 1.5s cubic-bezier(.65, 0, .2, 1);
+}
+
+html.intro.intro-out .meadow-ambient {
+  opacity: .5;
+  transition: opacity 1.4s .2s ease;
 }
 
 /* The words settle in as the picture pulls back, not before. */
@@ -969,8 +991,7 @@ html.intro-writing .intro-title text {
   }
 
   .site-header nav a {
-    font-size: .7rem;
-    letter-spacing: .1em;
+    font-size: .9rem;
   }
 
   .hero-copy h1 {
@@ -1016,8 +1037,7 @@ html.intro-writing .intro-title text {
   }
 
   .site-header nav a {
-    font-size: .64rem;
-    letter-spacing: .06em;
+    font-size: .82rem;
   }
 }
 

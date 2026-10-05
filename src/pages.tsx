@@ -11,7 +11,7 @@ const Arrow = () => <span className="arrow" aria-hidden="true">→</span>
 // An editorial list rather than cards: big titles, one line each, year and status to the side.
 function WorkList({ items, heading: Heading }: { items: Project[]; heading: 'h2' | 'h3' }) {
   return <ol className="work-list">
-    {items.map(project => <li key={project.slug} className="work-item" data-reveal data-cursor="View">
+    {items.map(project => <li key={project.slug} className="work-item" data-reveal data-cursor="view">
       <Heading className="work-title"><Link href={projectHref(project)}>{project.title}</Link></Heading>
       <p className="work-summary">{project.summary}</p>
       <p className="work-meta">{project.year}<br />{project.status}</p>
@@ -23,23 +23,23 @@ function Home() {
   const others = projects.length - featuredProjects.length
   return <>
     <section className="hero" aria-labelledby="home-title">
-      <div className="hero-media" data-cursor="Scroll">
+      <div className="hero-media" data-cursor="scroll">
         <Meadow alt="Long grass and wildflowers under old trees at the edge of a field" />
       </div>
       <div className="hero-copy" data-speed="-0.06">
         <p className="hello">Hello, I’m</p>
         <h1 id="home-title">Micah <span className="surname">VanEwyk</span></h1>
         <p className="alias">/ {site.alias}</p>
-        <p className="lede">Developer and IT professional. I build practical software around the way people actually work.</p>
+        <p className="lede">Developer and IT professional. I build practical software around the way people work.</p>
         <Link className="cta" href="/projects">View my work <Arrow /></Link>
         <p className="tagline">{site.tagline}</p>
       </div>
     </section>
 
     <section className="featured" aria-labelledby="featured-title">
-      <h2 id="featured-title" data-reveal>What I make</h2>
+      <h2 id="featured-title">What I make</h2>
       <WorkList items={featuredProjects} heading="h3" />
-      <p className="more" data-reveal>{others} more in the <Link href="/projects">project index</Link>, and a few I’m still writing up.</p>
+      <p className="more">{others} more in the <Link href="/projects">project index</Link>, and a few I’m still writing up.</p>
     </section>
   </>
 }
@@ -94,7 +94,7 @@ function ProjectPage({ project }: { project: Project }) {
         {project.repository && <a className="cta" href={project.repository}>Source on GitHub <Arrow /></a>}
       </div>
     </header>
-    {project.sections.map(section => <section className="case-section" key={section.title} data-reveal>
+    {project.sections.map(section => <section className="case-section" key={section.title}>
       <h2>{section.title}</h2>
       <div className="prose">{section.paragraphs.map(paragraph => <p key={paragraph}>{paragraph}</p>)}</div>
     </section>)}

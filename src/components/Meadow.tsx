@@ -74,7 +74,7 @@ function startEffects(video: HTMLVideoElement | null, still: HTMLImageElement, s
   const resize = 'ResizeObserver' in window ? new ResizeObserver(fit) : null
   resize?.observe(soft)
 
-  const paint = (source: HTMLVideoElement | HTMLImageElement, withGlow = true) => {
+  const paint = (source: HTMLVideoElement | HTMLImageElement, withGlow = true, blend = glowBlend) => {
     last = source
     const crop = cover(source, soft.width, soft.height)
     if (!crop) return
@@ -87,7 +87,7 @@ function startEffects(video: HTMLVideoElement | null, still: HTMLImageElement, s
         const r = pixels[i], g = pixels[i + 1], b = pixels[i + 2]
         const light = 0.2126 * r + 0.7152 * g + 0.0722 * b
         const rgb = [light + (r - light) * glowSaturation, light + (g - light) * glowSaturation, light + (b - light) * glowSaturation]
-        for (let c = 0; c < 3; c++) mixed[j + c] = first ? rgb[c] : mixed[j + c] + (rgb[c] - mixed[j + c]) * glowBlend
+        for (let c = 0; c < 3; c++) mixed[j + c] = first ? rgb[c] : mixed[j + c] + (rgb[c] - mixed[j + c]) * blend
       }
       first = false
       // A small box blur, so the stretched glow has no visible pixel structure.
@@ -139,7 +139,7 @@ function startEffects(video: HTMLVideoElement | null, still: HTMLImageElement, s
       else window.clearTimeout(handle)
     },
     // For a picture laid over the still (About's photo): the glow drifts over to its colours.
-    paint: (source: HTMLImageElement) => { if (!stopped && source.complete) paint(source) },
+    paint: (source: HTMLImageElement, blend?: number) => { if (!stopped && source.complete) paint(source, true, blend) },
   }
 }
 
@@ -147,34 +147,49 @@ function startEffects(video: HTMLVideoElement | null, still: HTMLImageElement, s
 // each is shown through a hole that grows from the centre while the frame grows to the photo's
 // own shape (up to most of the screen's height), with a softened copy at its edges.
 // `faces` are where the two faces are (fractions of the photo's width and height), and `face` how
-// big a face is (a fraction of its width): the photo's oval is fitted around them.
-export interface Photo { src: string; alt: string; width: number; height: number; faces: [[number, number], [number, number]]; face?: number }
+// big a face is (a fraction of its width): the photo's oval is fitted around them. A photo can
+// instead give its `oval` directly (centre as fractions; radii as fractions of the width).
+export interface Photo {
+  src: string; alt: string; width: number; height: number
+  faces: [[number, number], [number, number]]; face?: number
+  oval?: { cx: number; cy: number; rx: number; ry: number; angle: number }
+}
 
-// A soft oval tilted along the line between the two faces, large enough that both sit in its
-// clear middle, drawn as an SVG mask in the photo's own proportions.
+// A soft oval tilted along the line between the two faces, large enough that both sit in its clear
+// middle. It's drawn as a plain CSS gradient on a rotated box (nothing to load, so it can never
+// flash unmasked), with the photo inside turned back the other way so it stays upright.
+// Everything is in percentages of the frame, which has the photo's proportions.
 function ovalFor(photo: Photo) {
   const ratio = photo.height / photo.width
-  const [[x1, y1], [x2, y2]] = photo.faces.map(([x, y]) => [x * 100, y * 100 * ratio])
-  const face = (photo.face ?? 0.11) * 100
-  const cx = (x1 + x2) / 2
-  // A little below the middle of the faces, to take in shoulders and arms.
-  const cy = (y1 + y2) / 2 + face * 0.6
-  const half = Math.hypot(x2 - x1, y2 - y1) / 2
-  // The middle half of the oval is fully clear (the faces sit inside it, with room), and it
-  // feathers out slowly from there, like the field's own edge. Kept within the frame's sides.
-  const rx = Math.min((half + face * 1.6) / 0.5, 58)
-  const ry = Math.max((face * 2.2) / 0.5, rx * 0.84)
-  const angle = Math.atan2(y2 - y1, x2 - x1) * 180 / Math.PI
-  const height = (100 * ratio).toFixed(1)
-  const svg = `<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 100 ${height}" preserveAspectRatio="none">`
-    + `<radialGradient id="o"><stop offset=".5" stop-color="#fff"/><stop offset=".64" stop-color="#fff" stop-opacity=".84"/><stop offset=".77" stop-color="#fff" stop-opacity=".5"/><stop offset=".9" stop-color="#fff" stop-opacity=".16"/><stop offset="1" stop-color="#fff" stop-opacity="0"/></radialGradient>`
-    + `<ellipse cx="${cx.toFixed(1)}" cy="${cy.toFixed(1)}" rx="${rx.toFixed(1)}" ry="${ry.toFixed(1)}" transform="rotate(${angle.toFixed(1)} ${cx.toFixed(1)} ${cy.toFixed(1)})" fill="url(#o)"/></svg>`
+  const H = 100 * ratio
+  let cx: number, cy: number, rx: number, ry: number, angle: number
+  if (photo.oval) {
+    ({ cx, cy, rx, ry, angle } = photo.oval)
+    cx *= 100; cy *= H; rx *= 100; ry *= 100
+  } else {
+    const [[x1, y1], [x2, y2]] = photo.faces.map(([x, y]) => [x * 100, y * H])
+    const face = (photo.face ?? 0.11) * 100
+    cx = (x1 + x2) / 2
+    // A little below the middle of the faces, to take in shoulders and arms.
+    cy = (y1 + y2) / 2 + face * 0.6
+    const half = Math.hypot(x2 - x1, y2 - y1) / 2
+    // The middle 60% of the oval is fully clear: both faces, with room around them.
+    rx = Math.min((half + face * 1.5) / 0.6, 72)
+    ry = Math.max((face * 2.4) / 0.6, rx * 0.8)
+    angle = Math.atan2(y2 - y1, x2 - x1) * 180 / Math.PI
+  }
+  const pct = (value: number) => `${value.toFixed(2)}%`
   return {
-    '--oval': `url("data:image/svg+xml,${encodeURIComponent(svg)}")`,
-    '--hole-x': `${cx.toFixed(1)}%`,
-    '--hole-y': `${(cy / ratio).toFixed(1)}%`,
-  } as React.CSSProperties
+    layer: { '--hole-x': pct(cx), '--hole-y': pct(cy / H * 100) } as React.CSSProperties,
+    oval: { left: pct(cx - rx), top: pct((cy - ry) / H * 100), width: pct(2 * rx), height: pct(2 * ry / H * 100), rotate: `${angle.toFixed(1)}deg` },
+    image: {
+      left: pct(-(cx - rx) / (2 * rx) * 100), top: pct(-(cy - ry) / (2 * ry) * 100),
+      width: pct(100 / (2 * rx) * 100), height: pct(H / (2 * ry) * 100),
+      transformOrigin: `${pct(cx)} ${pct(cy / H * 100)}`, rotate: `${(-angle).toFixed(1)}deg`,
+    },
+  }
 }
+
 export interface Alternate { label: string; photos: Photo[] }
 
 // The centre of the picture is sharp; towards the edges it softens and takes on a wash of paper
@@ -199,11 +214,12 @@ export function Meadow({ still = false, alt, alternate }: { still?: boolean; alt
   const soft = useRef<HTMLCanvasElement>(null)
   const glow = useRef<HTMLCanvasElement>(null)
   const second = useRef<HTMLImageElement>(null)
-  const repaint = useRef<(source: HTMLImageElement) => void>(() => {})
+  const repaint = useRef<(source: HTMLImageElement, blend?: number) => void>(() => {})
   const [opened, setOpened] = useState(false)
   const [shown, setShown] = useState(0)
   const advance = useRef(0)
   const photo = alternate?.photos[shown % alternate.photos.length]
+  const shape = photo && ovalFor(photo)
   // A random photo each time, never the same one twice in a row. Only the chosen one is fetched
   // (ahead of time, so it's ready when the picture is next opened).
   const pickNext = () => {
@@ -211,7 +227,10 @@ export function Meadow({ still = false, alt, alternate }: { still?: boolean; alt
     const count = alternate.photos.length
     setShown(index => {
       const next = (index + 1 + Math.floor(Math.random() * (count - 1))) % count
-      new Image().src = alternate.photos[next].src
+      // Fetched and decoded now, so it's ready to draw the moment it's opened.
+      const ahead = new Image()
+      ahead.src = alternate.photos[next].src
+      ahead.decode().catch(() => {})
       return next
     })
   }
@@ -348,24 +367,34 @@ export function Meadow({ still = false, alt, alternate }: { still?: boolean; alt
     return () => { effects.stop(); repaint.current = () => {} }
   }, [clip, quality, showVideo, still, stillTries])
 
-  // Once the photo has fully opened (or closed), the glow drifts over to its colours: it waits for
-  // the transition to finish, then eases across for about a second and a half.
+  // As the photo opens (or closes), the glow drifts over to its colours alongside it: small steps
+  // from the start, so it neither jumps at once nor arrives after the photo has settled.
   useEffect(() => {
     if (!alternate) return
     const source = opened ? second.current : image.current
     if (!source) return
+    // Each step blends in just enough that the total follows an ease-in-out curve over the same
+    // time as the opening, rather than rushing at first.
+    const duration = 1300
+    const ease = (t: number) => t < 0.5 ? 2 * t * t : 1 - (-2 * t + 2) ** 2 / 2
     let frame = 0
     let last = 0
     let start = 0
+    let done = 0
     const step = (time: number) => {
       start ||= time
-      // About a dozen steps a second, each a third of the way there: a drift of most of a second.
-      if (time - last >= 80) { last = time; repaint.current(source) }
-      if (time - start < 1800) frame = requestAnimationFrame(step)
+      const progress = Math.min((time - start) / duration, 1)
+      if (time - last >= 50 || progress === 1) {
+        last = time
+        const target = ease(progress)
+        if (target > done) repaint.current(source, done >= 1 ? 1 : (target - done) / (1 - done))
+        done = target
+      }
+      if (progress < 1) frame = requestAnimationFrame(step)
     }
-    const wait = window.setTimeout(() => { frame = requestAnimationFrame(step) }, opened ? 1150 : 1050)
-    return () => { window.clearTimeout(wait); cancelAnimationFrame(frame) }
-  }, [opened, alternate])
+    frame = requestAnimationFrame(step)
+    return () => cancelAnimationFrame(frame)
+  }, [opened, alternate, shown])
 
   const hover = alternate ? {
     onPointerDown: (event: React.PointerEvent) => { lastPointer.current = event.pointerType },
@@ -392,8 +421,11 @@ export function Meadow({ still = false, alt, alternate }: { still?: boolean; alt
       <div className="tint" aria-hidden="true" />
       <div className="grain" aria-hidden="true" />
     </div>
-    {photo && <div className="meadow-alternate" style={ovalFor(photo)}>
-      <img ref={second} src={photo.src} alt={opened ? photo.alt : ''} aria-hidden={!opened} width={photo.width} height={photo.height} loading="lazy" decoding="async" />
+    {photo && shape && <div className="meadow-alternate" style={shape.layer}>
+      <div className="meadow-oval" style={shape.oval}>
+        {/* A new element per photo, so the last one can't linger while the next is drawn. */}
+        <img key={photo.src} ref={second} src={photo.src} alt={opened ? photo.alt : ''} aria-hidden={!opened} width={photo.width} height={photo.height} style={shape.image} decoding="async" />
+      </div>
     </div>}
     {alternate && <button type="button" className="alternate-toggle" aria-pressed={opened} onClick={event => { event.stopPropagation(); open(!opened) }}>
       {alternate.label}

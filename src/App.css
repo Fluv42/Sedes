@@ -380,14 +380,10 @@ video.meadow-source.is-playing {
   position: absolute;
   inset: -5%;
   --hole: -14%;
-  /* Two masks, both needed: the photo's own oval around the faces (from Meadow.tsx), and the
-     hole that opens from the middle of it. */
-  -webkit-mask-image: var(--oval), radial-gradient(ellipse farthest-corner at var(--hole-x) var(--hole-y), #000 var(--hole), transparent calc(var(--hole) + 14%));
-  mask-image: var(--oval), radial-gradient(ellipse farthest-corner at var(--hole-x) var(--hole-y), #000 var(--hole), transparent calc(var(--hole) + 14%));
-  -webkit-mask-size: 100% 100%;
-  mask-size: 100% 100%;
-  -webkit-mask-repeat: no-repeat;
-  mask-repeat: no-repeat;
+  /* Three gradient masks, all needed: a fade towards each pair of edges (so no edge of the photo
+     ever shows as a line) and the hole that opens from the middle of the faces. */
+  -webkit-mask-image: linear-gradient(90deg, transparent, #000 11%, #000 89%, transparent), linear-gradient(transparent, #000 9%, #000 91%, transparent), radial-gradient(ellipse farthest-corner at var(--hole-x) var(--hole-y), #000 var(--hole), transparent calc(var(--hole) + 14%));
+  mask-image: linear-gradient(90deg, transparent, #000 11%, #000 89%, transparent), linear-gradient(transparent, #000 9%, #000 91%, transparent), radial-gradient(ellipse farthest-corner at var(--hole-x) var(--hole-y), #000 var(--hole), transparent calc(var(--hole) + 14%));
   -webkit-mask-composite: source-in;
   mask-composite: intersect;
   transition: --hole .9s cubic-bezier(.5, 0, .25, 1);
@@ -400,12 +396,17 @@ video.meadow-source.is-playing {
   transition-timing-function: cubic-bezier(.3, 0, .2, 1);
 }
 
-.meadow-alternate img {
+/* The oval around the faces: a rotated box with a soft-edged gradient, clear in its middle 60%. */
+.meadow-oval {
   position: absolute;
-  inset: 0;
-  width: 100%;
+  -webkit-mask-image: radial-gradient(closest-side, #000 60%, rgb(0 0 0 / .82) 70%, rgb(0 0 0 / .5) 81%, rgb(0 0 0 / .18) 91%, transparent);
+  mask-image: radial-gradient(closest-side, #000 60%, rgb(0 0 0 / .82) 70%, rgb(0 0 0 / .5) 81%, rgb(0 0 0 / .18) 91%, transparent);
+}
+
+/* The photo inside, turned back upright and placed over the whole frame. */
+.meadow-oval img {
+  position: absolute;
   max-width: none;
-  height: 100%;
   object-fit: cover;
 }
 

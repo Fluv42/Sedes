@@ -75,7 +75,8 @@ export default function App({ initialPath = '/' }: { initialPath?: string }) {
             </Link>
           })}
         </nav>
-        <Link className="wordmark" href="/about">{site.name}</Link>
+        {/* Just the first name on phones, so the name and the pages share one row. */}
+        <Link className="wordmark" href="/about" aria-label={site.name}>{site.name.split(' ')[0]}<span className="wordmark-rest"> {site.name.split(' ').slice(1).join(' ')}</span></Link>
       </header>
       <main ref={main} id="main" tabIndex={-1} key={path}>
         <PageRoute path={path} />

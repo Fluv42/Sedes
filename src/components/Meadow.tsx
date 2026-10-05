@@ -1,23 +1,48 @@
 import type React from 'react'
 import { useEffect, useRef, useState } from 'react'
-import { toggleTheme, useTheme } from '../lib/theme'
+import { setGlowEdge, toggleTheme, useTheme } from '../lib/theme'
 import { stepDownQuality, useQuality } from '../lib/quality'
 import { ControlButton, QualityButton, SoundPill } from './Controls'
 import { MoonIcon, PauseIcon, PlayIcon, SunIcon } from './Icons'
-import { useDaypart } from '../lib/daypart'
+import { useClipChoice } from '../lib/daypart'
 import type { Daypart } from '../lib/daypart'
 
-// Four fields, chosen by the visitor's own clock (lib/daypart.ts): a foggy sunrise, sun through
-// the trees onto green grass, wheat at sunset, and stars over a field at night. Each file's last
-// 2 s crossfade into its first frame, so the plain loop has no visible jump.
-// `glow` strengthens one clip's glow: the morning's grey fog otherwise fades into the paper.
-const clips: Record<Daypart, { video: string; poster: string; alt: string; glow?: { saturation: number; strength: number } }> = {
-  morning: { video: '/media/field-morning.mp4', poster: '/media/field-morning.jpg', alt: 'The sun rising over a green field, with low fog and a line of trees', glow: { saturation: 1.9, strength: 1.3 } },
-  day: { video: '/media/field-day.mp4', poster: '/media/field-day.jpg', alt: 'Low sun shining through birch trees onto long green grass' },
-  evening: { video: '/media/field-sunset.mp4', poster: '/media/field-sunset.jpg', alt: 'Rows of green wheat under a soft sunset' },
-  night: { video: '/media/field-night.mp4', poster: '/media/field-night.jpg', alt: 'Stars and drifting cloud over a field with fence posts and birch trees at night' },
+// Fields chosen by the visitor's own clock (lib/daypart.ts): three for each part of the day, one a
+// day in turn. Each file's last 2 s (3 s for the drifting evening clouds) crossfade into its first
+// frame, so the plain loop has no visible jump.
+// `glow` strengthens a clip's glow: grey morning fog otherwise fades into the paper.
+interface Field { video: string; poster: string; alt: string; glow?: { saturation: number; strength: number } }
+const field = (name: string, alt: string, glow?: Field['glow']): Field => ({ video: `/media/${name}.mp4`, poster: `/media/${name}.jpg`, alt, glow })
+const fog = { saturation: 1.9, strength: 1.3 }
+const clips: Record<Daypart, Field[]> = {
+  morning: [
+    field('field-morning', 'The sun rising over a green field, with low fog and a line of trees', fog),
+    field('field-morning-2', 'The low sun behind trees, shining through morning mist over a heath', fog),
+    field('field-morning-3', 'The sun rising over a misty field under long streaks of cloud'),
+  ],
+  day: [
+    field('field-day', 'Low sun shining through birch trees onto long green grass'),
+    field('field-day-2', 'Trees and long grass around a sunny lawn under a blue sky'),
+    field('field-day-3', 'A wide green meadow with a line of trees and drifting clouds'),
+  ],
+  evening: [
+    field('field-sunset', 'Rows of green wheat under a soft sunset'),
+    field('field-sunset-2', 'Wild grasses in silhouette against a pale sun setting over a field'),
+    field('field-sunset-3', 'Grey clouds over green fields and a farmhouse, with the sunset low on the horizon'),
+  ],
+  night: [
+    field('field-night', 'Stars and drifting cloud over a field with fence posts and birch trees at night'),
+    field('field-night-2', 'Stars and passing cloud over tall trees, looking up from below'),
+    field('field-night-3', 'The Milky Way drifting across a starry sky'),
+  ],
 }
-type Clip = Daypart
+// "morning:1" (from useClipChoice) to its clip.
+function fieldFor(choice: string) {
+  const [daypart, turn] = choice.split(':')
+  const options = clips[daypart as Daypart] ?? clips.evening
+  return options[Number(turn)] ?? options[0]
+}
+type Clip = string
 const motionQuery = '(prefers-reduced-motion: reduce)'
 
 // The glow is worked out at 32 × 18 pixels and the soft edge at 256 pixels across; the browser
@@ -48,6 +73,38 @@ function cover(source: CanvasImageSource, width: number, height: number) {
 // Pretty mode: the soft edge (a small copy of the frame, stretched, shown only towards the edges)
 // and the glow (an even smaller copy, saturated, smoothed and blended with the frames before it).
 // Both are redrawn once per video frame, and not at all while the picture is off screen or still.
+// How much of the glow shows at a point, from its mask in App.css (.meadow-ambient): a radial
+// gradient whose stops are these, by distance from the middle (1 = the edge of the ellipse).
+const glowMask: [number, number][] = [[0, 1], [0.26, 1], [0.48, 0.75], [0.74, 0.35], [1, 0]]
+
+function maskAt(distance: number) {
+  for (let i = 1; i < glowMask.length; i++) {
+    const [d1, a1] = glowMask[i - 1], [d2, a2] = glowMask[i]
+    if (distance <= d2) return a1 + (a2 - a1) * (distance - d1) / (d2 - d1)
+  }
+  return 0
+}
+
+// The colour at the very top of the window, in its middle: the paper with the glow over it. Safari
+// paints its status bar with it, so the glow carries on above the page instead of stopping at a
+// band of plain paper.
+function topEdge(glow: HTMLCanvasElement, colours: Float32Array) {
+  const frame = glow.closest('.site-frame')
+  if (!frame) return ''
+  const paper = getComputedStyle(frame).backgroundColor.match(/[\d.]+/g)?.map(Number)
+  const style = getComputedStyle(glow)
+  const box = glow.getBoundingClientRect()
+  if (!paper || style.display === 'none' || !box.width) return ''
+  const u = (window.innerWidth / 2 - box.left) / box.width
+  const v = -box.top / box.height
+  const strength = Number(style.opacity) * maskAt(Math.hypot((u - 0.5) * 2, (v - 0.5) * 2))
+  const x = Math.min(glowWidth - 1, Math.max(0, Math.floor(u * glowWidth)))
+  const y = Math.min(glowHeight - 1, Math.max(0, Math.floor(v * glowHeight)))
+  const k = (y * glowWidth + x) * 3
+  const hex = [0, 1, 2].map(c => Math.round(paper[c] + (colours[k + c] - paper[c]) * strength).toString(16).padStart(2, '0'))
+  return '#' + hex.join('')
+}
+
 function startEffects(video: HTMLVideoElement | null, still: HTMLImageElement, soft: HTMLCanvasElement, glow: HTMLCanvasElement, saturation = glowSaturation) {
   const none = { stop: () => {}, paint: () => {} }
   const softContext = soft.getContext('2d', { alpha: false })
@@ -118,8 +175,20 @@ function startEffects(video: HTMLVideoElement | null, still: HTMLImageElement, s
         output.data[i + 3] = 255
       }
       glowContext.putImageData(output, 0, 0)
+      edgeSoon()
     } catch { /* a frame that isn't ready yet; the next one will do */ }
   }
+
+  // The status bar's colour follows the glow a few times a second, and the scroll (it goes back to
+  // the paper as the picture leaves the top of the window).
+  let edgeAt = 0
+  let edgeTimer = 0
+  const edge = () => { edgeAt = performance.now(); edgeTimer = 0; if (!stopped) setGlowEdge(topEdge(glow, smoothed)) }
+  const edgeSoon = () => {
+    if (edgeTimer) return
+    edgeTimer = window.setTimeout(edge, Math.max(0, 250 - (performance.now() - edgeAt)))
+  }
+  window.addEventListener('scroll', edgeSoon, { passive: true })
 
   let onScreen = true
   let stopped = false
@@ -142,6 +211,9 @@ function startEffects(video: HTMLVideoElement | null, still: HTMLImageElement, s
   return {
     stop() {
       stopped = true
+      window.removeEventListener('scroll', edgeSoon)
+      window.clearTimeout(edgeTimer)
+      setGlowEdge('')
       watcher?.disconnect()
       resize?.disconnect()
       if (video && 'cancelVideoFrameCallback' in video) video.cancelVideoFrameCallback(handle)
@@ -233,8 +305,9 @@ export function Meadow({ still = false, alt, alternate }: { still?: boolean; alt
   const theme = useTheme()
   const quality = useQuality()
   // The visitor's own time of day (evening on the server), kept up to date while the page is open.
-  const clip = useDaypart()
-  const { video: source, poster } = clips[clip]
+  const clip = useClipChoice()
+  const chosen = fieldFor(clip)
+  const { video: source, poster } = chosen
   const video = useRef<HTMLVideoElement>(null)
   const image = useRef<HTMLImageElement>(null)
   const soft = useRef<HTMLCanvasElement>(null)
@@ -386,12 +459,13 @@ export function Meadow({ still = false, alt, alternate }: { still?: boolean; alt
   }
   useEffect(() => () => window.clearTimeout(stillTimer.current), [])
 
+  const saturation = still ? undefined : chosen.glow?.saturation
   useEffect(() => {
     if (quality === 'fast' || !image.current || !soft.current || !glow.current) return
-    const effects = startEffects(video.current, image.current, soft.current, glow.current, still ? undefined : clips[clip].glow?.saturation)
+    const effects = startEffects(video.current, image.current, soft.current, glow.current, saturation)
     repaint.current = effects.paint
     return () => { effects.stop(); repaint.current = () => {} }
-  }, [clip, quality, showVideo, still, stillTries])
+  }, [clip, quality, saturation, showVideo, still, stillTries])
 
   // As the photo opens (or closes), the glow drifts over to its colours alongside it: small steps
   // from the start, so it neither jumps at once nor arrives after the photo has settled.
@@ -436,10 +510,10 @@ export function Meadow({ still = false, alt, alternate }: { still?: boolean; alt
   >
     <canvas
       ref={glow} className="meadow-ambient" width={glowWidth} height={glowHeight} aria-hidden="true"
-      style={!still && clips[clip].glow ? { '--glow-strength': clips[clip].glow.strength } as React.CSSProperties : undefined}
+      style={!still && chosen.glow ? { '--glow-strength': chosen.glow.strength } as React.CSSProperties : undefined}
     />
     <div className="meadow-stage">
-      <img ref={image} className="meadow-source" src={stillTries ? `${poster}?try=${stillTries}` : poster} onError={retryStill} alt={alt ?? clips[clip].alt} width="1280" height="720" fetchPriority="high" />
+      <img ref={image} className="meadow-source" src={stillTries ? `${poster}?try=${stillTries}` : poster} onError={retryStill} alt={alt ?? chosen.alt} width="1280" height="720" fetchPriority="high" />
       {showVideo && <video
         key={clip} ref={video} className={`meadow-source${playing ? ' is-playing' : ''}`}
         muted loop playsInline preload="metadata" poster={poster} aria-hidden="true"

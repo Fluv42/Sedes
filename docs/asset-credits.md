@@ -5,6 +5,15 @@
   - Day: `field-day.mp4`, [Landscape nature sunset summer, Pexels #28291393](https://www.pexels.com/video/landscape-nature-sunset-summer-28291393/), 540p (lots of moving leaves), 52 s loop
   - Night: `field-night.mp4`, [The night sky with stars and trees in the distance, Pexels #25649447](https://www.pexels.com/video/the-night-sky-with-stars-and-trees-in-the-distance-25649447/), a timelapse slowed to 1.6× its length (frame blending) for a 57 s loop
   - Evening: `field-sunset.mp4`, [Vibrant sunset over lush wheat field landscape, Pexels #32548262](https://www.pexels.com/video/vibrant-sunset-over-lush-wheat-field-landscape-32548262/)
+- More hero clips, three for each part of the day, one a day in turn (the cycle repeats every three days; days turn over at 5:00). Same licence and treatment (720p, a 2 s crossfade loop; 3 s for the drifting clouds), October 2026:
+  - Morning 2: `field-morning-2.mp4`, [Pexels #18089236](https://www.pexels.com/video/18089236/), the first 51 s, a 49 s loop
+  - Morning 3: `field-morning-3.mp4`, [Pexels #28972729](https://www.pexels.com/video/28972729/), the first 47.5 s, a 45.5 s loop
+  - Day 2: `field-day-2.mp4`, [Pexels #33743576](https://www.pexels.com/video/33743576/), the first 60.5 s, a 58.5 s loop
+  - Day 3: `field-day-3.mp4`, [Pexels #13517421](https://www.pexels.com/video/13517421/), 0:40 to 1:40 of a 6-minute shot, a 58 s loop
+  - Evening 2: `field-sunset-2.mp4`, [Pexels #17422808](https://www.pexels.com/video/17422808/), the first 60 s, a 58 s loop
+  - Evening 3: `field-sunset-3.mp4`, [Pexels #27496045](https://www.pexels.com/video/27496045/), the first 44 s slowed to 1.3× (frame blending), a 54 s loop
+  - Night 2: `field-night-2.mp4`, [Pexels #20603938](https://www.pexels.com/video/20603938/), a timelapse slowed to 1.45× (frame blending), a 57 s loop
+  - Night 3: `field-night-3.mp4`, [Pexels #25650512](https://www.pexels.com/video/25650512/), a 15 fps timelapse blended up to 30 fps, a 58 s loop
 - LiteReview screenshot: original `screenshots/homepage-logged-out.png`, preserved locally and published in the team repository README. Used to document the team course project, with team attribution in the case study.
 - Botanical marks and favicon: small decorative SVGs written for this foundation. They are illustrations, not screenshots of the projects or Micah's own hand-drawn artwork.
 - Libron v0.25 by Nico Verbruggen (github.com/nicoverbruggen/libron), derived from Readerly and Newsreader. SIL Open Font License 1.1; the licence is kept at `public/fonts/libron-LICENSE.txt`. Web (WOFF2) files from the official release.

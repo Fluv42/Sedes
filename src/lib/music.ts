@@ -126,8 +126,11 @@ function all() {
     const daypart = daypartNow()
     layers = [fieldLayer(ambience[daypart], fieldLevel[daypart]), songLayer()]
     // When the part of the day turns over, the old recording fades out and the new one fades in.
+    let playingFor = daypart
     subscribeDaypart(() => {
       const next = daypartNow()
+      if (next === playingFor) return
+      playingFor = next
       const old = all()[0]
       clearTimeout(old.timer)
       all()[0] = fieldLayer(ambience[next], fieldLevel[next])

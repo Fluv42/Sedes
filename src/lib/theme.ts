@@ -15,12 +15,22 @@ function current(): Theme {
 }
 
 // The browser's own colour around the page (Safari's bars). While the intro fills the screen it's
-// the picture's top edge (set by Intro.tsx as --edge-top); otherwise it's the paper.
+// the picture's top edge (set by Intro.tsx as --edge-top); after it, the colour at the top of the
+// page, glow included (set by Meadow.tsx), so the strip above the page carries it on; otherwise
+// it's the paper.
+let glowEdge = ''
+
+export function setGlowEdge(color: string) {
+  if (color === glowEdge) return
+  glowEdge = color
+  paintThemeColor()
+}
+
 function paintThemeColor() {
   const root = document.documentElement
   const edge = root.classList.contains('intro') ? root.style.getPropertyValue('--edge-top') : ''
   const paper = getComputedStyle(root).getPropertyValue('--paper').trim()
-  document.querySelector('meta[name="theme-color"]')?.setAttribute('content', edge || paper)
+  document.querySelector('meta[name="theme-color"]')?.setAttribute('content', edge || glowEdge || paper)
 }
 
 let fading = 0

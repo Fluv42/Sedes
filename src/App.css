@@ -1746,12 +1746,13 @@ html.intro-writing .intro-title text {
   }
 
   .site-header {
-    flex-direction: column-reverse;
-    align-items: flex-start;
-    gap: 4px;
-    padding-top: 14px;
-    min-height: 0;
+    gap: 16px;
+    padding-top: 10px;
+    min-height: 64px;
   }
+
+  .wordmark { font-size: 1.05rem; }
+  .wordmark-rest { display: none; }
 
   .site-header nav {
     flex-wrap: nowrap;

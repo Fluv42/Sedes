@@ -1,24 +1,19 @@
 import { useEffect, useRef, useState, useSyncExternalStore } from 'react'
 import { toggleMusic, useMusic } from '../lib/music'
+import { daypartNow } from '../lib/daypart'
+import type { Daypart } from '../lib/daypart'
 
-// Four fields, chosen by the visitor's own clock: a foggy sunrise (5–11), sun through the trees
-// onto green grass (11–5), wheat at sunset (5–11 pm), and stars over a field at night. Each file's last 2 s crossfade into its
-// first frame, so the plain loop has no visible jump.
-const clips = {
+// Four fields, chosen by the visitor's own clock (lib/daypart.ts): a foggy sunrise, sun through
+// the trees onto green grass, wheat at sunset, and stars over a field at night. Each file's last
+// 2 s crossfade into its first frame, so the plain loop has no visible jump.
+const clips: Record<Daypart, { video: string; poster: string }> = {
   morning: { video: '/media/field-morning.mp4', poster: '/media/field-morning.jpg' },
   day: { video: '/media/field-day.mp4', poster: '/media/field-day.jpg' },
   evening: { video: '/media/field-sunset.mp4', poster: '/media/field-sunset.jpg' },
   night: { video: '/media/field-night.mp4', poster: '/media/field-night.jpg' },
 }
-type Clip = keyof typeof clips
+type Clip = Daypart
 const noSubscription = () => () => {}
-const clipForNow = (): Clip => {
-  const hour = new Date().getHours()
-  if (hour >= 5 && hour < 11) return 'morning'
-  if (hour >= 11 && hour < 17) return 'day'
-  if (hour >= 17 && hour < 23) return 'evening'
-  return 'night'
-}
 const motionQuery = '(prefers-reduced-motion: reduce)'
 
 // The centre of the picture is sharp; towards the edges blur, tint and grain build until it
@@ -30,7 +25,7 @@ export function Meadow({ still = false, alt }: { still?: boolean; alt: string })
   const music = useMusic()
   // The server can't know the visitor's time, so the page is built with the evening clip and
   // switches during hydration to the one for their clock.
-  const clip = useSyncExternalStore(noSubscription, clipForNow, () => 'evening' as Clip)
+  const clip = useSyncExternalStore(noSubscription, daypartNow, () => 'evening' as Clip)
   const { video: source, poster } = clips[clip]
   const video = useRef<HTMLVideoElement>(null)
   const still_ = useRef<HTMLImageElement>(null)

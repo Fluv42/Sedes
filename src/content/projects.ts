@@ -38,7 +38,7 @@ export const projects: Project[] = [
     summary: 'This site. Somewhere to keep what I make, named after Sedes Sapientiae, the Seat of Wisdom.',
     stack: 'React · TypeScript · Vite', role: 'Design, writing and building it',
     sections: [
-      { title: 'The idea', paragraphs: ['I wanted somewhere for my work that felt like a place rather than a template: warm and quiet, a bit like home. The site is the seat, and the work is what it holds.'] },
+      { title: 'The idea', paragraphs: ['I wanted somewhere for my work that felt like a place rather than a template: warm and quiet, a bit like home.', 'The name comes from Sedes Sapientiae, the Seat of Wisdom. The site is the seat, and the work is what it holds.'] },
       { title: 'What’s on it', paragraphs: ['A home page, a list of projects with a write-up for each, a bit about me, and a way to reach me. The words live apart from the layout, so I can add things without rebuilding the site.'] },
       { title: 'How it works', paragraphs: [
         'The field at the top follows your clock: a foggy sunrise in the morning, sun through the trees in the afternoon, wheat at sunset in the evening and stars at night, with the site in dark mode overnight. A tiny copy of each video frame is blurred behind the picture so its colour spills onto the page, and a quiet field recording plays under the music, matched to the time of day.',
@@ -95,7 +95,7 @@ export const projects: Project[] = [
     sections: [
       { title: 'The idea', paragraphs: ['Built with a team for IRM 3004. Instead of one site for books and another for films, LiteReview kept everything you read, watch or listen to in one place.'] },
       { title: 'What we built', paragraphs: ['Sign-up and login, profiles, writing reviews, and a feed of recent ones, using Django templates with a little JavaScript for the forms.'] },
-      { title: 'How we worked', paragraphs: ['It was a Git and Scrum class, so we worked in sprints with goals and a definition of done. The README is honest about what got finished and what didn’t.'] },
+      { title: 'How we worked', paragraphs: ['It was a Git and Scrum class, so we worked in sprints with goals and a definition of done. We kept the backlog in Jira, broke the work into user stories, and estimated each one in story points when we planned a sprint. The README is honest about what got finished and what didn’t.'] },
       { title: 'My part', paragraphs: ['I built the review pop-up and worked through getting the database set up. The rest was the whole team.'] },
     ],
   },

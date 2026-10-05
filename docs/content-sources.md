@@ -9,11 +9,13 @@ Use current facts when editing; do not turn plans into shipped outcomes.
 | Sedes | User's October 2–5 instructions; supplied wireframe; earlier Sedes brief and principles | Live at sedes.ca since October 4, 2026, hosted on Cloudflare. Omit the developer's day. |
 | BeFarmWell | Master Resume v8; July 21 development/handoff history | Landing page prototype, separate from the mobile app. Later history removed Android UI; use iOS-only wording rather than stale résumé copy. Do not claim responsibility for subsequent WordPress deployment. |
 | TagMe | Public team repository `jessicadpo/capstone`; `tagme/models.py`; locally preserved about template; December 2024 debugging history | Team credit. Source supports Library of Congress items, public/private tags, comments, pinning, points/rewards, tag reporting. History supports interface/database debugging, not sole authorship. |
-| LiteReview | Public team repository `jessicadpo/LiteReview`; README and public sprint screenshot; March 2024 interface/database history | IRM 3004, Git/Scrum team project. README includes unfinished work; do not present all planned features as completed. The embedded screenshot is the original logged-out course screenshot. |
+| LiteReview | Public team repository `jessicadpo/LiteReview`; README and public sprint screenshot; March 2024 interface/database history | IRM 3004, Git/Scrum team project. README includes unfinished work; do not present all planned features as completed. The embedded screenshot is the original logged-out course screenshot. Jira backlog with user stories estimated in story points: per the user, October 5, 2026. |
 | BookMarks | Local BookMarks coursework; March–April 2024 history; user identifies IRM 3007 | Django library/rewards prototype, designed around OPL reading incentives. Do not claim an actual Ottawa Public Library integration or deployment. |
 | PMRTool | Earlier Sedes write-up and project history | Retired predecessor to LotFlow. Minimal historical entry; no invented performance claims. |
 
 ## Identity and contact
+
+About page, personal: Jessie, girlfriend of seven years, final year of medical school, on track to become an anesthesiologist (the user, October 5, 2026). The photos of them are deployed but kept out of the repository (`public/media/personal/`).
 
 Micah VanEwyk, IT specialist and developer; alias Fluv42. Experience facts (210 employees, five dealerships and a body shop, VPN, Teams remote support, Bluewater Health co-op, AAFC information management assistant under FSWEP, B.I.T. 2025) come from the Tailscale résumé, October 2026. Contact email from Master Resume v8. GitHub identity verified through the connected account. The user authorized a phone row only while the website is excluded from search indexing. The number is configured in ignored `.env.local`, never committed to source.
 

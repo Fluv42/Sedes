@@ -43,7 +43,7 @@ function Home() {
         <h1 id="home-title">Micah <span className="surname">VanEwyk</span></h1>
         <p className="alias">/ {site.alias}</p>
         <p className="lede">IT specialist and developer in Southwestern Ontario. I keep things running for the people I work with, and build software to make their work easier.</p>
-        <Link className="cta" href="/projects">See what I’ve made <Arrow /></Link>
+        <Link className="cta" href="/about">About me <Arrow /></Link>
       </div>
     </section>
 
@@ -111,9 +111,11 @@ function About() {
       <Meadow still alternate={{ label: 'Show a photo of Micah and Jessie', photos: together }} />
     </div>
     <div className="prose">
-      <h1 data-reveal>About</h1>
+      <div className="title-row" data-reveal>
+        <h1>About</h1>
+        <ResumeMenu />
+      </div>
       <p className="lede" data-reveal>I’m Micah, an IT specialist and developer. I live on a farm in Southwestern Ontario.</p>
-      <ResumeMenu />
       <p data-reveal>I’m the IT specialist for five dealerships and a body shop, about 210 people. Day to day that means logins, printers, VPN access and software, sorted in person, over Teams or on the phone, and working with our outside IT providers when something is bigger. I’m also building <Link href="/projects/lotflow">LotFlow</Link>, an app that tracks their vehicles from reconditioning to delivery.</p>
       <p data-reveal>I finished my Bachelor of Information Technology at Carleton in 2025, in Information Resource Management, done jointly with Algonquin College. Along the way I did a co-op in IT support at Bluewater Health, and worked as an information management assistant at Agriculture and Agri-Food Canada, where I built the <Link href="/projects/server-cleanup">server cleanup tool</Link>.</p>
       <dl className="toolkit" data-reveal>
@@ -121,7 +123,7 @@ function About() {
         <div><dt>Building</dt><dd>React and TypeScript, Python, Django, Express, SQLite, Git</dd></div>
       </dl>
       <p data-reveal>Outside of work I play a lot of Soulslikes (Elden Ring, Sekiro, Lies of P), mostly for the builds and the lore, and modded Minecraft. I like tinkering with computers, my Steam Deck and smart-home gear, and building or refinishing things around the house. Lately I’ve been customizing my Kobo e-reader with the font you’re now reading. <a href="https://github.com/nicoverbruggen/libron">Libron</a>!<a className="inline-icon" href="https://github.com/nicoverbruggen/libron" aria-label="Libron on GitHub" title="Libron on GitHub"><GitHubIcon /></a></p>
-      <p data-reveal>The site’s name comes from <em>Sedes Sapientiae</em>, the Seat of Wisdom. The site is the seat, and the work is what it holds.</p>
+      <p data-reveal>My girlfriend Jessie and I have been together for seven years. She’s in her final year of medical school and on track to become an anesthesiologist. <span className="photo-hint">That’s us in the picture: hover over it, or tap it, to see.</span></p>
       <Link className="cta" href="/projects" data-reveal>See the projects <Arrow /></Link>
     </div>
   </section>

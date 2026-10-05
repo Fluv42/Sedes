@@ -30,9 +30,11 @@ export function Cursor() {
       target.x = event.clientX
       target.y = event.clientY
       if (!visible) { position.x = target.x; position.y = target.y; visible = true; element.classList.add('is-visible') }
-      const over = (event.target as Element | null)?.closest?.('a, button, [data-cursor]')
-      const word = over?.getAttribute('data-cursor') ?? ''
-      element.classList.toggle('is-link', Boolean(over) && !word)
+      const under = event.target as Element | null
+      // A labelled area (a project row, the hero) wins over the plain link inside it.
+      const word = under?.closest?.('[data-cursor]')?.getAttribute('data-cursor') ?? ''
+      const link = under?.closest?.('a, button')
+      element.classList.toggle('is-link', Boolean(link) && !word)
       element.classList.toggle('has-label', Boolean(word))
       if (text.textContent !== word) text.textContent = word
     }

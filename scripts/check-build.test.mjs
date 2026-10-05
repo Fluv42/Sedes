@@ -39,7 +39,7 @@ test('noindex is present on every page and in Cloudflare response headers', asyn
 
 test('Home contains exactly three featured projects and a path to the full index', () => {
   const home = pages.find(page => page.path === '/').html
-  assert.equal((home.match(/class="project-row compact"/g) ?? []).length, 3)
+  assert.equal((home.match(/class="work-item"/g) ?? []).length, 3)
   assert.match(home, /href="\/projects"[^>]*>View my work/)
   for (const slug of ['lotflow', 'server-cleanup', 'sedes']) assert.match(home, new RegExp(`href="/projects/${slug}"`))
 })

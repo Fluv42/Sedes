@@ -1,4 +1,3 @@
-import { GrainArc } from './components/GrainArc'
 import { Link } from './components/Link'
 import { Meadow } from './components/Meadow'
 import { ProjectMark } from './components/ProjectMark'
@@ -9,13 +8,23 @@ import { principles, site } from './content/site'
 const projectHref = (project: Project) => `/projects/${project.slug}`
 const Arrow = () => <span className="arrow" aria-hidden="true">→</span>
 
+// An editorial list rather than cards: big titles, one line each, year and status to the side.
+function WorkList({ items, heading: Heading }: { items: Project[]; heading: 'h2' | 'h3' }) {
+  return <ol className="work-list">
+    {items.map(project => <li key={project.slug} className="work-item" data-reveal data-cursor="View">
+      <Heading className="work-title"><Link href={projectHref(project)}>{project.title}</Link></Heading>
+      <p className="work-summary">{project.summary}</p>
+      <p className="work-meta">{project.year}<br />{project.status}</p>
+    </li>)}
+  </ol>
+}
+
 function Home() {
   const others = projects.length - featuredProjects.length
   return <>
     <section className="hero" aria-labelledby="home-title">
       <div className="hero-media" data-cursor="Scroll">
         <Meadow alt="Long grass and wildflowers under old trees at the edge of a field" />
-        <GrainArc />
       </div>
       <div className="hero-copy" data-speed="-0.06">
         <p className="hello">Hello, I’m</p>
@@ -29,16 +38,7 @@ function Home() {
 
     <section className="featured" aria-labelledby="featured-title">
       <h2 id="featured-title" data-reveal>What I make</h2>
-      <ul className="featured-list">
-        {featuredProjects.map(project => <li key={project.slug} className="project-row compact" data-reveal data-cursor="View">
-          <ProjectMark project={project} />
-          <div>
-            <h3><Link href={projectHref(project)}>{project.title}</Link></h3>
-            <p className="summary">{project.summary}</p>
-            <p className="stack">{project.stack}</p>
-          </div>
-        </li>)}
-      </ul>
+      <WorkList items={featuredProjects} heading="h3" />
       <p className="more" data-reveal>{others} more in the <Link href="/projects">project index</Link>, and a few I’m still writing up.</p>
     </section>
   </>
@@ -67,17 +67,7 @@ function Projects() {
       <h1>Projects</h1>
       <p>Things I’ve built at work, on my own, and at university.</p>
     </header>
-    <ul className="project-index">
-      {projects.map(project => <li key={project.slug} className="project-row" data-reveal data-cursor="View">
-        <ProjectMark project={project} />
-        <div>
-          <h2><Link href={projectHref(project)}>{project.title}</Link></h2>
-          <p className="meta">{project.type}, {project.year} · {project.status}</p>
-          <p className="summary">{project.summary}</p>
-          <p className="stack">{project.stack}</p>
-        </div>
-      </li>)}
-    </ul>
+    <WorkList items={projects} heading="h2" />
     <p className="more">University projects were team work. Each write-up says which parts were mine.</p>
   </>
 }

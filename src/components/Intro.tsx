@@ -31,6 +31,7 @@ export function Intro() {
       if (finished) return
       finished = true
       root.classList.remove('intro', 'intro-out', 'intro-owned', 'intro-writing')
+      root.classList.add('intro-played')
       for (const animation of animations) animation.cancel()
       resumeSmoothScroll()
     }
@@ -39,7 +40,10 @@ export function Intro() {
       if (started) return
       started = true
       root.classList.add('intro-out')
-      const to = frame.getBoundingClientRect()
+      // The stage reaches past its frame by the bleed set in App.css (.meadow-stage inset).
+      const box = frame.getBoundingClientRect()
+      const bleed = 0.08
+      const to = { top: box.top - box.height * bleed, left: box.left - box.width * bleed, width: box.width * (1 + 2 * bleed), height: box.height * (1 + 2 * bleed) }
       const from = { top: 0, left: 0, width: window.innerWidth, height: window.innerHeight }
       const timing = { duration: zoom, easing: ease, fill: 'forwards' as const }
       animations.push(stage.animate([

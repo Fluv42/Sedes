@@ -67,7 +67,7 @@ export const projects: Project[] = [
     ],
   },
   {
-    slug: 'tagme', title: 'TagMe — Capstone', type: 'University team project', year: '2024–2025',
+    slug: 'tagme', title: 'TagMe (capstone)', type: 'University team project', year: '2024–2025',
     status: 'Course project', category: 'University', mark: 'monogram',
     summary: 'A Django project for tagging, saving and discussing items from the Library of Congress catalogue.',
     stack: 'Python · Django · SQLite · HTML · CSS', role: 'Team contributor · interface and database work',

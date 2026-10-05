@@ -2,7 +2,7 @@ import { projects } from '../content/projects'
 import { site } from '../content/site'
 
 const titles: Record<string, string> = {
-  '/': `${site.name} — ${site.title}`,
+  '/': `${site.name}, ${site.title}`,
   '/about': 'About',
   '/projects': 'Projects',
   '/notes': 'Notes',

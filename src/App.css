@@ -94,8 +94,8 @@ html.js [data-reveal].is-in {
   translate: 0 0;
 }
 
-.featured-list > :nth-child(2) { transition-delay: .1s; }
-.featured-list > :nth-child(3) { transition-delay: .2s; }
+.work-list > :nth-child(2) { transition-delay: .08s; }
+.work-list > :nth-child(3) { transition-delay: .16s; }
 
 /* Shared pieces ---------------------------------------------------------- */
 
@@ -209,7 +209,7 @@ a:hover .arrow {
   grid-template-columns: minmax(0, 54vw) minmax(0, 1fr);
   align-items: center;
   margin: 0 calc(-1 * var(--gutter));
-  padding: 8px var(--gutter) 56px 6vw;
+  padding: 40px var(--gutter) 72px 6vw;
 }
 
 .hero-media {
@@ -221,13 +221,14 @@ a:hover .arrow {
   aspect-ratio: 1.2;
 }
 
-/* The stage fades to nothing at its edges, so the picture becomes the page. */
+/* The stage fades to nothing at its edges, so the picture becomes the page.
+   It reaches 8% past its frame so the fade has room to be long and gentle. */
 .meadow-stage {
   position: absolute;
-  inset: 0;
+  inset: -8%;
   overflow: hidden;
-  -webkit-mask: radial-gradient(closest-side, #000 58%, rgb(0 0 0 / .6) 80%, transparent 100%) center / 100% 100% no-repeat;
-  mask: radial-gradient(closest-side, #000 58%, rgb(0 0 0 / .6) 80%, transparent 100%) center / 100% 100% no-repeat;
+  -webkit-mask: radial-gradient(closest-side, #000 52%, rgb(0 0 0 / .84) 62%, rgb(0 0 0 / .55) 73%, rgb(0 0 0 / .27) 84%, rgb(0 0 0 / .08) 93%, transparent 100%) center / 100% 100% no-repeat;
+  mask: radial-gradient(closest-side, #000 52%, rgb(0 0 0 / .84) 62%, rgb(0 0 0 / .55) 73%, rgb(0 0 0 / .27) 84%, rgb(0 0 0 / .08) 93%, transparent 100%) center / 100% 100% no-repeat;
 }
 
 /* The centre stays sharp... */
@@ -297,9 +298,7 @@ video.meadow-source.is-playing {
   bottom: 9%;
   translate: -50% 0;
   padding: 4px 2px;
-  font-size: .75rem;
-  letter-spacing: .14em;
-  text-transform: uppercase;
+  font-size: .85rem;
   color: var(--muted);
   background: none;
   border: 0;
@@ -310,26 +309,6 @@ video.meadow-source.is-playing {
 
 .motion-control:hover {
   opacity: 1;
-}
-
-.grain-arc {
-  position: absolute;
-  top: -4%;
-  left: -4%;
-  width: 34%;
-  overflow: visible;
-  pointer-events: none;
-}
-
-.grain-arc ellipse, .intro-arc ellipse {
-  fill: var(--wheat);
-  opacity: 0;
-  animation: grain-in .6s var(--ease) forwards;
-}
-
-@keyframes grain-in {
-  from { opacity: 0; translate: 0 -3px; }
-  to { opacity: .8; translate: 0 0; }
 }
 
 .hero-copy {
@@ -376,67 +355,71 @@ video.meadow-source.is-playing {
 
 .featured {
   padding: 40px 0 56px;
-  border-top: 1px dotted var(--rule);
 }
 
 .featured h2 {
   font-size: 1.9rem;
 }
 
-.featured-list {
-  display: grid;
-  grid-template-columns: repeat(2, minmax(0, 1fr));
-  gap: 36px 64px;
-  margin-top: 28px;
+.work-list {
+  margin: 28px 0 0;
+  padding: 0;
+  list-style: none;
+  border-top: 1px solid var(--rule);
 }
 
-.project-row {
+.work-item {
   position: relative;
   display: grid;
-  grid-template-columns: auto minmax(0, 1fr);
-  gap: 22px;
-  align-items: start;
+  grid-template-columns: minmax(0, 5fr) minmax(0, 5fr) minmax(0, 2fr);
+  gap: 12px 40px;
+  align-items: baseline;
+  padding: 26px 0 24px;
+  border-bottom: 1px solid var(--rule);
 }
 
-.project-row h2, .project-row h3 {
-  font-size: 1.55rem;
+.work-title {
+  font-size: clamp(1.9rem, 3vw, 2.7rem);
+  line-height: 1.05;
+  transition: translate .5s var(--ease), color .3s;
 }
 
-.project-row h2 a, .project-row h3 a {
+.work-title a {
   text-decoration: none;
 }
 
 /* The whole row is the link's target. */
-.project-row h2 a::after, .project-row h3 a::after {
+.work-title a::after {
   content: '';
   position: absolute;
-  inset: -8px;
+  inset: 0;
 }
 
-.project-row .summary {
-  margin-top: 6px;
-  max-width: 52ch;
+.work-summary {
+  max-width: 44ch;
+  color: var(--ink);
 }
 
-.project-row .stack {
-  margin-top: 6px;
+.work-meta {
+  justify-self: end;
+  text-align: right;
+  color: var(--muted);
+  font-size: .9rem;
+  line-height: 1.5;
 }
 
-.project-row:has(a:focus-visible) {
-  outline: 2px solid var(--rust);
-  outline-offset: 10px;
-}
-
-.project-row a:focus-visible {
-  outline: none;
-}
-
-.project-row:hover .project-mark {
-  transform: translateY(-3px) rotate(-2deg);
-}
-
-.project-row:hover h2 a, .project-row:hover h3 a {
+.work-item:hover .work-title {
+  translate: 10px 0;
   color: var(--rust);
+}
+
+.work-item:has(a:focus-visible) {
+  outline: 2px solid var(--rust);
+  outline-offset: 6px;
+}
+
+.work-item a:focus-visible {
+  outline: none;
 }
 
 /* Inner pages ------------------------------------------------------------- */
@@ -458,31 +441,6 @@ video.meadow-source.is-playing {
 
 .page-heading .crumb {
   margin-bottom: 12px;
-}
-
-.project-index {
-  border-top: 1px solid var(--rule);
-}
-
-.project-index .project-row {
-  grid-template-columns: 112px minmax(0, 1fr);
-  gap: 32px;
-  padding: 28px 0;
-  border-bottom: 1px solid var(--rule);
-}
-
-.project-index .project-mark {
-  width: 112px;
-}
-
-.project-index .meta {
-  margin-top: 4px;
-  color: var(--muted);
-  font-size: .92rem;
-}
-
-.project-index + .more {
-  margin-bottom: 56px;
 }
 
 .project-header {
@@ -757,17 +715,17 @@ html.has-cursor .cursor-dot {
   transition: width .5s var(--ease), height .5s var(--ease), margin .5s var(--ease), background-color .25s, opacity .25s, scale .2s;
 }
 
-.cursor-dot.is-visible { opacity: 1; }
-.cursor-dot.is-pressed { scale: .75; }
+html.has-cursor .cursor-dot.is-visible { opacity: 1; }
+html.has-cursor .cursor-dot.is-pressed { scale: .75; }
 
-.cursor-dot.is-link {
+html.has-cursor .cursor-dot.is-link {
   width: 36px;
   height: 36px;
   margin: -18px 0 0 -18px;
   background: rgb(108 119 82 / .28);
 }
 
-.cursor-dot.has-label {
+html.has-cursor .cursor-dot.has-label {
   width: 68px;
   height: 68px;
   margin: -34px 0 0 -34px;
@@ -776,9 +734,8 @@ html.has-cursor .cursor-dot {
 
 .cursor-dot span {
   color: var(--paper);
-  font-size: .68rem;
-  letter-spacing: .14em;
-  text-transform: uppercase;
+  font-size: .8rem;
+  font-style: italic;
   opacity: 0;
   transition: opacity .2s .1s;
 }
@@ -799,29 +756,33 @@ html.intro {
 html.intro .site-header,
 html.intro main > :not(.hero),
 html.intro .hero-copy,
-html.intro .grain-arc,
 html.intro .motion-control,
 html.intro .site-footer {
   opacity: 0;
 }
 
+html.intro .site-header { translate: 0 -14px; }
+html.intro main > :not(.hero), html.intro .hero-copy { translate: 0 36px; }
+
 html.intro.intro-out .site-header,
 html.intro.intro-out main > :not(.hero),
 html.intro.intro-out .hero-copy,
-html.intro.intro-out .grain-arc,
+html.intro.intro-out .motion-control,
 html.intro.intro-out .site-footer {
   opacity: 1;
-  transition: opacity 1s .5s ease;
+  translate: 0 0;
+  transition: opacity 1.2s .15s ease, translate 1.5s cubic-bezier(.65, 0, .2, 1);
 }
 
 /* The words settle in as the picture pulls back, not before. */
-html.intro:not(.intro-out) .hero-copy > *,
-html.intro:not(.intro-out) .grain-arc ellipse {
+html.intro:not(.intro-out) .hero-copy > * {
   animation-play-state: paused;
 }
 
-/* Fixed elements need no transformed or filtered ancestors to cover the screen. */
-html.intro main, html.intro .hero .meadow {
+/* Fixed elements need no transformed or filtered ancestors to cover the screen,
+   and once the intro has played the page's own arrival animations must not replay. */
+html.intro main, html.intro .hero .meadow,
+html.intro-played main, html.intro-played .hero .meadow {
   animation: none;
 }
 
@@ -1020,18 +981,18 @@ html.intro-writing .intro-title text {
     display: inline;
   }
 
-  .featured-list {
+  .work-item {
     grid-template-columns: 1fr;
-    gap: 28px;
+    gap: 6px;
   }
 
-  .project-mark, .project-index .project-mark {
-    width: 64px;
+  .work-meta {
+    justify-self: start;
+    text-align: left;
   }
 
-  .project-index .project-row {
-    grid-template-columns: 64px minmax(0, 1fr);
-    gap: 18px;
+  .work-meta br {
+    display: none;
   }
 
   .case-section {
@@ -1088,7 +1049,6 @@ html.intro-writing .intro-title text {
 
 /* With motion reduced, everything shows in its finished state. */
 @media (prefers-reduced-motion: reduce) {
-  .grain-arc ellipse, .intro-arc ellipse { opacity: .8; }
   .squiggle { stroke-dashoffset: 0; }
   html.js [data-reveal] { opacity: 1; translate: none; }
 }

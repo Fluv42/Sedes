@@ -2,7 +2,7 @@ import type React from 'react'
 import { useEffect, useRef, useState } from 'react'
 import { setGlowEdge, toggleTheme, useTheme } from '../lib/theme'
 import { stepDownQuality, useQuality } from '../lib/quality'
-import { ControlButton, QualityButton, SoundPill } from './Controls'
+import { ControlButton, QualityButton, SoundButton } from './Controls'
 import { MoonIcon, PauseIcon, PlayIcon, SunIcon } from './Icons'
 import { useClipChoice } from '../lib/daypart'
 import type { Daypart } from '../lib/daypart'
@@ -562,7 +562,7 @@ export function Meadow({ still = false, alt, alternate }: { still?: boolean; alt
       {showVideo && <ControlButton label={playing ? 'Pause the video' : 'Play the video'} onClick={() => setPlaying(value => !value)}>
         {playing ? <PauseIcon /> : <PlayIcon />}
       </ControlButton>}
-      <SoundPill />
+      <SoundButton />
       <ControlButton label={theme === 'dark' ? 'Dark mode: switch to light' : 'Light mode: switch to dark'} onClick={toggleTheme}>
         {theme === 'dark' ? <MoonIcon /> : <SunIcon />}
       </ControlButton>

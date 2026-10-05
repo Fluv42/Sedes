@@ -3,15 +3,14 @@ import { daypartNow, rotationNow, subscribeDaypart } from './daypart'
 import type { Daypart } from './daypart'
 
 // Background sound in two layers: the song, and under it a field recording that matches the
-// hero video showing (the same clock picks both). The Sound button steps through
-// Music and field sound are switched on and off separately (toggleLayer), and the footer's heart
-// switches both. The field sound plays only on the home page, under its picture; the song carries
-// on from page to page. Every visit starts with both on.
+// hero video showing (the same clock picks both). One control plays or pauses both (the sound
+// button by the picture, or the footer's heart); the field sound plays only on the home page,
+// under its picture, and the song carries on from page to page.
 //
-// Browsers only allow sound once the visitor has clicked, tapped or pressed a key, so until then
-// the button reads "Enable sound", and pressing it is what starts it. If the browser
-// already trusts the site, sound starts on load. The field sound fades in first and the song
-// rises in over it; both fade rather than cut, and go quiet while the tab is hidden.
+// Nothing plays until the visitor presses play: sound that starts by itself (or tries to, and is
+// blocked by the browser) leaves people unsure whether it's on. The press is also what browsers
+// need before they allow sound. Both layers fade in and out rather than cut, and go quiet while
+// the tab is hidden.
 //
 // The song is a plain <audio> element. The field sound is played through Web Audio instead,
 // because <audio loop> leaves a short gap at the loop point and Web Audio loops seamlessly.
@@ -118,7 +117,7 @@ function fieldLayer(src: string, volume: number): Layer {
 }
 
 let layers: Layer[] | null = null
-let mode: SoundMode = 'both'
+let mode: SoundMode = 'off'
 let onHome = false
 let allowed = false
 const listeners = new Set<() => void>()
@@ -195,26 +194,18 @@ function tryStart() {
   probe.silence()
   return probe.play().then(() => {
     allowed = true
-    enabledAt = performance.now()
     notify()
     for (const layer of all()) if (!wanted(layer)) layer.pause()
     apply(true)
   })
 }
 
-// Sound starts from the Enable sound button (or the footer's heart): that click is the visitor
-// asking for it, which is what the browser needs. Any other click on the page (the intro's arrow,
-// a link) just does its own job.
+// Sound starts from the play button (or the footer's heart): that click is the visitor asking for
+// it, which is what the browser needs.
 let starting: Promise<void> | null = null
 function startOnGesture() {
   if (allowed || starting || mode === 'off') return
   starting = tryStart().catch(() => {}).finally(() => { starting = null })
-}
-
-// Called once when the site loads: if the browser already trusts the site, sound starts now.
-export function startMusic() {
-  if (allowed) return
-  tryStart().catch(() => {})
 }
 
 // Called by the app whenever the page changes: the field sound belongs to the home page.
@@ -224,38 +215,18 @@ export function setHomePage(home: boolean) {
   apply()
 }
 
-// The sound controls are two switches in one pill, music and field sound, each on or off on its
-// own (the four modes are just their combinations). Before sound is allowed, either one simply
-// starts sound as it's set, since that press is what the browser needs.
-// When a press is what enabled sound, the same press's click arrives a moment later, after the
-// controls have already switched to on; it mustn't then switch them straight back off.
-let enabledAt = -Infinity
-const sameGesture = () => performance.now() - enabledAt < 700
-
-export function toggleLayer(which: 'music' | 'field') {
-  if (sameGesture()) return
-  if (!allowed) { if (mode === 'off') mode = 'both'; notify(); startOnGesture(); return }
-  const music = mode === 'both' || mode === 'music'
-  const field = mode === 'both' || mode === 'ambient'
-  const next = which === 'music' ? [!music, field] : [music, !field]
-  mode = next[0] ? (next[1] ? 'both' : 'music') : (next[1] ? 'ambient' : 'off')
-  notify()
-  apply()
-}
-
-// The footer's heart: all sound off, or back to both.
-export function toggleAllSound() {
-  if (sameGesture()) return
-  if (!allowed) { mode = 'both'; notify(); startOnGesture(); return }
+// Play or pause all of it.
+export function toggleSound() {
   mode = mode === 'off' ? 'both' : 'off'
   notify()
-  apply()
+  if (!allowed) startOnGesture()
+  else apply(mode === 'both')
 }
 
 export const musicOn = (mode: SoundMode) => mode === 'both' || mode === 'music'
 export const fieldOn = (mode: SoundMode) => mode === 'both' || mode === 'ambient'
 
-const serverSnapshot = { mode: 'both' as SoundMode, allowed: false }
+const serverSnapshot = { mode: 'off' as SoundMode, allowed: false }
 let snapshot: { mode: SoundMode; allowed: boolean } = { mode, allowed }
 export function useSound() {
   return useSyncExternalStore(
@@ -271,7 +242,4 @@ export function useSound() {
 // Whether sound is already allowed (the browser trusts the site) right now, outside React.
 export const soundAllowed = () => allowed
 
-export function soundLabel({ mode, allowed }: { mode: SoundMode; allowed: boolean }) {
-  if (!allowed && mode !== 'off') return 'Enable music'
-  return { both: 'Sound on', music: 'Music only', ambient: 'Ambient only', off: 'Muted' }[mode]
-}
+export const soundPlaying = ({ mode, allowed }: { mode: SoundMode; allowed: boolean }) => allowed && mode !== 'off'

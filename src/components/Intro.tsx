@@ -1,6 +1,6 @@
 import { useEffect, useRef, useState } from 'react'
 import { stopSmoothScroll, resumeSmoothScroll } from '../lib/motion'
-import { QualityButton, SoundPill } from './Controls'
+import { QualityButton, SoundButton } from './Controls'
 
 // The home page opens on the meadow, filling the screen, while "Sedes" is written across it.
 // Then it waits: near the bottom is a down arrow, and under the name are the Sound and
@@ -69,8 +69,8 @@ function tintEdges(frame: HTMLElement) {
     const source = video && video.readyState >= 2 ? video : image?.naturalWidth ? image : null
     if (!source) return
     try {
-      const top = band(source, 0, 10)
-      const bottom = band(source, window.innerHeight - 10, 10)
+      const top = band(source, 12, 3)
+      const bottom = band(source, window.innerHeight - 15, 3)
       if (!top || !bottom) return
       strips[0].style.setProperty('--edge', top)
       strips[1].style.setProperty('--edge', bottom)
@@ -255,7 +255,7 @@ export function Intro() {
       <text x="320" y="160" textAnchor="middle" mask="url(#intro-hand)">Sedes</text>
     </svg>
     <div ref={actions} className="intro-actions">
-      <SoundPill />
+      <SoundButton />
       <QualityButton />
     </div>
     <button ref={next} type="button" className="intro-next" aria-label="Enter the site">

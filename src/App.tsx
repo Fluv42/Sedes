@@ -8,7 +8,7 @@ import { Intro } from './components/Intro'
 import { usePath } from './lib/router'
 import { scrollToTop, startSmoothScroll, watchParallax, watchReveals } from './lib/motion'
 import { PageRoute } from './pages'
-import { setHomePage, soundLabel, startMusic, toggleAllSound, useSound } from './lib/music'
+import { setHomePage, soundPlaying, toggleSound, useSound } from './lib/music'
 import { followClock, toggleTheme, useTheme } from './lib/theme'
 import { checkDaypart, subscribeDaypart } from './lib/daypart'
 import { useQuality } from './lib/quality'
@@ -34,7 +34,6 @@ export default function App({ initialPath = '/' }: { initialPath?: string }) {
   useEffect(() => quality === 'pretty' ? startSmoothScroll() : undefined, [quality])
   // The field sound plays under the home page's picture only; the song carries on everywhere.
   useEffect(() => setHomePage(path === '/'), [path])
-  useEffect(() => startMusic(), [])
   // A page left open moves on with the clock (lib/daypart.ts): check it on every page change too.
   useEffect(() => subscribeDaypart(followClock), [])
   useEffect(() => checkDaypart(), [path])
@@ -86,9 +85,9 @@ export default function App({ initialPath = '/' }: { initialPath?: string }) {
           <span className="footer-credits">
             <span>© {new Date().getFullYear()} {site.name} <span className="alias">/ {site.alias}</span></span>
             <span className="music-credit">
-              <button className="music-toggle" type="button" onClick={toggleAllSound} title={sound.mode === 'off' ? 'Sound off: turn it on' : 'Sound on: turn it off'}>
+              <button className="music-toggle" type="button" onClick={toggleSound} title={soundPlaying(sound) ? 'Sound playing: pause it' : 'Play the sound'}>
                 {/* A heart for the music: filled while sound is on, outlined when muted. */}
-                <HeartIcon filled={sound.mode !== 'off'} /><span className="visually-hidden">Sound: {soundLabel(sound)}</span>
+                <HeartIcon filled={soundPlaying(sound)} /><span className="visually-hidden">{soundPlaying(sound) ? 'Pause the sound' : 'Play the sound'}</span>
               </button>
               Music by <a href={site.musicBy.href}>{site.musicBy.name}</a>
               <a className="credit-note" href={site.musicBy.songHref} title={site.musicBy.original}>♪ {site.musicBy.song}</a>

@@ -22,13 +22,13 @@ function points() {
 
 const grains = points()
 
-export function GrainArc() {
-  return <svg className="grain-arc" viewBox="0 0 300 310" aria-hidden="true">
+export function GrainArc({ className = 'grain-arc', delay = 600 }: { className?: string; delay?: number }) {
+  return <svg className={className} viewBox="0 0 300 310" aria-hidden="true">
     {grains.map((grain, index) => <ellipse
       key={index}
       cx="0" cy="0" rx="2.4" ry="5.6"
       transform={`translate(${grain.x.toFixed(1)} ${grain.y.toFixed(1)}) rotate(${(grain.angle + 90 + grain.tilt).toFixed(1)}) scale(${grain.scale.toFixed(2)})`}
-      style={{ animationDelay: `${600 + index * 22}ms` }}
+      style={{ animationDelay: `${delay + index * 22}ms` }}
     />)}
   </svg>
 }

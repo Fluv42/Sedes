@@ -27,11 +27,15 @@
   --body: 'Source Serif', Georgia, serif;
   --gutter: clamp(16px, 4vw, 56px);
   --ease: cubic-bezier(.22, .61, .36, 1);
+  /* Hero picture, like Monocle's sliders. Tune with the dev-only panel, then paste here. */
+  --blur: 24px;
+  --tint: .55;
+  --grain: .35;
 
   font-family: var(--body);
   font-size: 17px;
   color: var(--ink);
-  background: var(--paper-deep);
+  background: var(--paper);
   font-synthesis: none;
   text-rendering: optimizeLegibility;
   -webkit-font-smoothing: antialiased;
@@ -50,7 +54,7 @@ html {
 body {
   margin: 0;
   min-width: 320px;
-  background: var(--paper-deep);
+  background: var(--paper);
 }
 
 h1, h2, h3, p, figure, dl, dd, ul {

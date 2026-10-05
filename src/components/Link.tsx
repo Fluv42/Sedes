@@ -1,4 +1,5 @@
 import type { AnchorHTMLAttributes, MouseEvent } from 'react'
+import { leaveThen } from '../lib/motion'
 const eventName = 'sedes:navigate'
 export function Link({ href = '/', onClick, ...props }: AnchorHTMLAttributes<HTMLAnchorElement>) {
   function navigate(event: MouseEvent<HTMLAnchorElement>) {
@@ -7,10 +8,11 @@ export function Link({ href = '/', onClick, ...props }: AnchorHTMLAttributes<HTM
     const url = new URL(href, window.location.href)
     if (url.origin !== window.location.origin || url.hash) return
     event.preventDefault()
-    if (url.pathname !== window.location.pathname) {
+    if (url.pathname === window.location.pathname) return window.scrollTo({ top: 0 })
+    leaveThen(() => {
       window.history.pushState(null, '', url.pathname + url.search)
       window.dispatchEvent(new Event(eventName))
-    } else window.scrollTo({ top: 0 })
+    })
   }
   return <a href={href} onClick={navigate} {...props} />
 }

@@ -1,59 +1,64 @@
-/* Frame ------------------------------------------------------------------ */
+/* Page ------------------------------------------------------------------- */
 
 .site-frame {
-  max-width: 1280px;
-  margin: 20px auto;
   padding: 0 var(--gutter);
   background: var(--paper);
-  border: 1px solid var(--rule);
   overflow: clip;
 }
 
+/* Header: pages on the left, name on the right (after Matthew Encina's site) */
+
 .site-header {
-  margin: 0 calc(-1 * var(--gutter));
-  padding: 0 var(--gutter);
-  border-bottom: 1px solid var(--rule);
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 24px;
+  min-height: 84px;
 }
 
 .site-header nav {
   display: flex;
-  align-items: baseline;
-  justify-content: space-between;
-  gap: 12px;
+  flex-wrap: wrap;
+  gap: 6px 30px;
 }
 
-.site-header a {
+.site-header nav a, .wordmark {
   position: relative;
-  padding: 20px 2px 18px;
+  padding: 8px 0;
   text-decoration: none;
+  text-transform: uppercase;
+  letter-spacing: .16em;
+  font-size: .78rem;
+  color: var(--muted);
 }
 
-.site-header .wordmark {
-  font-family: var(--heading);
-  font-size: 1.55rem;
-  line-height: 1;
+.site-header nav a[aria-current] {
+  color: var(--ink);
+}
+
+.wordmark {
+  font-size: 1.05rem;
+  letter-spacing: .22em;
+  color: var(--ink);
+  white-space: nowrap;
 }
 
 .squiggle {
   position: absolute;
-  left: -4px;
-  right: -4px;
-  bottom: 9px;
-  width: calc(100% + 8px);
-  height: 8px;
+  left: -3px;
+  right: -3px;
+  bottom: 0;
+  width: calc(100% + 6px);
+  height: 7px;
   overflow: visible;
   fill: none;
   stroke: var(--rust);
-  stroke-width: 1.4;
+  stroke-width: 1.3;
   stroke-linecap: round;
   stroke-dasharray: 1;
   stroke-dashoffset: 1;
   animation: draw .7s .1s var(--ease) forwards;
   vector-effect: non-scaling-stroke;
-}
-
-.wordmark .squiggle {
-  bottom: 6px;
 }
 
 @keyframes draw {
@@ -63,7 +68,34 @@
 main {
   display: block;
   min-height: 60vh;
+  animation: page-in .55s var(--ease) both;
 }
+
+html.is-leaving main {
+  opacity: 0;
+  translate: 0 -10px;
+  transition: opacity .28s ease, translate .28s ease;
+}
+
+@keyframes page-in {
+  from { opacity: 0; translate: 0 12px; }
+  to { opacity: 1; translate: 0 0; }
+}
+
+/* Things that settle in as they scroll into view (only once scripts are running) */
+html.js [data-reveal] {
+  opacity: 0;
+  translate: 0 28px;
+  transition: opacity 1s var(--ease), translate 1s var(--ease);
+}
+
+html.js [data-reveal].is-in {
+  opacity: 1;
+  translate: 0 0;
+}
+
+.featured-list > :nth-child(2) { transition-delay: .1s; }
+.featured-list > :nth-child(3) { transition-delay: .2s; }
 
 /* Shared pieces ---------------------------------------------------------- */
 
@@ -121,133 +153,157 @@ a:hover .arrow {
   letter-spacing: .01em;
 }
 
-/* Sun prints: pale plants on toned paper ---------------------------------- */
+/* Project marks: the real app icon where there is one, a plain tile otherwise */
 
-.sun-print {
-  --tone: #7b5c3d;
-  position: relative;
+.project-mark {
   display: grid;
   place-items: center;
   width: 88px;
   aspect-ratio: 1;
   flex: none;
-  color: #f3ead6;
-  background:
-    radial-gradient(120% 90% at 28% 20%, color-mix(in srgb, var(--tone) 70%, #e9d9b8) 0%, transparent 60%),
-    var(--tone);
-  border-radius: 2px 3px 2px 4px;
-  box-shadow: inset 0 0 14px color-mix(in srgb, var(--tone) 50%, #000), 0 1px 0 rgb(0 0 0 / .04);
-  transition: filter .5s var(--ease), transform .5s var(--ease);
+  overflow: hidden;
+  border-radius: 22%;
+  transition: transform .5s var(--ease);
 }
 
-.sun-print .botanical {
-  width: 78%;
-  height: 78%;
-  filter: blur(.3px) drop-shadow(0 0 2px rgb(243 234 214 / .55));
+.project-mark svg {
+  width: 52%;
+  height: 52%;
+  fill: none;
+  stroke: currentColor;
+  stroke-width: 1.8;
+  stroke-linecap: round;
+  stroke-linejoin: round;
 }
 
-.sun-print .botanical g {
-  stroke-width: 3.2;
+.mark-lotflow { background: #c2410c; color: #fff; }
+.mark-server { background: #3f4a3b; color: #f3ead6; }
+.mark-sedes { background: #8c6a3e; color: #f3ead6; }
+.mark-sedes svg { stroke-width: 3; }
+
+.mark-monogram {
+  background: var(--paper-deep);
+  color: var(--ink);
+  border: 1px solid var(--rule);
+  font-family: var(--heading);
+  font-size: 1.9rem;
 }
 
-.sun-print-large {
+.mark-large.mark-monogram { font-size: 6rem; }
+
+.mark-screenshot {
+  border: 1px solid var(--rule);
+}
+
+.mark-screenshot img {
   width: 100%;
-  max-width: 360px;
-  aspect-ratio: 1;
+  height: 100%;
+  object-fit: cover;
+  object-position: left top;
 }
-
-.sun-print-large .botanical {
-  width: 62%;
-  height: 62%;
-}
-
-.sun-print-large .botanical g {
-  stroke-width: 2.2;
-}
-
-.tone-wheat { --tone: #8c6a3e; }
-.tone-fern { --tone: #5b6646; }
-.tone-tree { --tone: #6c5944; }
-.tone-book { --tone: #7a5a42; }
-.tone-sun { --tone: #9a6a34; }
 
 /* Home ------------------------------------------------------------------- */
 
 .hero {
   display: grid;
-  grid-template-columns: minmax(0, 1.2fr) minmax(0, 1fr);
+  grid-template-columns: minmax(0, 43vw) minmax(0, 1fr);
   align-items: center;
-  padding: 36px 0 56px;
+  margin: 0 calc(-1 * var(--gutter));
+  padding: 24px var(--gutter) 64px 15vw;
 }
 
 .hero-media {
   position: relative;
-  margin-left: calc(-1 * var(--gutter));
 }
 
 .meadow {
   position: relative;
-  aspect-ratio: 1.12;
+  aspect-ratio: 1.15;
 }
 
-.meadow-picture, .meadow-glow {
+/* The stage fades to nothing at its edges, so the picture becomes the page. */
+.meadow-stage {
   position: absolute;
   inset: 0;
-}
-
-.meadow-picture {
   overflow: hidden;
-  -webkit-mask: url('/media/dissolve.svg') center / 100% 100% no-repeat;
-  mask: url('/media/dissolve.svg') center / 100% 100% no-repeat;
+  -webkit-mask-image: radial-gradient(closest-side, #000 52%, rgb(0 0 0 / .6) 78%, transparent 100%);
+  mask-image: radial-gradient(closest-side, #000 52%, rgb(0 0 0 / .6) 78%, transparent 100%);
 }
 
-.meadow-picture img, .meadow-picture video, .meadow-glow img {
+/* Everything starts half-blurred... */
+.meadow-source {
   position: absolute;
-  inset: 0;
-  width: 100%;
-  height: 100%;
+  inset: -6%;
+  width: 112%;
+  height: 112%;
   object-fit: cover;
   object-position: 45% 60%;
+  filter: blur(calc(var(--blur) * .5)) saturate(.95);
 }
 
-.meadow-picture img, .meadow-picture video {
-  filter: sepia(.12) saturate(.92) brightness(1.03);
-}
-
-.meadow-picture video {
+video.meadow-source {
   opacity: 0;
   transition: opacity 1.6s var(--ease);
 }
 
-.meadow-picture video.is-playing {
+video.meadow-source.is-playing {
   opacity: 1;
 }
 
-/* A blurred copy spills the picture's colour outward, like light through a window. */
-.meadow-glow {
-  inset: -6%;
-  opacity: .5;
-  -webkit-mask-image: radial-gradient(closest-side, #000 30%, transparent 100%);
-  mask-image: radial-gradient(closest-side, #000 30%, transparent 100%);
+/* ...outside the central oval it reaches full blur... */
+.frost {
+  position: absolute;
+  inset: 0;
 }
 
-.meadow-glow img {
-  filter: blur(42px) saturate(1.2);
-  transform: scale(1.1);
+.frost-outer {
+  -webkit-backdrop-filter: blur(calc(var(--blur) * .5));
+  backdrop-filter: blur(calc(var(--blur) * .5));
+  -webkit-mask-image: radial-gradient(closest-side, transparent 34%, #000 64%);
+  mask-image: radial-gradient(closest-side, transparent 34%, #000 64%);
+}
+
+/* ...and keeps building towards the edges. */
+.frost-edge {
+  -webkit-backdrop-filter: blur(var(--blur));
+  backdrop-filter: blur(var(--blur));
+  -webkit-mask-image: radial-gradient(closest-side, transparent 60%, #000 92%);
+  mask-image: radial-gradient(closest-side, transparent 60%, #000 92%);
+}
+
+/* Tint: a wash of paper, light in the middle, full at the edges. */
+.tint {
+  position: absolute;
+  inset: 0;
+  opacity: var(--tint);
+  background: radial-gradient(closest-side, rgb(246 242 231 / .3) 0%, rgb(246 242 231 / .45) 50%, var(--paper) 100%);
+}
+
+/* Grain: fine noise, a little in the middle and more where it meets the page. */
+.grain {
+  position: absolute;
+  inset: 0;
+  opacity: var(--grain);
+  mix-blend-mode: overlay;
+  background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='180' height='180'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='.85' numOctaves='3' stitchTiles='stitch'/%3E%3CfeColorMatrix type='saturate' values='0'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)'/%3E%3C/svg%3E");
+  -webkit-mask-image: radial-gradient(closest-side, rgb(0 0 0 / .45) 30%, #000 85%);
+  mask-image: radial-gradient(closest-side, rgb(0 0 0 / .45) 30%, #000 85%);
 }
 
 .motion-control {
   position: absolute;
-  left: 22%;
-  bottom: 17%;
+  left: 50%;
+  bottom: 9%;
+  translate: -50% 0;
   padding: 4px 2px;
-  font-size: .82rem;
-  color: #fffbef;
+  font-size: .75rem;
+  letter-spacing: .14em;
+  text-transform: uppercase;
+  color: var(--muted);
   background: none;
   border: 0;
-  border-bottom: 1px solid rgb(255 251 239 / .6);
-  text-shadow: 0 1px 6px rgb(0 0 0 / .45);
-  opacity: .85;
+  border-bottom: 1px solid currentColor;
+  opacity: .7;
   transition: opacity .2s;
 }
 
@@ -257,14 +313,14 @@ a:hover .arrow {
 
 .grain-arc {
   position: absolute;
-  top: -2%;
-  left: calc(var(--gutter) - 3%);
-  width: 44%;
+  top: -4%;
+  left: -4%;
+  width: 40%;
   overflow: visible;
   pointer-events: none;
 }
 
-.grain-arc ellipse {
+.grain-arc ellipse, .intro-arc ellipse {
   fill: var(--wheat);
   opacity: 0;
   animation: grain-in .6s var(--ease) forwards;
@@ -277,8 +333,7 @@ a:hover .arrow {
 
 .hero-copy {
   position: relative;
-  margin-left: clamp(-80px, -4vw, 0px);
-  padding-right: 8px;
+  padding-left: 1vw;
 }
 
 .hello {
@@ -288,7 +343,7 @@ a:hover .arrow {
 
 .hero-copy h1 {
   margin-top: 6px;
-  font-size: clamp(3.4rem, 7.6vw, 7rem);
+  font-size: clamp(3.4rem, 6.3vw, 7.4rem);
   line-height: .9;
   letter-spacing: -.02em;
 }
@@ -375,9 +430,8 @@ a:hover .arrow {
   outline: none;
 }
 
-.project-row:hover .sun-print {
-  filter: brightness(1.12) saturate(1.1);
-  transform: rotate(-1.5deg);
+.project-row:hover .project-mark {
+  transform: translateY(-3px) rotate(-2deg);
 }
 
 .project-row:hover h2 a, .project-row:hover h3 a {
@@ -416,7 +470,7 @@ a:hover .arrow {
   border-bottom: 1px solid var(--rule);
 }
 
-.project-index .sun-print {
+.project-index .project-mark {
   width: 112px;
 }
 
@@ -441,6 +495,10 @@ a:hover .arrow {
 .project-cover {
   display: grid;
   justify-items: center;
+}
+
+.project-cover .project-mark {
+  width: min(100%, 300px);
 }
 
 .project-cover img {
@@ -523,10 +581,17 @@ a:hover .arrow {
   margin-left: calc(-1 * var(--gutter));
 }
 
-.contact .split-media {
-  justify-self: center;
-  width: 100%;
-  max-width: 320px;
+.contact {
+  max-width: 760px;
+  padding: 72px 0 96px;
+}
+
+.contact h1 {
+  font-size: clamp(2.8rem, 5.2vw, 4.4rem);
+}
+
+.contact .lede {
+  margin-top: 20px;
 }
 
 .contact-email {
@@ -625,6 +690,7 @@ a:hover .arrow {
 .footer-meta {
   display: flex;
   flex-wrap: wrap;
+  align-items: center;
   justify-content: space-between;
   gap: 8px 24px;
   padding: 14px var(--gutter) 18px;
@@ -639,7 +705,174 @@ a:hover .arrow {
 
 .footer-links {
   display: flex;
+  gap: 18px;
+}
+
+.footer-links a {
+  display: grid;
+  place-items: center;
+  width: 28px;
+  height: 28px;
+  color: var(--ink);
+}
+
+.footer-links a:hover {
+  color: var(--rust);
+}
+
+.footer-links svg {
+  width: 19px;
+  height: 19px;
+}
+
+.footer-links svg:not([fill]) {
+  fill: currentColor;
+}
+
+/* Cursor: a small dot that trails the pointer (after TaylorHare) ------------ */
+
+.cursor-dot {
+  display: none;
+}
+
+html.has-cursor, html.has-cursor * {
+  cursor: none !important;
+}
+
+html.has-cursor .cursor-dot {
+  position: fixed;
+  top: 0;
+  left: 0;
+  z-index: 400;
+  display: grid;
+  place-items: center;
+  width: 12px;
+  height: 12px;
+  margin: -6px 0 0 -6px;
+  border-radius: 50%;
+  background: var(--sage);
+  pointer-events: none;
+  opacity: 0;
+  transition: width .5s var(--ease), height .5s var(--ease), margin .5s var(--ease), background-color .25s, opacity .25s, scale .2s;
+}
+
+.cursor-dot.is-visible { opacity: 1; }
+.cursor-dot.is-pressed { scale: .75; }
+
+.cursor-dot.is-link {
+  width: 36px;
+  height: 36px;
+  margin: -18px 0 0 -18px;
+  background: rgb(108 119 82 / .28);
+}
+
+.cursor-dot.has-label {
+  width: 68px;
+  height: 68px;
+  margin: -34px 0 0 -34px;
+  background: var(--ink);
+}
+
+.cursor-dot span {
+  color: var(--paper);
+  font-size: .68rem;
+  letter-spacing: .14em;
+  text-transform: uppercase;
+  opacity: 0;
+  transition: opacity .2s .1s;
+}
+
+.cursor-dot.has-label span { opacity: 1; }
+
+/* Intro: once per visit, the arc of grain is laid down, then the page is uncovered */
+
+.intro-overlay {
+  display: none;
+}
+
+html.intro .intro-overlay {
+  position: fixed;
+  inset: 0;
+  z-index: 300;
+  display: grid;
+  place-content: center;
+  justify-items: center;
+  gap: 18px;
+  background: var(--paper);
+  animation: uncover .9s 1.5s cubic-bezier(.7, 0, .2, 1) forwards;
+}
+
+.intro-arc {
+  width: 140px;
+  overflow: visible;
+}
+
+.intro-word {
+  font-family: var(--heading);
+  font-size: 2rem;
+  letter-spacing: .04em;
+  animation: settle .8s .6s var(--ease) both;
+}
+
+@keyframes uncover {
+  to { clip-path: inset(0 0 100% 0); }
+}
+
+html.intro .hero, html.intro .hero * {
+  animation-play-state: paused !important;
+}
+
+/* Development-only tuning panel ------------------------------------------- */
+
+.tuner {
+  position: fixed;
+  right: 16px;
+  bottom: 16px;
+  z-index: 350;
+  display: grid;
   gap: 10px;
+  width: 300px;
+  padding: 14px 16px;
+  color: #eee;
+  font: 13px/1.2 -apple-system, system-ui, sans-serif;
+  background: rgb(38 38 38 / .82);
+  -webkit-backdrop-filter: blur(20px);
+  backdrop-filter: blur(20px);
+  border-radius: 14px;
+  box-shadow: 0 10px 30px rgb(0 0 0 / .25);
+}
+
+.tuner.is-closed {
+  width: auto;
+  padding: 6px;
+}
+
+.tuner label {
+  display: grid;
+  grid-template-columns: 48px 1fr 46px;
+  align-items: center;
+  gap: 10px;
+}
+
+.tuner input {
+  width: 100%;
+  accent-color: #ddd;
+}
+
+.tuner output {
+  text-align: right;
+  font-variant-numeric: tabular-nums;
+  color: #aaa;
+}
+
+.tuner button {
+  justify-self: end;
+  padding: 4px 10px;
+  color: #eee;
+  font: inherit;
+  background: rgb(255 255 255 / .1);
+  border: 0;
+  border-radius: 6px;
 }
 
 /* Smaller screens ----------------------------------------------------------- */
@@ -647,19 +880,20 @@ a:hover .arrow {
 @media (max-width: 900px) {
   .hero {
     grid-template-columns: 1fr;
-    padding-top: 8px;
+    padding: 0 var(--gutter) 48px;
   }
 
   .hero-media {
-    margin-right: calc(-1 * var(--gutter));
+    margin: 0 calc(-1 * var(--gutter));
   }
 
   .meadow {
-    aspect-ratio: 1.35;
+    aspect-ratio: 1.25;
   }
 
   .hero-copy {
-    margin: -24px 0 0;
+    margin-top: -16px;
+    padding-left: 0;
   }
 
   .hero-copy h1 {
@@ -674,12 +908,8 @@ a:hover .arrow {
     margin-right: calc(-1 * var(--gutter));
   }
 
-  .project-cover .sun-print-large {
-    max-width: 200px;
-  }
-
-  .contact .split-media {
-    display: none;
+  .project-cover .project-mark {
+    width: 160px;
   }
 }
 
@@ -688,22 +918,22 @@ a:hover .arrow {
     font-size: 16px;
   }
 
-  .site-frame {
-    margin: 0;
-    border: 0;
+  .site-header {
+    flex-direction: column-reverse;
+    align-items: flex-start;
+    gap: 4px;
+    padding-top: 14px;
+    min-height: 0;
   }
 
-  .site-header a {
-    padding: 16px 0 14px;
-    font-size: .92rem;
+  .site-header nav {
+    flex-wrap: nowrap;
+    gap: 14px;
   }
 
-  .site-header .wordmark {
-    font-size: 1.3rem;
-  }
-
-  .squiggle {
-    bottom: 6px;
+  .site-header nav a {
+    font-size: .7rem;
+    letter-spacing: .1em;
   }
 
   .hero-copy h1 {
@@ -719,17 +949,13 @@ a:hover .arrow {
     gap: 28px;
   }
 
-  .sun-print {
+  .project-mark, .project-index .project-mark {
     width: 64px;
   }
 
   .project-index .project-row {
     grid-template-columns: 64px minmax(0, 1fr);
     gap: 18px;
-  }
-
-  .project-index .sun-print {
-    width: 64px;
   }
 
   .case-section {
@@ -747,13 +973,14 @@ a:hover .arrow {
   }
 }
 
-@media (max-width: 360px) {
-  .site-header a {
-    font-size: .84rem;
+@media (max-width: 370px) {
+  .site-header nav {
+    gap: 10px;
   }
 
-  .site-header .wordmark {
-    font-size: 1.15rem;
+  .site-header nav a {
+    font-size: .64rem;
+    letter-spacing: .06em;
   }
 }
 
@@ -774,7 +1001,7 @@ a:hover .arrow {
 .hero-copy > :nth-child(6) { animation-delay: .54s; }
 
 @keyframes develop {
-  from { opacity: 0; filter: blur(6px) brightness(1.15); }
+  from { opacity: 0; filter: blur(10px) brightness(1.15); }
   to { opacity: 1; filter: none; }
 }
 
@@ -785,6 +1012,7 @@ a:hover .arrow {
 
 /* With motion reduced, everything shows in its finished state. */
 @media (prefers-reduced-motion: reduce) {
-  .grain-arc ellipse { opacity: .8; }
+  .grain-arc ellipse, .intro-arc ellipse { opacity: .8; }
   .squiggle { stroke-dashoffset: 0; }
+  html.js [data-reveal] { opacity: 1; translate: none; }
 }

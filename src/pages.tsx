@@ -1,7 +1,7 @@
 import { GrainArc } from './components/GrainArc'
 import { Link } from './components/Link'
 import { Meadow } from './components/Meadow'
-import { SunPrint } from './components/SunPrint'
+import { ProjectMark } from './components/ProjectMark'
 import { featuredProjects, projects } from './content/projects'
 import type { Project } from './content/projects'
 import { principles, site } from './content/site'
@@ -13,11 +13,11 @@ function Home() {
   const others = projects.length - featuredProjects.length
   return <>
     <section className="hero" aria-labelledby="home-title">
-      <div className="hero-media">
+      <div className="hero-media" data-cursor="Scroll">
         <Meadow alt="Long grass and wildflowers under old trees at the edge of a field" />
         <GrainArc />
       </div>
-      <div className="hero-copy">
+      <div className="hero-copy" data-speed="-0.06">
         <p className="hello">Hello, I’m</p>
         <h1 id="home-title">Micah <span className="surname">VanEwyk</span></h1>
         <p className="alias">/ {site.alias}</p>
@@ -28,10 +28,10 @@ function Home() {
     </section>
 
     <section className="featured" aria-labelledby="featured-title">
-      <h2 id="featured-title">What I make</h2>
+      <h2 id="featured-title" data-reveal>What I make</h2>
       <ul className="featured-list">
-        {featuredProjects.map(project => <li key={project.slug} className="project-row compact">
-          <SunPrint motif={project.motif} />
+        {featuredProjects.map(project => <li key={project.slug} className="project-row compact" data-reveal data-cursor="View">
+          <ProjectMark project={project} />
           <div>
             <h3><Link href={projectHref(project)}>{project.title}</Link></h3>
             <p className="summary">{project.summary}</p>
@@ -39,7 +39,7 @@ function Home() {
           </div>
         </li>)}
       </ul>
-      <p className="more">{others} more in the <Link href="/projects">project index</Link>, and a few I’m still writing up.</p>
+      <p className="more" data-reveal>{others} more in the <Link href="/projects">project index</Link>, and a few I’m still writing up.</p>
     </section>
   </>
 }
@@ -68,8 +68,8 @@ function Projects() {
       <p>Things I’ve built at work, on my own, and at university.</p>
     </header>
     <ul className="project-index">
-      {projects.map(project => <li key={project.slug} className="project-row">
-        <SunPrint motif={project.motif} />
+      {projects.map(project => <li key={project.slug} className="project-row" data-reveal data-cursor="View">
+        <ProjectMark project={project} />
         <div>
           <h2><Link href={projectHref(project)}>{project.title}</Link></h2>
           <p className="meta">{project.type}, {project.year} · {project.status}</p>
@@ -89,7 +89,7 @@ function ProjectPage({ project }: { project: Project }) {
       <div className="project-cover">
         {project.image
           ? <img src={project.image.src} alt={project.image.alt} width="1920" height="921" />
-          : <SunPrint motif={project.motif} size="large" />}
+          : <ProjectMark project={project} size="large" />}
       </div>
       <div>
         <p className="crumb"><Link href="/projects">Projects</Link> / {project.status}</p>
@@ -104,7 +104,7 @@ function ProjectPage({ project }: { project: Project }) {
         {project.repository && <a className="cta" href={project.repository}>Source on GitHub <Arrow /></a>}
       </div>
     </header>
-    {project.sections.map(section => <section className="case-section" key={section.title}>
+    {project.sections.map(section => <section className="case-section" key={section.title} data-reveal>
       <h2>{section.title}</h2>
       <div className="prose">{section.paragraphs.map(paragraph => <p key={paragraph}>{paragraph}</p>)}</div>
     </section>)}
@@ -151,8 +151,7 @@ function Principles() {
 
 function Contact() {
   const phone = import.meta.env.VITE_CONTACT_PHONE?.trim()
-  return <section className="split-page contact">
-    <div className="split-media"><SunPrint motif="fern" size="large" /></div>
+  return <section className="contact">
     <div>
       <h1>Contact</h1>
       <p className="lede">If something here is useful to you, or you’d like to work on something together, I’d be glad to hear from you.</p>

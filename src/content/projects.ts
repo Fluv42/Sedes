@@ -1,4 +1,4 @@
-export type Motif = 'wheat' | 'fern' | 'tree' | 'book' | 'sun'
+export type Mark = 'lotflow' | 'server' | 'sedes' | 'screenshot' | 'monogram'
 export type Project = {
   slug: string
   title: string
@@ -8,7 +8,7 @@ export type Project = {
   summary: string
   stack: string
   role: string
-  motif: Motif
+  mark: Mark
   category: 'Professional' | 'Personal' | 'University'
   repository?: string
   image?: { src: string; alt: string }
@@ -19,7 +19,7 @@ export type Project = {
 export const projects: Project[] = [
   {
     slug: 'lotflow', title: 'LotFlow', type: 'Web application', year: '2025–present',
-    status: 'In development', category: 'Professional', motif: 'wheat',
+    status: 'In development', category: 'Professional', mark: 'lotflow',
     summary: 'A vehicle workflow app that brings reconditioning and delivery handoffs into one place.',
     stack: 'React · TypeScript · Express · SQLite',
     role: 'Product design, AI-assisted development, testing and rollout preparation',
@@ -32,7 +32,7 @@ export const projects: Project[] = [
   },
   {
     slug: 'sedes', title: 'Sedes', type: 'Personal website', year: '2026–present',
-    status: 'In progress', category: 'Personal', motif: 'sun',
+    status: 'In progress', category: 'Personal', mark: 'sedes',
     summary: 'This site: a settled place for my projects, notes and the things I’m making.',
     stack: 'React · TypeScript · Vite', role: 'Direction, content and AI-assisted development',
     sections: [
@@ -44,7 +44,7 @@ export const projects: Project[] = [
   },
   {
     slug: 'befarmwell', title: 'BeFarmWell', type: 'Landing page prototype', year: '2026',
-    status: 'Prototype', category: 'Personal', motif: 'fern',
+    status: 'Prototype', category: 'Personal', mark: 'monogram',
     summary: 'A responsive landing page prototype for a farming wellbeing app.',
     stack: 'React · TypeScript · Vite', role: 'Direction, AI-assisted implementation and handoff',
     sections: [
@@ -55,8 +55,8 @@ export const projects: Project[] = [
     ],
   },
   {
-    slug: 'server-cleanup', title: 'File Disposition Tool', type: 'Desktop application', year: '2024–2025',
-    status: 'Completed', category: 'Professional', motif: 'tree',
+    slug: 'server-cleanup', title: 'Litigation Server Cleanup Tool', type: 'Desktop application', year: '2024–2025',
+    status: 'Completed', category: 'Professional', mark: 'server',
     summary: 'A guided file-review workflow that supported the approved removal of about 2.2 TB of server data.',
     stack: 'Python · PyQt5 · Excel audit logs', role: 'Proposal, design, implementation, documentation and demonstrations',
     sections: [
@@ -68,7 +68,7 @@ export const projects: Project[] = [
   },
   {
     slug: 'tagme', title: 'TagMe — Capstone', type: 'University team project', year: '2024–2025',
-    status: 'Course project', category: 'University', motif: 'book',
+    status: 'Course project', category: 'University', mark: 'monogram',
     summary: 'A Django project for tagging, saving and discussing items from the Library of Congress catalogue.',
     stack: 'Python · Django · SQLite · HTML · CSS', role: 'Team contributor · interface and database work',
     repository: 'https://github.com/jessicadpo/capstone',
@@ -81,7 +81,7 @@ export const projects: Project[] = [
   },
   {
     slug: 'litereview', title: 'LiteReview', type: 'University team project', year: '2024',
-    status: 'Course project', category: 'University', motif: 'book',
+    status: 'Course project', category: 'University', mark: 'screenshot',
     summary: 'A shared place to track, rate and review books, films, television and music.',
     stack: 'Python · Django · HTML · CSS · JavaScript', role: 'Team contributor · review interface and database work',
     repository: 'https://github.com/jessicadpo/LiteReview',
@@ -95,7 +95,7 @@ export const projects: Project[] = [
   },
   {
     slug: 'bookmarks', title: 'BookMarks', type: 'University project', year: '2024',
-    status: 'Course project', category: 'University', motif: 'book',
+    status: 'Course project', category: 'University', mark: 'monogram',
     summary: 'A Django library website prototype that encourages reading through points and age-based rewards.',
     stack: 'Python · Django · HTML · CSS', role: 'University coursework · IRM 3007',
     sections: [
@@ -107,7 +107,7 @@ export const projects: Project[] = [
   },
   {
     slug: 'pmrtool', title: 'PMRTool', type: 'Internal application', year: 'Before LotFlow',
-    status: 'Retired', category: 'Professional', motif: 'wheat',
+    status: 'Retired', category: 'Professional', mark: 'monogram',
     summary: 'An earlier vehicle appraisal project that preceded my work on LotFlow.',
     stack: 'React · TypeScript', role: 'Internal application development',
     sections: [

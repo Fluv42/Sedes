@@ -8,6 +8,20 @@
     <meta name="googlebot" content="noindex, nofollow, noarchive" />
     <meta name="description" content="Micah VanEwyk’s home for software, projects and notes. Developer and IT professional in Southwestern Ontario." />
     <meta name="theme-color" content="#f6f2e7" />
+    <script>
+      // Runs before paint: enables scroll reveals, and plays the intro once per visit on the home page.
+      (function () {
+        var root = document.documentElement
+        root.classList.add('js')
+        try {
+          var calm = window.matchMedia('(prefers-reduced-motion: reduce)').matches
+          if (location.pathname === '/' && !calm && !sessionStorage.getItem('sedes:intro')) {
+            root.classList.add('intro')
+            sessionStorage.setItem('sedes:intro', '1')
+          }
+        } catch (error) {}
+      })()
+    </script>
     <title>Micah VanEwyk — Developer &amp; IT Professional | Sedes</title>
   </head>
   <body>

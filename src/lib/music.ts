@@ -4,7 +4,7 @@ import type { Daypart } from './daypart'
 
 // Background sound in two layers: the song, and under it a field recording that matches the
 // time of day (the same clock that picks the hero video). The Sound button steps through
-// both → music only → ambient only → muted. The field sound plays only on the home page, under
+// both → muted → music only → ambient only, so turning it off is always one press away. The field sound plays only on the home page, under
 // its picture; the song carries on from page to page. Every visit starts with both on.
 //
 // Browsers only allow sound once the visitor has clicked, tapped or pressed a key, so until then
@@ -15,7 +15,7 @@ import type { Daypart } from './daypart'
 // The song is a plain <audio> element. The field sound is played through Web Audio instead,
 // because <audio loop> leaves a short gap at the loop point and Web Audio loops seamlessly.
 export type SoundMode = 'both' | 'music' | 'ambient' | 'off'
-const order: SoundMode[] = ['both', 'music', 'ambient', 'off']
+const order: SoundMode[] = ['both', 'off', 'music', 'ambient']
 
 const ambience: Record<Daypart, string> = {
   morning: '/media/ambience/morning.m4a',
@@ -166,6 +166,10 @@ function apply(together = false) {
 // The song's play() tells us whether the browser agreed; if nothing should sound, the song is
 // started and stopped silently just to unlock sound for later.
 function tryStart() {
+  // Development only: ?blocksound imitates a browser that refuses sound until a click.
+  if (import.meta.env.DEV && new URLSearchParams(location.search).has('blocksound') && !navigator.userActivation?.isActive) {
+    return Promise.reject(new Error('blocked for testing'))
+  }
   for (const layer of all()) if (wanted(layer)) { layer.silence(); layer.play().catch(() => {}) }
   const probe = song()
   probe.silence()
@@ -225,6 +229,9 @@ export function useSound() {
     () => serverSnapshot,
   )
 }
+
+// Whether sound is already allowed (the browser trusts the site) right now, outside React.
+export const soundAllowed = () => allowed
 
 export function soundLabel({ mode, allowed }: { mode: SoundMode; allowed: boolean }) {
   if (!allowed && mode !== 'off') return 'Enable music'

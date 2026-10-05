@@ -1147,20 +1147,119 @@ html.intro .intro-title {
   position: fixed;
   inset: 0;
   z-index: 260;
-  display: grid;
-  place-items: center;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 18px;
   pointer-events: none;
+}
+
+html.intro .intro-title > * {
+  pointer-events: auto;
+}
+
+.intro-title > svg {
+  width: min(78vw, 760px);
+  overflow: visible;
   transition: opacity .6s ease, scale 1.2s cubic-bezier(.65, 0, .2, 1);
 }
 
-html.intro.intro-out .intro-title {
+/* The sound button and the arrow arrive once the name is mostly written. */
+.intro-actions, .intro-next {
+  opacity: 0;
+  translate: 0 8px;
+  transition: opacity .8s ease, translate .9s var(--ease);
+}
+
+html.intro-writing .intro-actions, html.intro-writing .intro-next {
+  opacity: 1;
+  translate: 0 0;
+  transition-delay: 1.6s;
+}
+
+/* If the button is offered after the name has finished, it simply fades up. */
+@starting-style {
+  html.intro-writing .intro-actions { opacity: 0; translate: 0 8px; }
+}
+
+/* The same frosted pill as the buttons under the picture, which it becomes. */
+.intro-sound {
+  padding: 5px 13px;
+  font: inherit;
+  font-size: .85rem;
+  white-space: nowrap;
+  color: var(--on-accent);
+  background: var(--walnut);
+  border: 1px solid var(--walnut);
+  border-radius: 999px;
+  box-shadow: 0 2px 10px rgb(0 0 0 / .12);
+}
+
+.intro-sound:focus-visible, .intro-next:focus-visible {
+  outline: 2px solid var(--walnut);
+  outline-offset: 3px;
+}
+
+/* A down arrow near the bottom, nudging gently: the way in. */
+.intro-next {
+  position: absolute;
+  left: 50%;
+  bottom: max(5vh, 28px);
+  display: grid;
+  place-items: center;
+  width: 46px;
+  height: 46px;
+  margin-left: -23px;
+  padding: 0;
+  color: #2d2b24;
+  background: rgb(246 242 231 / .6);
+  border: 1px solid rgb(45 43 36 / .15);
+  border-radius: 50%;
+  -webkit-backdrop-filter: blur(6px);
+  backdrop-filter: blur(6px);
+}
+
+html[data-daypart='night'] .intro-next {
+  color: #f4efe2;
+  background: rgb(20 19 16 / .45);
+  border-color: rgb(244 239 226 / .2);
+}
+
+.intro-next svg {
+  width: 20px;
+  height: 20px;
+  fill: none;
+  stroke: currentColor;
+  stroke-width: 1.8;
+  stroke-linecap: round;
+  stroke-linejoin: round;
+}
+
+html.intro-writing:not(.intro-out) .intro-next svg {
+  animation: nudge 2.4s 2.6s ease-in-out infinite;
+}
+
+@keyframes nudge {
+  0%, 60%, 100% { translate: 0 0; }
+  30% { translate: 0 4px; }
+}
+
+/* On the way out the name and the arrow fade; the sound button travels to the hero instead. */
+html.intro.intro-out .intro-title > svg {
   opacity: 0;
   scale: .82;
 }
 
-.intro-title svg {
-  width: min(78vw, 760px);
-  overflow: visible;
+html.intro.intro-out .intro-next {
+  opacity: 0;
+  transition-delay: 0s;
+  transition-duration: .4s;
+}
+
+/* The hero's own sound button stays hidden until the intro's has landed on top of it. */
+html.intro.intro-offer .hero .sound-control {
+  visibility: hidden;
 }
 
 .intro-title text {

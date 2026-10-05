@@ -125,7 +125,7 @@ export function Meadow({ still = false, alt }: { still?: boolean; alt?: string }
       </button>}
       <button
         type="button" onClick={nextSoundMode} title="Sound on, music only, ambient only, or muted"
-        className={sound.allowed ? `sound-${sound.mode}` : 'sound-waiting'}
+        className={`sound-control ${sound.allowed ? `sound-${sound.mode}` : 'sound-waiting'}`}
       >
         <span className="visually-hidden">Sound: </span>{soundLabel(sound)}
       </button>

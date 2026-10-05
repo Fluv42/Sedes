@@ -91,15 +91,23 @@ function ResumeMenu() {
   </details>
 }
 
+// Micah and Jessie, shown one at a time when the About picture is hovered or tapped
+// (public/media/personal, which is kept out of the repository).
+const together = [
+  { src: '/media/personal/doorway.jpg', width: 1204, height: 1400, focus: '50% 30%', alt: 'Micah and Jessie smiling in front of a wooden door in a stone wall' },
+  { src: '/media/personal/selfie.jpg', width: 1050, height: 1400, focus: '50% 35%', alt: 'A selfie of Jessie and Micah under a grey sky, with autumn trees behind' },
+  { src: '/media/personal/lift.jpg', width: 934, height: 1400, focus: '50% 40%', alt: 'Micah lifting Jessie off her feet under yellow autumn leaves' },
+  { src: '/media/personal/oak.jpg', width: 1400, height: 1096, focus: '50% 35%', alt: 'Jessie and Micah smiling in front of a big oak tree in autumn' },
+  { src: '/media/personal/hug.jpg', width: 932, height: 1400, focus: '50% 35%', alt: 'Micah and Jessie hugging and laughing on a bright day' },
+  { src: '/media/personal/look.jpg', width: 1400, height: 1166, focus: '40% 40%', alt: 'Micah holding Jessie’s face as she smiles up at him, by a field of tall grass' },
+  { src: '/media/personal/forehead.jpg', width: 1400, height: 1166, focus: '45% 40%', alt: 'Micah and Jessie with their foreheads together, smiling, outside on a sunny day' },
+  { src: '/media/personal/door-wide.jpg', width: 1400, height: 1380, focus: '50% 30%', alt: 'Jessie and Micah standing arm in arm at a wooden door' },
+]
+
 function About() {
   return <section className="split-page about">
     <div className="split-media" data-reveal>
-      <Meadow still alternate={{
-        src: '/media/personal/micah-and-jessie.jpg',
-        alt: 'Micah and Jessie hugging outside on a bright day, both laughing',
-        label: 'Show a photo of Micah and Jessie',
-        position: '50% 22%',
-      }} />
+      <Meadow still alternate={{ label: 'Show a photo of Micah and Jessie', photos: together }} />
     </div>
     <div className="prose">
       <h1 data-reveal>About</h1>
@@ -111,7 +119,7 @@ function About() {
         <div><dt>Support</dt><dd>Windows and macOS, Microsoft 365 and Teams, VPN and network printers, Cloudflare DNS, NAS setup, Cherwell</dd></div>
         <div><dt>Building</dt><dd>React and TypeScript, Python, Django, Express, SQLite, Git</dd></div>
       </dl>
-      <p data-reveal>Outside of work I play a lot of Soulslikes (Elden Ring, Sekiro, Lies of P), mostly for the builds and the lore, and modded Minecraft. I like tinkering with computers, my Steam Deck and smart-home gear, and building or refinishing things around the house. Lately I’ve been customizing my Kobo e-reader with the font you’re now reading. Libron!<a className="inline-icon" href="https://github.com/nicoverbruggen/libron" aria-label="Libron on GitHub" title="Libron on GitHub"><GitHubIcon /></a></p>
+      <p data-reveal>Outside of work I play a lot of Soulslikes (Elden Ring, Sekiro, Lies of P), mostly for the builds and the lore, and modded Minecraft. I like tinkering with computers, my Steam Deck and smart-home gear, and building or refinishing things around the house. Lately I’ve been customizing my Kobo e-reader with the font you’re now reading. <a href="https://github.com/nicoverbruggen/libron">Libron</a>!<a className="inline-icon" href="https://github.com/nicoverbruggen/libron" aria-label="Libron on GitHub" title="Libron on GitHub"><GitHubIcon /></a></p>
       <p data-reveal>The site’s name comes from <em>Sedes Sapientiae</em>, the Seat of Wisdom. The site is the seat, and the work is what it holds.</p>
       <Link className="cta" href="/projects" data-reveal>See the projects <Arrow /></Link>
     </div>

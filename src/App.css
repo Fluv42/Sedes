@@ -394,30 +394,40 @@ video.meadow-source.is-playing {
 
 .meadow-alternate img {
   position: absolute;
-  max-width: none;
-  object-fit: cover;
-}
-
-/* A portrait photo in a wide frame: the sharp copy is narrower than the frame so it shows more
-   of the photo's height (both faces), fading out at its sides into a blurred copy that fills the
-   frame. Both are still, so their blur and masks are drawn once. */
-.meadow-alternate-soft {
   inset: 0;
   width: 100%;
+  max-width: none;
   height: 100%;
-  object-position: var(--focus, 50% 50%);
-  filter: blur(14px) saturate(1.1);
-  scale: 1.1;
+  object-fit: cover;
+  object-position: var(--focus, 50% 40%);
 }
 
-.meadow-alternate-sharp {
-  top: 0;
-  left: 22%;
-  width: 56%;
-  height: 100%;
-  object-position: var(--focus, 50% 50%);
-  -webkit-mask-image: linear-gradient(90deg, transparent, #000 22%, #000 78%, transparent);
-  mask-image: linear-gradient(90deg, transparent, #000 22%, #000 78%, transparent);
+/* A still photo, so its blur is drawn once; it softens the photo towards its edges. */
+.meadow-alternate-soft {
+  filter: blur(4px);
+  -webkit-mask-image: radial-gradient(closest-side, transparent 50%, rgb(0 0 0 / .55) 68%, #000 88%);
+  mask-image: radial-gradient(closest-side, transparent 50%, rgb(0 0 0 / .55) 68%, #000 88%);
+}
+
+/* The frame grows to the photo's own shape, up to most of the screen's height, and the page
+   makes room for it. Sized from the column's width (a container), so the height can ease. */
+.about .split-media {
+  container-type: inline-size;
+}
+
+.meadow.has-alternate {
+  --closed-ratio: .5625;
+  aspect-ratio: auto;
+  height: calc(100cqw * var(--closed-ratio));
+  /* Safari only sends taps to things that look clickable. */
+  cursor: pointer;
+  -webkit-tap-highlight-color: transparent;
+  transition: height 1s cubic-bezier(.4, 0, .2, 1);
+}
+
+.meadow.has-alternate.is-opened {
+  height: min(86svh, 100cqw * var(--open-ratio, 1));
+  transition-duration: 1.1s;
 }
 
 html[data-quality='fast'] .meadow-alternate-soft {
@@ -864,7 +874,8 @@ html[data-quality='fast'] .meadow-alternate-soft {
   z-index: 5;
   justify-self: start;
   width: fit-content;
-  margin: 6px 0 14px;
+  /* The same space above and below (the paragraph after it adds its own 1em). */
+  margin: 1.1em 0 .1em;
 }
 
 .resume summary {
@@ -973,6 +984,15 @@ html[data-quality='fast'] .meadow-alternate-soft {
 
 .about .split-media {
   margin-left: calc(-1 * var(--gutter));
+}
+
+/* Beside the text, the picture stays in view as you read (and has room to grow). */
+@media (min-width: 901px) {
+  .about .split-media {
+    position: sticky;
+    top: 4vh;
+    align-self: start;
+  }
 }
 
 .contact {
@@ -1545,6 +1565,10 @@ html.intro-writing .intro-title text {
 
   .about .split-media {
     margin-right: calc(-1 * var(--gutter));
+  }
+
+  .meadow.has-alternate {
+    --closed-ratio: .8;
   }
 
   .project-cover .project-mark {

@@ -58,17 +58,23 @@ function startEffects(video: HTMLVideoElement | null, still: HTMLImageElement, s
   let first = true
 
   // The soft canvas keeps the shape of its box, so the crop matches the picture on any screen.
+  // Resizing a canvas clears it, so the last picture is drawn again (About's frame grows).
+  let last: HTMLVideoElement | HTMLImageElement | null = null
   const fit = () => {
     const box = soft.getBoundingClientRect()
     if (!box.width || !box.height) return
     const height = Math.max(1, Math.round(softWidth * box.height / box.width))
-    if (soft.width !== softWidth || soft.height !== height) { soft.width = softWidth; soft.height = height }
+    if (soft.width === softWidth && soft.height === height) return
+    soft.width = softWidth
+    soft.height = height
+    if (last) paint(last)
   }
   fit()
   const resize = 'ResizeObserver' in window ? new ResizeObserver(fit) : null
   resize?.observe(soft)
 
   const paint = (source: HTMLVideoElement | HTMLImageElement) => {
+    last = source
     const crop = cover(source, soft.width, soft.height)
     if (!crop) return
     try {
@@ -135,9 +141,11 @@ function startEffects(video: HTMLVideoElement | null, still: HTMLImageElement, s
   }
 }
 
-// A second picture that opens out of the middle of the first on hover (About): its own sharp and
-// softened copies, shown through a hole that grows from the centre.
-export interface Alternate { src: string; alt: string; label: string; position: string }
+// Photos that open out of the middle of the still on hover or tap (About), one after another:
+// each is shown through a hole that grows from the centre while the frame grows to the photo's
+// own shape (up to most of the screen's height), with a softened copy at its edges.
+export interface Photo { src: string; alt: string; width: number; height: number; focus?: string }
+export interface Alternate { label: string; photos: Photo[] }
 
 // The centre of the picture is sharp; towards the edges it softens and takes on a wash of paper
 // until it becomes the page (like Monocle or Arc), and its colours glow out around it (like
@@ -163,6 +171,22 @@ export function Meadow({ still = false, alt, alternate }: { still?: boolean; alt
   const second = useRef<HTMLImageElement>(null)
   const repaint = useRef<(source: HTMLImageElement) => void>(() => {})
   const [opened, setOpened] = useState(false)
+  const [shown, setShown] = useState(0)
+  const advance = useRef(0)
+  const photo = alternate?.photos[shown % alternate.photos.length]
+  // Closing moves on to the next photo for next time, once the hole has closed.
+  const open = (value: boolean) => {
+    window.clearTimeout(advance.current)
+    setOpened(value)
+    if (!value) advance.current = window.setTimeout(() => setShown(index => index + 1), 1200)
+  }
+  useEffect(() => () => window.clearTimeout(advance.current), [])
+  // The next photo is fetched while this one is open, so it's ready when its turn comes.
+  useEffect(() => {
+    if (!opened || !alternate) return
+    const next = alternate.photos[(shown + 1) % alternate.photos.length]
+    new Image().src = next.src
+  }, [opened, shown, alternate])
   // Hover opens it with a mouse; a tap or the (keyboard-reachable) button toggles it.
   const lastPointer = useRef('mouse')
   const showVideo = !still && failed !== clip
@@ -302,11 +326,16 @@ export function Meadow({ still = false, alt, alternate }: { still?: boolean; alt
 
   const hover = alternate ? {
     onPointerDown: (event: React.PointerEvent) => { lastPointer.current = event.pointerType },
-    onPointerEnter: (event: React.PointerEvent) => { if (event.pointerType === 'mouse') setOpened(true) },
-    onPointerLeave: (event: React.PointerEvent) => { if (event.pointerType === 'mouse') setOpened(false) },
-    onClick: () => { if (lastPointer.current !== 'mouse') setOpened(value => !value) },
+    onPointerEnter: (event: React.PointerEvent) => { if (event.pointerType === 'mouse') open(true) },
+    onPointerLeave: (event: React.PointerEvent) => { if (event.pointerType === 'mouse') open(false) },
+    // A tap does what hovering does: the first opens the photo, the next closes it.
+    onClick: () => { if (lastPointer.current !== 'mouse') open(!opened) },
   } : {}
-  return <figure className={`meadow${alternate ? ' has-alternate' : ''}${opened ? ' is-opened' : ''}`} {...hover}>
+  return <figure
+    className={`meadow${alternate ? ' has-alternate' : ''}${opened ? ' is-opened' : ''}`}
+    style={photo ? { '--open-ratio': photo.height / photo.width } as React.CSSProperties : undefined}
+    {...hover}
+  >
     <canvas ref={glow} className="meadow-ambient" width={glowWidth} height={glowHeight} aria-hidden="true" />
     <div className="meadow-stage">
       <img ref={image} className="meadow-source" src={stillTries ? `${poster}?try=${stillTries}` : poster} onError={retryStill} alt={alt ?? clips[clip].alt} width="1280" height="720" fetchPriority="high" />
@@ -317,14 +346,14 @@ export function Meadow({ still = false, alt, alternate }: { still?: boolean; alt
         <source src={source} type="video/mp4" />
       </video>}
       <canvas ref={soft} className="meadow-soft" aria-hidden="true" />
-      {alternate && <div className="meadow-alternate" style={{ '--focus': alternate.position } as React.CSSProperties}>
-        <img className="meadow-alternate-soft" src={alternate.src} alt="" aria-hidden="true" loading="lazy" decoding="async" />
-        <img ref={second} className="meadow-alternate-sharp" src={alternate.src} alt={opened ? alternate.alt : ''} aria-hidden={!opened} loading="lazy" decoding="async" />
+      {photo && <div className="meadow-alternate" style={{ '--focus': photo.focus ?? '50% 40%' } as React.CSSProperties}>
+        <img ref={second} src={photo.src} alt={opened ? photo.alt : ''} aria-hidden={!opened} width={photo.width} height={photo.height} loading="lazy" decoding="async" />
+        <img className="meadow-alternate-soft" src={photo.src} alt="" aria-hidden="true" loading="lazy" decoding="async" />
       </div>}
       <div className="tint" aria-hidden="true" />
       <div className="grain" aria-hidden="true" />
     </div>
-    {alternate && <button type="button" className="alternate-toggle" aria-pressed={opened} onClick={event => { event.stopPropagation(); setOpened(value => !value) }}>
+    {alternate && <button type="button" className="alternate-toggle" aria-pressed={opened} onClick={event => { event.stopPropagation(); open(!opened) }}>
       {alternate.label}
     </button>}
     {!still && <div className="motion-control">

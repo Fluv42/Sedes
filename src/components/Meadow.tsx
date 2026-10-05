@@ -1,7 +1,14 @@
 import { useEffect, useRef, useState } from 'react'
 import { toggleMusic, useMusic } from '../lib/music'
 
-const poster = '/media/farm-poster.jpg'
+// Two fields, chosen by the visitor's own clock: green farmland under a big sky through the day,
+// and wheat at sunset in the evening and overnight. Both loop for as long as the page is open.
+const clips = {
+  day: { video: '/media/field-barn.mp4', poster: '/media/field-barn.jpg' },
+  evening: { video: '/media/field-sunset.mp4', poster: '/media/field-sunset.jpg' },
+}
+type Clip = keyof typeof clips
+const clipForNow = (): Clip => { const hour = new Date().getHours(); return hour >= 6 && hour < 17 ? 'day' : 'evening' }
 const motionQuery = '(prefers-reduced-motion: reduce)'
 
 // The centre of the picture is sharp; towards the edges blur, tint and grain build until it
@@ -11,9 +18,15 @@ export function Meadow({ still = false, alt }: { still?: boolean; alt: string })
   const [playing, setPlaying] = useState(false)
   const [unavailable, setUnavailable] = useState(false)
   const music = useMusic()
+  // The server can't know the visitor's time, so the page is built with the evening clip and
+  // switches after hydration if it's daytime where they are.
+  const [clip, setClip] = useState<Clip>('evening')
+  const { video: source, poster } = clips[clip]
   const video = useRef<HTMLVideoElement>(null)
   const still_ = useRef<HTMLImageElement>(null)
   const ambient = useRef<HTMLCanvasElement>(null)
+
+  useEffect(() => { setClip(clipForNow()) }, [])
 
   useEffect(() => {
     if (still) return
@@ -31,7 +44,7 @@ export function Meadow({ still = false, alt }: { still?: boolean; alt: string })
     // An interrupted play() (a quick pause, or React re-running effects) is not a failure.
     if (playing) element.play().catch((error: DOMException) => { if (error.name !== 'AbortError') setPlaying(false) })
     else element.pause()
-  }, [playing])
+  }, [playing, clip])
 
   // Ambient light, like YouTube's ambient mode: a tiny copy of each frame, blown up and blurred
   // behind the picture, so its colours spill across the top of the page as if it were larger.
@@ -67,7 +80,7 @@ export function Meadow({ still = false, alt }: { still?: boolean; alt: string })
       if (element && 'cancelVideoFrameCallback' in element) element.cancelVideoFrameCallback(handle)
       else window.clearTimeout(handle)
     }
-  }, [])
+  }, [clip])
 
   const showVideo = !still && !unavailable
   return <figure className="meadow">
@@ -75,11 +88,11 @@ export function Meadow({ still = false, alt }: { still?: boolean; alt: string })
     <div className="meadow-stage">
       <img ref={still_} className="meadow-source" src={poster} alt={alt} width="1280" height="720" fetchPriority="high" />
       {showVideo && <video
-        ref={video} className={`meadow-source${playing ? ' is-playing' : ''}`}
+        key={clip} ref={video} className={`meadow-source${playing ? ' is-playing' : ''}`}
         muted loop playsInline preload="metadata" poster={poster} aria-hidden="true"
         onError={() => { setUnavailable(true); setPlaying(false) }}
       >
-        <source src="/media/farm.mp4" type="video/mp4" />
+        <source src={source} type="video/mp4" />
       </video>}
       <div className="frost frost-outer" aria-hidden="true" />
       <div className="frost frost-edge" aria-hidden="true" />

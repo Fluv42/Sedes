@@ -33,7 +33,7 @@ function Home() {
   return <>
     <section className="hero" aria-labelledby="home-title">
       <div className="hero-media" data-cursor="scroll">
-        <Meadow alt="The sun setting low behind a field of wheat, with a line of trees on the horizon" />
+        <Meadow alt="Open farmland under a wide evening sky" />
       </div>
       <div className="hero-copy" data-speed="-0.06">
         <p className="hello">Hello, I’m</p>

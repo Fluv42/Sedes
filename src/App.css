@@ -804,6 +804,10 @@ video.meadow-source.is-playing {
   gap: 12px;
 }
 
+@media (max-width: 680px) {
+  .toolkit div { grid-template-columns: 5em 1fr; }
+}
+
 .toolkit dt {
   color: var(--muted);
   font-size: .9rem;
@@ -1112,6 +1116,13 @@ html.has-cursor .cursor-dot.is-link {
 
 html.intro {
   overflow: hidden;
+}
+
+/* The zoomed-in page is far wider than the screen; clip it here, or phone browsers widen the
+   whole view to fit it and the intro shows up shrunk into a corner. */
+html.intro body {
+  overflow: clip;
+  height: 100svh;
 }
 
 /* Hold the page back while the picture fills the screen. */

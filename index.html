@@ -24,8 +24,8 @@
     <!-- The typeface the intro draws with, fetched before the CSS asks for it. -->
     <link rel="preload" href="/fonts/Libron-Regular.woff2" as="font" type="font/woff2" crossorigin />
     <script>
-      // Runs before paint: enables scroll reveals, sets the time of day and the light/dark theme
-      // (so there is no flash of the wrong one), and plays the intro on every load of the home page.
+      // Runs before paint: enables scroll reveals, sets the time of day, the light/dark theme and
+      // performance mode (so there is no flash of the wrong one), and plays the intro on every load of the home page.
       (function () {
         var root = document.documentElement
         root.classList.add('js')
@@ -38,6 +38,10 @@
           root.setAttribute('data-daypart', daypart)
           // Dark at night, light otherwise, on every load; the Light/Dark button changes it until then.
           root.setAttribute('data-theme', daypart === 'night' ? 'dark' : 'light')
+        } catch (error) {}
+        try {
+          // Performance mode (src/lib/quality.ts), if this device chose it before.
+          if (localStorage.getItem('sedes-quality') === 'fast') root.setAttribute('data-quality', 'fast')
         } catch (error) {}
         try {
           var calm = window.matchMedia('(prefers-reduced-motion: reduce)').matches

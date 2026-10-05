@@ -1,6 +1,7 @@
 import { useEffect, useRef } from 'react'
 import { navigation, site } from './content/site'
 import { Link } from './components/Link'
+import { Stalk } from './components/Stalk'
 import { GitHubIcon, InstagramIcon, LinkedInIcon, MailIcon, MoonIcon, SunIcon } from './components/Icons'
 import { Cursor } from './components/Cursor'
 import { Intro } from './components/Intro'
@@ -55,8 +56,11 @@ export default function App({ initialPath = '/' }: { initialPath?: string }) {
         <nav aria-label="Main navigation">
           {navigation.map(item => {
             const current = isCurrent(item.path, path)
-            return <Link key={item.path} href={item.path} aria-current={current ? 'page' : undefined}>
+            return <Link
+              key={item.path} href={item.path} aria-current={current ? 'page' : undefined}
+            >
               {item.label}
+              <Stalk className={current ? 'is-grown' : ''} />
             </Link>
           })}
         </nav>

@@ -39,29 +39,81 @@
   white-space: nowrap;
 }
 
-.site-header nav a::after {
-  content: '';
+/* The Sedes line (components/Stalk.tsx): a walnut line ending in an ear of wheat that grows. */
+.stalk {
+  --stalk: 3px;
+  display: flex;
+  align-items: center;
+  pointer-events: none;
+}
+
+.stalk-line {
+  flex: 1;
+  min-width: 0;
+  height: var(--stalk);
+  border-radius: 999px;
+  background: var(--walnut);
+  transform: scaleX(0);
+  transform-origin: left;
+  transition: transform .5s var(--ease);
+}
+
+/* The ear is drawn so its stem is as thick as the line (4.5 of its 16 units tall). */
+.stalk-ear {
+  flex: none;
+  height: calc(var(--stalk) * 16 / 4.5);
+  width: auto;
+  aspect-ratio: 44 / 16;
+  margin-left: calc(var(--stalk) * -.5);
+  overflow: visible;
+  fill: var(--walnut);
+}
+
+.stalk-stem {
+  fill: none;
+  stroke: var(--walnut);
+  stroke-width: 4.5;
+  stroke-linecap: round;
+  transform-box: fill-box;
+  transform-origin: left center;
+  transform: scaleX(0);
+  transition: transform .22s linear;
+}
+
+.stalk-grain {
+  transform-box: fill-box;
+  transform-origin: 12% 50%;
+  transform: scale(0);
+  transition: transform .3s ease-in;
+}
+
+/* Grown: the line first, then the stem into the ear, then each grain from the base to the tip.
+   (Under the current page in the menu, on hover there, or once revealed by scrolling.) */
+:is(.stalk.is-grown, .stalk.is-in, .site-header nav a:hover .stalk, .site-header nav a:focus-visible .stalk) .stalk-line { transform: none; }
+:is(.stalk.is-grown, .stalk.is-in, .site-header nav a:hover .stalk, .site-header nav a:focus-visible .stalk) .stalk-stem { transform: none; transition-delay: .4s; }
+:is(.stalk.is-grown, .stalk.is-in, .site-header nav a:hover .stalk, .site-header nav a:focus-visible .stalk) .stalk-grain {
+  transform: none;
+  transition: transform .42s cubic-bezier(.3, 1.45, .55, 1) calc(.55s + var(--g) * 65ms);
+}
+
+/* In the menu: grown under the current page, faintly on hover; it overhangs the word a little so
+   the ear has room. */
+.site-header nav .stalk {
   position: absolute;
   left: 0;
-  right: 0;
-  bottom: 2px;
-  height: 3px;
-  border-radius: 2px;
-  background: var(--walnut);
-  scale: 0 1;
-  transform-origin: left;
-  transition: scale .45s var(--ease);
+  right: -14px;
+  bottom: 0;
 }
 
-/* A walnut underline under the current page, and drawn in on hover. */
-.site-header nav a[aria-current]::after,
-.site-header nav a:hover::after {
-  scale: 1 1;
-}
-
-/* Faint on the other pages, and it stays faint while it shrinks away after hover. */
-.site-header nav a:not([aria-current])::after {
+.site-header nav a:not([aria-current]) .stalk {
   opacity: .45;
+}
+
+/* Under a section heading, growing as it scrolls into view. */
+.section-stalk {
+  --stalk: 4px;
+  width: min(240px, 60%);
+  margin-top: 14px;
 }
 
 main {
@@ -367,6 +419,7 @@ video.meadow-source.is-playing {
   border-color: var(--walnut);
 }
 
+.motion-control button.quality-pretty,
 .motion-control button[aria-pressed='true'] {
   color: var(--on-accent);
   background: var(--walnut);
@@ -1232,25 +1285,38 @@ html.intro-writing .intro-actions, html.intro-writing .intro-next {
   transition-delay: 1.6s;
 }
 
-/* If the button is offered after the name has finished, it simply fades up. */
-@starting-style {
-  html.intro-writing .intro-actions { opacity: 0; translate: 0 8px; }
+/* The same pills as the buttons under the picture, which they become: walnut when on. */
+.intro-actions {
+  display: flex;
+  gap: 10px;
 }
 
-/* The same frosted pill as the buttons under the picture, which it becomes. */
-.intro-sound {
+.intro-actions button {
   padding: 5px 13px;
   font: inherit;
   font-size: .85rem;
   white-space: nowrap;
-  color: var(--on-accent);
-  background: var(--walnut);
-  border: 1px solid var(--walnut);
+  color: #2d2b24;
+  background: rgb(246 242 231 / .78);
+  border: 1px solid rgb(45 43 36 / .15);
   border-radius: 999px;
   box-shadow: 0 2px 10px rgb(0 0 0 / .12);
+  transition: background-color .2s, color .2s, border-color .2s;
 }
 
-.intro-sound:focus-visible, .intro-next:focus-visible {
+html[data-daypart='night'] .intro-actions button {
+  color: #f4efe2;
+  background: rgb(20 19 16 / .55);
+  border-color: rgb(244 239 226 / .2);
+}
+
+html .intro-actions button.is-on {
+  color: var(--on-accent);
+  background: var(--walnut);
+  border-color: var(--walnut);
+}
+
+.intro-actions button:focus-visible, .intro-next:focus-visible {
   outline: 2px solid var(--walnut);
   outline-offset: 3px;
 }
@@ -1299,7 +1365,7 @@ html.intro-writing:not(.intro-out) .intro-next svg {
   30% { translate: 0 4px; }
 }
 
-/* On the way out the name and the arrow fade; the sound button travels to the hero instead. */
+/* On the way out the name and the arrow fade; the buttons travel to the hero instead. */
 html.intro.intro-out .intro-title > svg {
   opacity: 0;
   scale: .82;
@@ -1311,8 +1377,8 @@ html.intro.intro-out .intro-next {
   transition-duration: .4s;
 }
 
-/* The hero's own sound button stays hidden until the intro's has landed on top of it. */
-html.intro.intro-offer .hero .sound-control {
+/* The hero's own buttons stay hidden until the intro's have landed on top of them. */
+html.intro .hero :is(.sound-control, .quality-control) {
   visibility: hidden;
 }
 
@@ -1496,6 +1562,21 @@ html.intro-writing .intro-title text {
 
 /* With motion reduced, everything shows in its finished state. */
 @media (prefers-reduced-motion: reduce) {
-  .site-header nav a::after { transition: none; }
+  .stalk-line, .stalk-stem, .stalk-grain { transition: none !important; }
   html.js [data-reveal] { opacity: 1; translate: none; }
+}
+
+/* Performance mode (src/lib/quality.ts): no glow, frosted blur or grain, the parts that cost the
+   most graphics memory and battery. The picture keeps its soft painted edge. */
+html[data-quality='fast'] :is(.meadow-ambient, .meadow-stage .frost, .meadow-stage .grain) {
+  display: none;
+}
+
+html[data-quality='fast'] :is(.motion-control button, .intro-next) {
+  -webkit-backdrop-filter: none;
+  backdrop-filter: none;
+}
+
+html[data-quality='fast'] .intro-title text {
+  filter: none;
 }

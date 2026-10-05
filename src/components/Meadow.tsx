@@ -1,6 +1,7 @@
 import { useEffect, useRef, useState, useSyncExternalStore } from 'react'
 import { nextSoundMode, soundLabel, useSound } from '../lib/music'
 import { toggleTheme, useTheme } from '../lib/theme'
+import { qualityLabel, toggleQuality, useQuality } from '../lib/quality'
 import { daypartNow } from '../lib/daypart'
 import type { Daypart } from '../lib/daypart'
 
@@ -26,6 +27,7 @@ export function Meadow({ still = false, alt }: { still?: boolean; alt?: string }
   const [unavailable, setUnavailable] = useState(false)
   const sound = useSound()
   const theme = useTheme()
+  const quality = useQuality()
   // The server can't know the visitor's time, so the page is built with the evening clip and
   // switches during hydration to the one for their clock.
   const clip = useSyncExternalStore(noSubscription, daypartNow, () => 'evening' as Clip)
@@ -66,7 +68,9 @@ export function Meadow({ still = false, alt }: { still?: boolean; alt?: string }
 
   // Ambient light, like YouTube's ambient mode: a tiny copy of each frame, blown up and blurred
   // behind the picture, so its colours spill across the top of the page as if it were larger.
+  // In performance mode the glow is hidden, so it isn't painted either.
   useEffect(() => {
+    if (quality === 'fast') return
     const canvas = ambient.current
     const context = canvas?.getContext('2d', { alpha: false })
     if (!canvas || !context) return
@@ -105,7 +109,7 @@ export function Meadow({ still = false, alt }: { still?: boolean; alt?: string }
       if (element && 'cancelVideoFrameCallback' in element) element.cancelVideoFrameCallback(handle)
       else window.clearTimeout(handle)
     }
-  }, [clip])
+  }, [clip, quality])
 
   const showVideo = !still && !unavailable
   return <figure className="meadow">
@@ -136,6 +140,12 @@ export function Meadow({ still = false, alt }: { still?: boolean; alt?: string }
       </button>
       <button type="button" onClick={toggleTheme} aria-label={theme === 'dark' ? 'Switch to light mode' : 'Switch to dark mode'}>
         {theme === 'dark' ? 'Light' : 'Dark'}
+      </button>
+      <button
+        type="button" onClick={toggleQuality} title="Pretty: every effect. Performance: lighter on older phones and laptops."
+        className={`quality-control quality-${quality}`}
+      >
+        <span className="visually-hidden">Effects: </span>{qualityLabel(quality)}
       </button>
     </div>}
   </figure>

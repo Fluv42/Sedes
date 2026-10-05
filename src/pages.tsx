@@ -1,6 +1,7 @@
 import { Link } from './components/Link'
 import { Meadow } from './components/Meadow'
 import { ProjectMark } from './components/ProjectMark'
+import { Stalk } from './components/Stalk'
 import { GitHubIcon } from './components/Icons'
 import { useEffect, useMemo, useRef, useState } from 'react'
 import type { CSSProperties } from 'react'
@@ -47,6 +48,7 @@ function Home() {
 
     <section className="featured" aria-labelledby="featured-title">
       <h2 id="featured-title" data-reveal>What I make</h2>
+      <Stalk className="section-stalk" data-reveal />
       <WorkList items={featuredProjects} heading="h3" />
       <p className="more" data-reveal>{others} more in the <Link href="/projects">full list</Link>, and a few I haven’t written up yet.</p>
     </section>

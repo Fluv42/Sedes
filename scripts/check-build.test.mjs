@@ -27,7 +27,7 @@ test('all internal links and referenced media exist in the deployable output', a
       await assert.doesNotReject(access(destination), `${path}: ${target}`)
     }
   }
-  for (const file of ['fonts/Libron-Regular.woff2', 'fonts/Libron-Bold.woff2', 'fonts/Libron-Italic.woff2', 'media/field-morning.mp4', 'media/field-day.mp4', 'media/field-sunset.mp4']) await assert.doesNotReject(access(resolve(root, file)))
+  for (const file of ['fonts/Libron-Regular.woff2', 'fonts/Libron-Bold.woff2', 'fonts/Libron-Italic.woff2', 'media/field-morning.mp4', 'media/field-day.mp4', 'media/field-sunset.mp4', 'media/field-night.mp4']) await assert.doesNotReject(access(resolve(root, file)))
 })
 
 test('noindex is present on every page and in Cloudflare response headers', async () => {

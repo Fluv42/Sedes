@@ -1056,16 +1056,21 @@ html.intro-played main, html.intro-played .hero .meadow {
   animation: none;
 }
 
+/* Until the script has zoomed the page in on the picture, show only paper; then the picture
+   fades up already filling the screen. Its soft edge starts far beyond the screen. */
+html.intro .site-frame {
+  opacity: 0;
+}
+
+html.intro.intro-owned .site-frame {
+  opacity: 1;
+  transition: opacity .7s ease;
+  will-change: transform;
+}
+
 html.intro .hero .meadow-stage {
-  position: fixed;
-  inset: auto;
-  top: 0;
-  left: 0;
-  z-index: 250;
-  width: 100vw;
-  height: 100vh;
-  -webkit-mask-size: 220% 220%;
-  mask-size: 220% 220%;
+  -webkit-mask-size: 260% 260%;
+  mask-size: 260% 260%;
 }
 
 html.intro:not(.intro-out) .meadow-stage :is(.frost, .tint, .grain) {

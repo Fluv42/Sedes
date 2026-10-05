@@ -96,8 +96,8 @@ export function Intro() {
         { maskSize: '260% 260%', webkitMaskSize: '260% 260%' } as Keyframe,
         { maskSize: '100% 100%', webkitMaskSize: '100% 100%' } as Keyframe,
       ], { duration: zoom * 0.62, easing: 'cubic-bezier(.25, .6, .3, 1)', fill: 'forwards' }))
-      // Blur, tint and grain rise from nothing to their usual strength (the implicit end keyframe).
-      for (const layer of stage.querySelectorAll<HTMLElement>('.frost, .tint, .grain')) {
+      // The softened edge, tint and grain rise from nothing to their usual strength (the implicit end keyframe).
+      for (const layer of stage.querySelectorAll<HTMLElement>('.meadow-soft, .tint, .grain')) {
         animations.push(layer.animate([{ opacity: 0, offset: 0 }], { ...timing, easing: 'ease-in' }))
       }
       zoomOut.finished.then(finish).catch(() => {})

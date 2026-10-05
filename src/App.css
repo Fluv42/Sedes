@@ -138,16 +138,12 @@ html.js [data-reveal] {
   opacity: 0;
   translate: 0 28px;
   transition: opacity .8s var(--ease), translate .8s var(--ease);
-  will-change: opacity, translate;
 }
 
 html.js [data-reveal].is-in {
   opacity: 1;
   translate: 0 0;
 }
-
-/* Once settled, let the browser drop the extra layers. */
-html.js [data-reveal].is-done { will-change: auto; }
 
 /* Neighbours arrive one after another. */
 html.js [data-reveal]:nth-child(2) { transition-delay: .08s; }
@@ -282,7 +278,9 @@ a:hover .arrow {
   aspect-ratio: 16 / 9;
 }
 
-/* Ambient light: the picture's own colours, blurred far past its edges and up the page. */
+/* Ambient light: the picture's own colours, spread far past its edges and up the page. The
+   canvas is 32 × 18 pixels, already smoothed and saturated by Meadow.tsx, so stretching it is all
+   the blur it needs. */
 .meadow-ambient {
   position: absolute;
   /* Centred on the picture so the colour spreads evenly in every direction. */
@@ -292,7 +290,6 @@ a:hover .arrow {
   height: 250%;
   max-width: none;
   opacity: var(--ambient);
-  filter: blur(90px) saturate(1.35);
   -webkit-mask-image: radial-gradient(closest-side, #000 26%, rgb(0 0 0 / .75) 48%, rgb(0 0 0 / .35) 74%, transparent 100%);
   mask-image: radial-gradient(closest-side, #000 26%, rgb(0 0 0 / .75) 48%, rgb(0 0 0 / .35) 74%, transparent 100%);
   pointer-events: none;
@@ -317,7 +314,6 @@ a:hover .arrow {
   height: 112%;
   object-fit: cover;
   object-position: 45% 60%;
-  filter: saturate(.95);
 }
 
 video.meadow-source {
@@ -329,25 +325,16 @@ video.meadow-source.is-playing {
   opacity: 1;
 }
 
-/* ...blur begins outside the central oval... */
-.frost {
+/* ...softness begins outside the central oval and builds towards the edges: a low-resolution
+   copy of the frame (drawn by Meadow.tsx) laid over the sharp one, shown only towards the edges. */
+.meadow-soft {
   position: absolute;
-  inset: 0;
-}
-
-.frost-outer {
-  -webkit-backdrop-filter: blur(calc(var(--blur) * .5));
-  backdrop-filter: blur(calc(var(--blur) * .5));
-  -webkit-mask-image: radial-gradient(closest-side, transparent 48%, #000 74%);
-  mask-image: radial-gradient(closest-side, transparent 48%, #000 74%);
-}
-
-/* ...and keeps building towards the edges. */
-.frost-edge {
-  -webkit-backdrop-filter: blur(var(--blur));
-  backdrop-filter: blur(var(--blur));
-  -webkit-mask-image: radial-gradient(closest-side, transparent 66%, #000 94%);
-  mask-image: radial-gradient(closest-side, transparent 66%, #000 94%);
+  inset: -6%;
+  width: 112%;
+  max-width: none;
+  height: 112%;
+  -webkit-mask-image: radial-gradient(closest-side, transparent 46%, rgb(0 0 0 / .55) 64%, #000 84%);
+  mask-image: radial-gradient(closest-side, transparent 46%, rgb(0 0 0 / .55) 64%, #000 84%);
 }
 
 /* Tint: a wash of paper that only starts outside the centre and is full at the edges. */
@@ -362,9 +349,10 @@ video.meadow-source.is-playing {
 .grain {
   position: absolute;
   inset: 0;
-  opacity: var(--grain);
-  mix-blend-mode: overlay;
-  background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='180' height='180'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='.85' numOctaves='3' stitchTiles='stitch'/%3E%3CfeColorMatrix type='saturate' values='0'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)'/%3E%3C/svg%3E");
+  opacity: calc(var(--grain) * 1.6);
+  /* Dark specks with their own transparency, not a blend mode, so the video under them is simply
+     drawn over rather than re-blended every frame. */
+  background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='180' height='180'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='.85' numOctaves='3' stitchTiles='stitch'/%3E%3CfeColorMatrix values='0 0 0 0 .16 0 0 0 0 .14 0 0 0 0 .1 -1.6 0 0 0 1.25'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)'/%3E%3C/svg%3E");
   -webkit-mask-image: radial-gradient(closest-side, transparent 45%, #000 85%);
   mask-image: radial-gradient(closest-side, transparent 45%, #000 85%);
 }
@@ -387,19 +375,17 @@ video.meadow-source.is-playing {
   pointer-events: auto;
 }
 
-/* Small frosted pills, so they read over any part of the picture. */
+/* Small pills on near-solid paper, so they read over the glow without a live blur behind them. */
 .motion-control button {
   padding: 5px 13px;
   font: inherit;
   font-size: .85rem;
   white-space: nowrap;
   color: var(--ink);
-  background: rgb(var(--paper-rgb) / .72);
+  background: rgb(var(--paper-rgb) / .86);
   border: 1px solid rgb(var(--ink-rgb) / .12);
   border-radius: 999px;
   box-shadow: 0 2px 10px rgb(0 0 0 / .12);
-  -webkit-backdrop-filter: blur(6px);
-  backdrop-filter: blur(6px);
   transition: background-color .2s, color .2s;
 }
 
@@ -1125,8 +1111,8 @@ html.has-cursor .cursor-dot {
   height: 16px;
   margin: -8px 0 0 -8px;
   border-radius: 50%;
-  background: var(--sage);
-  box-shadow: inset 0 0 0 1.5px var(--sage);
+  background: var(--walnut);
+  box-shadow: inset 0 0 0 1.5px var(--walnut);
   pointer-events: none;
   opacity: 0;
   will-change: translate;
@@ -1237,7 +1223,7 @@ html.intro:not(.intro-out) .site-frame {
   height: 100svh;
 }
 
-html.intro:not(.intro-out) :is(.meadow-ambient, .meadow-stage .frost, .meadow-stage .tint, .meadow-stage .grain, main > :not(.hero), .site-footer, .hero-copy, .motion-control) {
+html.intro:not(.intro-out) :is(.meadow-ambient, .meadow-stage .meadow-soft, .meadow-stage .tint, .meadow-stage .grain, main > :not(.hero), .site-footer, .hero-copy, .motion-control) {
   visibility: hidden;
 }
 
@@ -1246,7 +1232,7 @@ html.intro .hero .meadow-stage {
   mask-size: 260% 260%;
 }
 
-html.intro:not(.intro-out) .meadow-stage :is(.frost, .tint, .grain) {
+html.intro:not(.intro-out) .meadow-stage :is(.meadow-soft, .tint, .grain) {
   opacity: 0;
 }
 
@@ -1333,16 +1319,14 @@ html .intro-actions button.is-on {
   margin-left: -23px;
   padding: 0;
   color: #2d2b24;
-  background: rgb(246 242 231 / .6);
+  background: rgb(246 242 231 / .78);
   border: 1px solid rgb(45 43 36 / .15);
   border-radius: 50%;
-  -webkit-backdrop-filter: blur(6px);
-  backdrop-filter: blur(6px);
 }
 
 html[data-daypart='night'] .intro-next {
   color: #f4efe2;
-  background: rgb(20 19 16 / .45);
+  background: rgb(20 19 16 / .6);
   border-color: rgb(244 239 226 / .2);
 }
 
@@ -1566,15 +1550,20 @@ html.intro-writing .intro-title text {
   html.js [data-reveal] { opacity: 1; translate: none; }
 }
 
-/* Performance mode (src/lib/quality.ts): no glow, frosted blur or grain, the parts that cost the
-   most graphics memory and battery. The picture keeps its soft painted edge. */
-html[data-quality='fast'] :is(.meadow-ambient, .meadow-stage .frost, .meadow-stage .grain) {
+/* Performance mode (src/lib/quality.ts). Off: the glow, the picture's softened edge and grain,
+   the paper grain over the page and the trailing cursor (scripts also stop weighted scrolling and
+   parallax). Sections still fade in, but without moving. */
+html[data-quality='fast'] :is(.meadow-ambient, .meadow-soft, .meadow-stage .grain, .cursor-dot) {
   display: none;
 }
 
-html[data-quality='fast'] :is(.motion-control button, .intro-next) {
-  -webkit-backdrop-filter: none;
-  backdrop-filter: none;
+html[data-quality='fast'] body::after {
+  content: none;
+}
+
+html[data-quality='fast'].js [data-reveal] {
+  translate: none;
+  transition: opacity .5s ease;
 }
 
 html[data-quality='fast'] .intro-title text {

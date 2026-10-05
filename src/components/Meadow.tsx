@@ -1,7 +1,7 @@
 import { useEffect, useRef, useState, useSyncExternalStore } from 'react'
 import { nextSoundMode, soundLabel, useSound } from '../lib/music'
 import { toggleTheme, useTheme } from '../lib/theme'
-import { qualityLabel, toggleQuality, useQuality } from '../lib/quality'
+import { qualityLabel, stepDownQuality, toggleQuality, useQuality } from '../lib/quality'
 import { daypartNow } from '../lib/daypart'
 import type { Daypart } from '../lib/daypart'
 
@@ -18,9 +18,121 @@ type Clip = Daypart
 const noSubscription = () => () => {}
 const motionQuery = '(prefers-reduced-motion: reduce)'
 
-// The centre of the picture is sharp; towards the edges blur, tint and grain build until it
-// becomes the page (like Monocle or Arc). Strengths come from --blur, --tint and --grain
-// in index.css.
+// The glow is worked out at 32 × 18 pixels and the soft edge at 256 pixels across; the browser
+// stretches both smoothly to size. Small sizes are the point: the effects used to be live CSS
+// blurs (a 90 px blur across a quarter of the page, and two frosted layers over the video), which
+// the graphics card had to redo for every frame of video.
+const glowWidth = 32
+const glowHeight = 18
+const softWidth = 256
+// How much of each new frame goes into the glow, so it drifts rather than flickers.
+const glowBlend = 0.35
+const glowSaturation = 1.35
+
+// The video is cropped like CSS object-fit: cover, at the same focus point as the <img> and <video>.
+function cover(source: CanvasImageSource, width: number, height: number) {
+  const sourceWidth = source instanceof HTMLVideoElement ? source.videoWidth : (source as HTMLImageElement).naturalWidth
+  const sourceHeight = source instanceof HTMLVideoElement ? source.videoHeight : (source as HTMLImageElement).naturalHeight
+  if (!sourceWidth || !sourceHeight) return null
+  const scale = Math.max(width / sourceWidth, height / sourceHeight)
+  const w = width / scale
+  const h = height / scale
+  return [(sourceWidth - w) * 0.45, (sourceHeight - h) * 0.6, w, h] as const
+}
+
+// Pretty mode: the soft edge (a small copy of the frame, stretched, shown only towards the edges)
+// and the glow (an even smaller copy, saturated, smoothed and blended with the frames before it).
+// Both are redrawn once per video frame, and not at all while the picture is off screen or still.
+function startEffects(video: HTMLVideoElement | null, still: HTMLImageElement, soft: HTMLCanvasElement, glow: HTMLCanvasElement) {
+  const softContext = soft.getContext('2d', { alpha: false })
+  const glowContext = glow.getContext('2d', { alpha: false })
+  const sample = document.createElement('canvas')
+  sample.width = glowWidth
+  sample.height = glowHeight
+  const sampleContext = sample.getContext('2d', { willReadFrequently: true })
+  if (!softContext || !glowContext || !sampleContext) return () => {}
+  const output = glowContext.createImageData(glowWidth, glowHeight)
+  const mixed = new Float32Array(glowWidth * glowHeight * 3)
+  const smoothed = new Float32Array(mixed.length)
+  let first = true
+
+  // The soft canvas keeps the shape of its box, so the crop matches the picture on any screen.
+  const fit = () => {
+    const box = soft.getBoundingClientRect()
+    if (!box.width || !box.height) return
+    const height = Math.max(1, Math.round(softWidth * box.height / box.width))
+    if (soft.width !== softWidth || soft.height !== height) { soft.width = softWidth; soft.height = height }
+  }
+  fit()
+  const resize = 'ResizeObserver' in window ? new ResizeObserver(fit) : null
+  resize?.observe(soft)
+
+  const paint = (source: HTMLVideoElement | HTMLImageElement) => {
+    const crop = cover(source, soft.width, soft.height)
+    if (!crop) return
+    try {
+      softContext.drawImage(source, ...crop, 0, 0, soft.width, soft.height)
+      sampleContext.drawImage(soft, 0, 0, glowWidth, glowHeight)
+      const pixels = sampleContext.getImageData(0, 0, glowWidth, glowHeight).data
+      for (let i = 0, j = 0; i < pixels.length; i += 4, j += 3) {
+        const r = pixels[i], g = pixels[i + 1], b = pixels[i + 2]
+        const light = 0.2126 * r + 0.7152 * g + 0.0722 * b
+        const rgb = [light + (r - light) * glowSaturation, light + (g - light) * glowSaturation, light + (b - light) * glowSaturation]
+        for (let c = 0; c < 3; c++) mixed[j + c] = first ? rgb[c] : mixed[j + c] + (rgb[c] - mixed[j + c]) * glowBlend
+      }
+      first = false
+      // A small box blur, so the stretched glow has no visible pixel structure.
+      for (let y = 0; y < glowHeight; y++) for (let x = 0; x < glowWidth; x++) {
+        let r = 0, g = 0, b = 0, n = 0
+        for (let dy = -1; dy <= 1; dy++) for (let dx = -1; dx <= 1; dx++) {
+          const sx = x + dx, sy = y + dy
+          if (sx < 0 || sy < 0 || sx >= glowWidth || sy >= glowHeight) continue
+          const k = (sy * glowWidth + sx) * 3
+          r += mixed[k]; g += mixed[k + 1]; b += mixed[k + 2]; n++
+        }
+        const k = (y * glowWidth + x) * 3
+        smoothed[k] = r / n; smoothed[k + 1] = g / n; smoothed[k + 2] = b / n
+      }
+      for (let i = 0, j = 0; i < output.data.length; i += 4, j += 3) {
+        output.data[i] = smoothed[j]
+        output.data[i + 1] = smoothed[j + 1]
+        output.data[i + 2] = smoothed[j + 2]
+        output.data[i + 3] = 255
+      }
+      glowContext.putImageData(output, 0, 0)
+    } catch { /* a frame that isn't ready yet; the next one will do */ }
+  }
+
+  let onScreen = true
+  let stopped = false
+  let handle = 0
+  const watcher = 'IntersectionObserver' in window
+    ? new IntersectionObserver(([entry]) => { onScreen = entry.isIntersecting })
+    : null
+  watcher?.observe(soft)
+  const showing = () => video && video.classList.contains('is-playing') && video.readyState >= 2
+  const loop = () => {
+    if (stopped) return
+    if (onScreen && video && showing() && !video.paused) paint(video)
+    if (video && 'requestVideoFrameCallback' in video) handle = video.requestVideoFrameCallback(loop)
+    else handle = window.setTimeout(loop, 1000 / 30)
+  }
+  // Until the video is showing, the effects are drawn from the still.
+  if (still.complete) paint(still)
+  else still.addEventListener('load', () => { if (!showing()) paint(still) }, { once: true })
+  if (video) loop()
+  return () => {
+    stopped = true
+    watcher?.disconnect()
+    resize?.disconnect()
+    if (video && 'cancelVideoFrameCallback' in video) video.cancelVideoFrameCallback(handle)
+    else window.clearTimeout(handle)
+  }
+}
+
+// The centre of the picture is sharp; towards the edges it softens and takes on a wash of paper
+// until it becomes the page (like Monocle or Arc), and its colours glow out around it (like
+// YouTube's ambient mode). Strengths come from --tint, --grain and --ambient in index.css.
 // The hero describes whichever field is showing; a still (About) can pass its own description.
 export function Meadow({ still = false, alt }: { still?: boolean; alt?: string }) {
   const [playing, setPlaying] = useState(false)
@@ -33,8 +145,10 @@ export function Meadow({ still = false, alt }: { still?: boolean; alt?: string }
   const clip = useSyncExternalStore(noSubscription, daypartNow, () => 'evening' as Clip)
   const { video: source, poster } = clips[clip]
   const video = useRef<HTMLVideoElement>(null)
-  const still_ = useRef<HTMLImageElement>(null)
-  const ambient = useRef<HTMLCanvasElement>(null)
+  const image = useRef<HTMLImageElement>(null)
+  const soft = useRef<HTMLCanvasElement>(null)
+  const glow = useRef<HTMLCanvasElement>(null)
+  const showVideo = !still && !unavailable
 
   useEffect(() => {
     if (still) return
@@ -46,85 +160,90 @@ export function Meadow({ still = false, alt }: { still?: boolean; alt?: string }
     return () => { window.clearTimeout(start); preference.removeEventListener('change', stop) }
   }, [still])
 
+  // Playback, with a watchdog. While the video should be playing (it's wanted, on screen and the
+  // tab is open) it is checked every two seconds: paused by the browser → play again; stuck on one
+  // frame → ask for the data again, then reload it where it was; failing to load twice → keep the
+  // still picture. If the computer is dropping a lot of frames, Pretty steps down to Performance.
   useEffect(() => {
     const element = video.current
     if (!element) return
-    // An interrupted play() (a quick pause, or React re-running effects) is not a failure.
-    const resume = () => element.play().catch((error: DOMException) => { if (error.name !== 'AbortError') setPlaying(false) })
     if (!playing) { element.pause(); return }
+    let inView = true
+    let retries = 0
+    let stuck = 0
+    let lastTime = -1
+    let lastQuality: VideoPlaybackQuality | undefined = element.getVideoPlaybackQuality?.()
+    let struggling = 0
+    const give = () => { setUnavailable(true); setPlaying(false) }
+    // An interrupted play() (a quick pause, or React re-running effects) is not a failure. A
+    // refusal (iOS Low Power Mode won't autoplay) leaves the still and a Play button.
+    const resume = () => element.play().catch((error: DOMException) => { if (error.name !== 'AbortError') setPlaying(false) })
+    const wanted = () => inView && !document.hidden
+    const reload = () => {
+      if (retries++ >= 2) return give()
+      const at = element.currentTime
+      element.load()
+      element.addEventListener('loadedmetadata', () => { element.currentTime = at }, { once: true })
+      resume()
+    }
+    const update = () => { if (wanted()) { if (element.paused) resume() } else element.pause() }
+    const check = () => {
+      if (!wanted()) { lastTime = -1; lastQuality = undefined; return }
+      if (element.paused) { resume(); return }
+      if (element.currentTime === lastTime && !element.seeking) {
+        stuck += 1
+        // A seek to where it already is makes the browser fetch and decode from there again.
+        if (stuck === 1) element.currentTime = lastTime
+        else { stuck = 0; reload() }
+      } else stuck = 0
+      lastTime = element.currentTime
+      const now = element.getVideoPlaybackQuality?.()
+      if (now && lastQuality) {
+        const shown = now.totalVideoFrames - lastQuality.totalVideoFrames
+        const dropped = now.droppedVideoFrames - lastQuality.droppedVideoFrames
+        struggling = shown >= 20 && dropped / shown > 0.2 ? struggling + 1 : 0
+        if (struggling >= 2) { struggling = 0; stepDownQuality() }
+      }
+      lastQuality = now
+    }
     resume()
+    const timer = window.setInterval(check, 2000)
+    const sourceElement = element.querySelector('source')
+    element.addEventListener('error', reload)
+    sourceElement?.addEventListener('error', reload)
     // Scrolled out of view or in a background tab, the video stops decoding (saving battery and
     // graphics memory, which Safari is strict about); it carries on when it's seen again.
-    let inView = true
-    const update = () => { if (inView && !document.hidden) resume(); else element.pause() }
     document.addEventListener('visibilitychange', update)
     const figure = element.closest('figure')
     const watcher = figure && 'IntersectionObserver' in window
       ? new IntersectionObserver(([entry]) => { inView = entry.isIntersecting; update() })
       : null
     if (figure) watcher?.observe(figure)
-    return () => { watcher?.disconnect(); document.removeEventListener('visibilitychange', update) }
+    return () => {
+      window.clearInterval(timer)
+      watcher?.disconnect()
+      element.removeEventListener('error', reload)
+      sourceElement?.removeEventListener('error', reload)
+      document.removeEventListener('visibilitychange', update)
+    }
   }, [playing, clip])
 
-  // Ambient light, like YouTube's ambient mode: a tiny copy of each frame, blown up and blurred
-  // behind the picture, so its colours spill across the top of the page as if it were larger.
-  // In performance mode the glow is hidden, so it isn't painted either.
   useEffect(() => {
-    if (quality === 'fast') return
-    const canvas = ambient.current
-    const context = canvas?.getContext('2d', { alpha: false })
-    if (!canvas || !context) return
-    let handle = 0
-    let stopped = false
-    let onScreen = true
-    let first = true
-    // Each new frame is laid over the last at partial strength, so the glow drifts from one frame
-    // to the next instead of stepping (trees passing through the picture used to flicker in it).
-    const paint = (source: CanvasImageSource) => {
-      try {
-        context.globalAlpha = first ? 1 : 0.35
-        context.drawImage(source, 0, 0, canvas.width, canvas.height)
-        first = false
-      } catch { /* not ready yet */ }
-    }
-    const element = video.current
-    // Repainted on every video frame (the canvas is only 48 × 27, so this is cheap); while the
-    // hero is scrolled away it isn't repainted at all.
-    const watcher = 'IntersectionObserver' in window
-      ? new IntersectionObserver(([entry]) => { onScreen = entry.isIntersecting })
-      : null
-    watcher?.observe(canvas)
-    const loop = () => {
-      if (stopped) return
-      if (onScreen && element && element.readyState >= 2 && !element.paused) paint(element)
-      if (element && 'requestVideoFrameCallback' in element) handle = element.requestVideoFrameCallback(loop)
-      else handle = window.setTimeout(loop, 33)
-    }
-    const image = still_.current
-    if (image) { if (image.complete) paint(image); else image.addEventListener('load', () => paint(image), { once: true }) }
-    if (element) loop()
-    return () => {
-      stopped = true
-      watcher?.disconnect()
-      if (element && 'cancelVideoFrameCallback' in element) element.cancelVideoFrameCallback(handle)
-      else window.clearTimeout(handle)
-    }
-  }, [clip, quality])
+    if (quality === 'fast' || !image.current || !soft.current || !glow.current) return
+    return startEffects(video.current, image.current, soft.current, glow.current)
+  }, [clip, quality, showVideo, still])
 
-  const showVideo = !still && !unavailable
   return <figure className="meadow">
-    <canvas ref={ambient} className="meadow-ambient" width="48" height="27" aria-hidden="true" />
+    <canvas ref={glow} className="meadow-ambient" width={glowWidth} height={glowHeight} aria-hidden="true" />
     <div className="meadow-stage">
-      <img ref={still_} className="meadow-source" src={poster} alt={alt ?? clips[clip].alt} width="1280" height="720" fetchPriority="high" />
+      <img ref={image} className="meadow-source" src={poster} alt={alt ?? clips[clip].alt} width="1280" height="720" fetchPriority="high" />
       {showVideo && <video
         key={clip} ref={video} className={`meadow-source${playing ? ' is-playing' : ''}`}
         muted loop playsInline preload="metadata" poster={poster} aria-hidden="true"
-        onError={() => { setUnavailable(true); setPlaying(false) }}
       >
         <source src={source} type="video/mp4" />
       </video>}
-      <div className="frost frost-outer" aria-hidden="true" />
-      <div className="frost frost-edge" aria-hidden="true" />
+      <canvas ref={soft} className="meadow-soft" aria-hidden="true" />
       <div className="tint" aria-hidden="true" />
       <div className="grain" aria-hidden="true" />
     </div>

@@ -1,16 +1,19 @@
 import { useEffect, useRef } from 'react'
+import { useQuality } from '../lib/quality'
 
 // A small dot in place of the pointer, after TaylorHare. It trails the mouse slightly and never
 // grows (so it never covers text); instead the mark inside it changes: a ring over links,
 // an arrow over projects (data-cursor="view"), a down-arrow over the hero (data-cursor="scroll").
-// Only on devices with a precise pointer; touch screens keep their normal behaviour.
+// Only on devices with a precise pointer, in Pretty mode; touch screens and Performance mode keep
+// the normal pointer.
 const marks = ['view', 'scroll'] as const
 
 export function Cursor() {
   const dot = useRef<HTMLDivElement>(null)
+  const quality = useQuality()
 
   useEffect(() => {
-    if (!window.matchMedia('(pointer: fine)').matches) return
+    if (quality === 'fast' || !window.matchMedia('(pointer: fine)').matches) return
     const element = dot.current!
     const root = document.documentElement
     root.classList.add('has-cursor')
@@ -75,7 +78,7 @@ export function Cursor() {
       window.removeEventListener('pointerdown', press)
       window.removeEventListener('pointerup', release)
     }
-  }, [])
+  }, [quality])
 
   return <div ref={dot} className="cursor-dot" aria-hidden="true">
     <svg className="cursor-view" viewBox="0 0 10 10"><path d="M3 7 7 3M3.6 3H7v3.4" /></svg>

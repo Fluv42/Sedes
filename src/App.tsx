@@ -10,6 +10,7 @@ import { scrollToTop, startSmoothScroll, watchParallax, watchReveals } from './l
 import { PageRoute } from './pages'
 import { nextSoundMode, setHomePage, soundLabel, startMusic, useSound } from './lib/music'
 import { toggleTheme, useTheme } from './lib/theme'
+import { useQuality } from './lib/quality'
 import { getPageTitle } from './lib/routes'
 import './App.css'
 
@@ -26,8 +27,10 @@ export default function App({ initialPath = '/' }: { initialPath?: string }) {
   const main = useRef<HTMLElement>(null)
   const sound = useSound()
   const theme = useTheme()
+  const quality = useQuality()
 
-  useEffect(() => startSmoothScroll(), [])
+  // Weighted scrolling and parallax are Pretty-mode extras; Performance scrolls natively.
+  useEffect(() => quality === 'pretty' ? startSmoothScroll() : undefined, [quality])
   // The field sound plays under the home page's picture only; the song carries on everywhere.
   useEffect(() => setHomePage(path === '/'), [path])
   useEffect(() => startMusic(), [])
@@ -43,10 +46,14 @@ export default function App({ initialPath = '/' }: { initialPath?: string }) {
     }
     const page = main.current
     if (!page) return
-    const stopReveals = watchReveals(page)
-    const stopParallax = watchParallax(page)
-    return () => { stopReveals(); stopParallax() }
+    return watchReveals(page)
   }, [path, title])
+
+  useEffect(() => {
+    const page = main.current
+    if (!page || quality === 'fast') return
+    return watchParallax(page)
+  }, [path, quality])
 
   return <>
     <a className="skip-link" href="#main">Skip to content</a>

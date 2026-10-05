@@ -51,7 +51,6 @@
   --gutter: clamp(16px, 4vw, 56px);
   --ease: cubic-bezier(.22, .61, .36, 1);
   /* Hero picture edges (like Monocle's sliders), and the grain laid over the whole site. */
-  --blur: 3px;
   --tint: .07;
   --grain: .11;
   /* Strength of the video's colour glowing out around it. */
@@ -124,11 +123,17 @@ body {
   background: var(--paper);
 }
 
-/* Switching light/dark: every colour eases across together for a moment, then the page's own
-   transitions take over again. */
+/* Switching light/dark (src/lib/theme.ts): the page before and after dissolve into each other. */
+::view-transition-old(root), ::view-transition-new(root) {
+  animation-duration: 1.2s;
+  animation-timing-function: ease-in-out;
+}
+
+/* The same switch where view transitions aren't supported: backgrounds ease across over a second
+   and a half; text turns over quickly at the halfway point, when either colour still reads. */
 html.theme-fading, html.theme-fading *, html.theme-fading *::before, html.theme-fading *::after {
-  transition: background-color 1.5s ease, color 1.5s ease, border-color 1.5s ease, fill 1.5s ease,
-    stroke 1.5s ease, box-shadow 1.5s ease, outline-color 1.5s ease, opacity 1.5s ease !important;
+  transition: background-color 1.5s ease, border-color 1.5s ease, box-shadow 1.5s ease, opacity 1.5s ease,
+    color .3s ease .45s, fill .3s ease .45s, stroke .3s ease .45s, outline-color .3s ease .45s !important;
 }
 
 /* A little paper texture over everything: the same grain as the hero picture's edges. */

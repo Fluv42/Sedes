@@ -929,13 +929,14 @@ html.intro.intro-out .intro-title {
 .intro-title text {
   font-family: var(--heading);
   font-size: 168px;
-  fill: #fbf8ef;
+  fill: var(--ink);
   fill-opacity: 0;
-  stroke: #fbf8ef;
+  stroke: var(--ink);
   stroke-width: 1.4;
   stroke-dasharray: 700;
   stroke-dashoffset: 700;
-  filter: drop-shadow(0 2px 14px rgb(30 34 20 / .35));
+  /* Dark ink like the rest of the text; a soft paper glow keeps it readable over the video. */
+  filter: drop-shadow(0 0 18px rgb(246 242 231 / .55));
 }
 
 /* The hand: a soft-edged wipe moving left to right while the strokes trace and fill. */

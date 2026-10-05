@@ -53,7 +53,7 @@ function Home() {
     <section className="about-teaser" aria-labelledby="about-teaser-title">
       <h2 id="about-teaser-title" data-reveal>A little about me</h2>
       <div>
-        <p className="statement" data-reveal>I’m the IT specialist for a group of car dealerships, and I’m building LotFlow, a workflow app, for them. Home is a farm in Southwestern Ontario.</p>
+        <p className="statement" data-reveal>I’m the IT specialist for a group of car dealerships. Right now I’m building LotFlow, an app that tracks their vehicles from reconditioning to delivery. I live on a farm in Southwestern Ontario.</p>
         <Link className="cta" href="/about" data-reveal>More about me <Arrow /></Link>
       </div>
     </section>
@@ -67,8 +67,8 @@ function About() {
     </div>
     <div className="prose">
       <h1 data-reveal>About</h1>
-      <p className="lede" data-reveal>I’m Micah, an IT specialist and developer living on a farm in Southwestern Ontario.</p>
-      <p data-reveal>I’m the IT specialist for five dealerships and a body shop, looking after logins, printers and software for about 210 people. I’m also building LotFlow for them, a board that keeps track of vehicles between reconditioning and delivery.</p>
+      <p className="lede" data-reveal>I’m Micah, an IT specialist and developer. I live on a farm in Southwestern Ontario.</p>
+      <p data-reveal>I’m the IT specialist for five dealerships and a body shop, looking after logins, printers and software for about 210 people. I’m also building LotFlow, an app that tracks their vehicles from reconditioning to delivery.</p>
       <p data-reveal>I finished my Bachelor of Information Technology at Carleton in 2025, in Information Resource Management, done jointly with Algonquin College. Along the way I did co-ops in IT support at Bluewater Health and in information management at Agriculture and Agri-Food Canada.</p>
       <p data-reveal>How I work: talk to the people who’ll use the thing, build something they can try, then fix what breaks. AI writes a lot of my code. My job is knowing what to build, checking what it wrote, testing it, and sticking around to support it.</p>
       <p data-reveal>The site’s name comes from <em>Sedes Sapientiae</em>, the Seat of Wisdom. The site is the seat, and the work is what it holds.</p>

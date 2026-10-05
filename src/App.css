@@ -227,10 +227,10 @@ a:hover .arrow {
 /* Ambient light: the picture's own colours, blurred far past its edges and up the page. */
 .meadow-ambient {
   position: absolute;
-  top: -70%;
-  left: -45%;
-  width: 260%;
-  height: 230%;
+  top: -100%;
+  left: -60%;
+  width: 330%;
+  height: 235%;
   max-width: none;
   opacity: .5;
   filter: blur(90px) saturate(1.3);
@@ -960,59 +960,6 @@ html.intro-writing .intro-title text {
 
 @keyframes ink {
   to { fill-opacity: 1; }
-}
-
-/* Development-only tuning panel ------------------------------------------- */
-
-.tuner {
-  position: fixed;
-  right: 16px;
-  bottom: 16px;
-  z-index: 350;
-  display: grid;
-  gap: 10px;
-  width: 300px;
-  padding: 14px 16px;
-  color: #eee;
-  font: 13px/1.2 -apple-system, system-ui, sans-serif;
-  background: rgb(38 38 38 / .82);
-  -webkit-backdrop-filter: blur(20px);
-  backdrop-filter: blur(20px);
-  border-radius: 14px;
-  box-shadow: 0 10px 30px rgb(0 0 0 / .25);
-}
-
-.tuner.is-closed {
-  width: auto;
-  padding: 6px;
-}
-
-.tuner label {
-  display: grid;
-  grid-template-columns: 48px 1fr 46px;
-  align-items: center;
-  gap: 10px;
-}
-
-.tuner input {
-  width: 100%;
-  accent-color: #ddd;
-}
-
-.tuner output {
-  text-align: right;
-  font-variant-numeric: tabular-nums;
-  color: #aaa;
-}
-
-.tuner button {
-  justify-self: end;
-  padding: 4px 10px;
-  color: #eee;
-  font: inherit;
-  background: rgb(255 255 255 / .1);
-  border: 0;
-  border-radius: 6px;
 }
 
 /* Smaller screens ----------------------------------------------------------- */

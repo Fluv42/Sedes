@@ -5,7 +5,7 @@ const motionQuery = '(prefers-reduced-motion: reduce)'
 
 // The centre of the picture is sharp; towards the edges blur, tint and grain build until it
 // becomes the page (like Monocle or Arc). Strengths come from --blur, --tint and --grain
-// (see index.css and the dev-only Tuner).
+// in index.css.
 export function Meadow({ still = false, alt }: { still?: boolean; alt: string }) {
   const [playing, setPlaying] = useState(false)
   const [unavailable, setUnavailable] = useState(false)

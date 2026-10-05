@@ -5,7 +5,6 @@ import { Cursor } from './components/Cursor'
 import { Intro } from './components/Intro'
 import { Grass } from './components/Grass'
 import { Squiggle } from './components/Squiggle'
-import { Tuner } from './components/Tuner'
 import { usePath } from './lib/router'
 import { scrollToTop, startSmoothScroll, watchParallax, watchReveals } from './lib/motion'
 import { PageRoute } from './pages'
@@ -79,6 +78,5 @@ export default function App({ initialPath = '/' }: { initialPath?: string }) {
       </footer>
     </div>
     <Cursor />
-    {import.meta.env.DEV && <Tuner />}
   </>
 }

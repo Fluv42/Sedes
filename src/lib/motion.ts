@@ -68,9 +68,11 @@ export function watchReveals(root: ParentNode) {
   return () => observer.disconnect()
 }
 
-// Elements marked data-speed drift against the scroll by that fraction (0.1 = a tenth).
+// Elements marked data-speed drift against the scroll by that fraction (0.1 = a tenth). Not on
+// touch screens: there the page scrolls natively, a frame ahead of anything script can move, so
+// the drift reads as a stutter rather than depth.
 export function watchParallax(root: ParentNode) {
-  if (reduced()) return () => {}
+  if (reduced() || window.matchMedia('(pointer: coarse)').matches) return () => {}
   const items = [...root.querySelectorAll<HTMLElement>('[data-speed]')]
   if (!items.length) return () => {}
   let frame = 0

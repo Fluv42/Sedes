@@ -94,7 +94,7 @@ function About() {
       </details>
       <p data-reveal>I’m the IT specialist for five dealerships and a body shop, looking after logins, printers and software for about 210 people. I’m also building LotFlow, an app that tracks their vehicles from reconditioning to delivery.</p>
       <p data-reveal>I finished my Bachelor of Information Technology at Carleton in 2025, in Information Resource Management, done jointly with Algonquin College. Along the way I did co-ops in IT support at Bluewater Health and in information management at Agriculture and Agri-Food Canada.</p>
-      <p data-reveal>Outside of work I play a lot of Soulslikes (Dark Souls, Elden Ring, Mortal Shell), mostly for the builds and the lore, and modded Minecraft. I like tinkering with computers, my Steam Deck and smart-home gear, and building or refinishing things around the house. Lately I’ve been customizing my Kobo e-reader.</p>
+      <p data-reveal>Outside of work I play a lot of Soulslikes (Elden Ring, Sekiro, Lies of P), mostly for the builds and the lore, and modded Minecraft. I like tinkering with computers, my Steam Deck and smart-home gear, and building or refinishing things around the house. Lately I’ve been customizing my Kobo e-reader.</p>
       <p data-reveal>The site’s name comes from <em>Sedes Sapientiae</em>, the Seat of Wisdom. The site is the seat, and the work is what it holds.</p>
       <Link className="cta" href="/projects" data-reveal>See the projects <Arrow /></Link>
     </div>

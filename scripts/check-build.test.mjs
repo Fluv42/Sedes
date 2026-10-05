@@ -9,7 +9,7 @@ const pageFile = path => resolve(root, path === '/' ? 'index.html' : `${path.sli
 const pages = await Promise.all(paths.map(async path => ({ path, html: await readFile(pageFile(path), 'utf8') })))
 
 test('every canonical route has usable static content before JavaScript runs', () => {
-  assert.equal(pages.length, 14)
+  assert.equal(pages.length, 12)
   for (const { path, html } of pages) {
     assert.equal((html.match(/<h1\b/g) ?? []).length, 1, `${path}: one page heading`)
     assert.match(html, /<main\b[^>]*id="main"/, `${path}: main landmark`)
@@ -40,7 +40,7 @@ test('noindex is present on every page and in Cloudflare response headers', asyn
 test('Home contains exactly three featured projects and a path to the full index', () => {
   const home = pages.find(page => page.path === '/').html
   assert.equal((home.match(/class="work-item"/g) ?? []).length, 3)
-  assert.match(home, /href="\/projects"[^>]*>View my work/)
+  assert.match(home, /href="\/projects"[^>]*>See what I’ve made/)
   for (const slug of ['lotflow', 'server-cleanup', 'sedes']) assert.match(home, new RegExp(`href="/projects/${slug}"`))
 })
 

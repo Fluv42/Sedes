@@ -1,20 +1,29 @@
 import { Link } from './components/Link'
 import { Meadow } from './components/Meadow'
 import { ProjectMark } from './components/ProjectMark'
-import { featuredProjects, projects } from './content/projects'
-import type { Project } from './content/projects'
-import { principles, site } from './content/site'
+import { useMemo, useState } from 'react'
+import type { CSSProperties } from 'react'
+import { categories, featuredProjects, projects } from './content/projects'
+import type { Category, Project } from './content/projects'
+import { site } from './content/site'
 
 const projectHref = (project: Project) => `/projects/${project.slug}`
 const Arrow = () => <span className="arrow" aria-hidden="true">→</span>
 
 // An editorial list rather than cards: big titles, one line each, year and status to the side.
-function WorkList({ items, heading: Heading }: { items: Project[]; heading: 'h2' | 'h3' }) {
+// On Home rows rise in as they scroll into view; on Projects they rise in as filters bring them back.
+function WorkList({ items, heading: Heading, live = false }: { items: Project[]; heading: 'h2' | 'h3'; live?: boolean }) {
   return <ol className="work-list">
-    {items.map(project => <li key={project.slug} className="work-item" data-reveal data-cursor="view">
+    {items.map((project, index) => <li
+      key={project.slug}
+      className={live ? 'work-item rises' : 'work-item'}
+      data-reveal={live ? undefined : ''}
+      style={live ? { '--i': index } as CSSProperties : undefined}
+      data-cursor="view"
+    >
       <Heading className="work-title"><Link href={projectHref(project)}>{project.title}</Link></Heading>
       <p className="work-summary">{project.summary}</p>
-      <p className="work-meta">{project.year}<br />{project.status}</p>
+      <p className="work-meta"><span>{project.year}</span> <span>{project.status}</span></p>
     </li>)}
   </ol>
 }
@@ -30,21 +39,21 @@ function Home() {
         <p className="hello">Hello, I’m</p>
         <h1 id="home-title">Micah <span className="surname">VanEwyk</span></h1>
         <p className="alias">/ {site.alias}</p>
-        <p className="lede">Developer and IT professional. I build practical software around the way people work.</p>
-        <Link className="cta" href="/projects">View my work <Arrow /></Link>
+        <p className="lede">Developer and IT guy in Southwestern Ontario. I make useful software for the people around me, and keep their computers running.</p>
+        <Link className="cta" href="/projects">See what I’ve made <Arrow /></Link>
       </div>
     </section>
 
     <section className="featured" aria-labelledby="featured-title">
       <h2 id="featured-title" data-reveal>What I make</h2>
       <WorkList items={featuredProjects} heading="h3" />
-      <p className="more" data-reveal>{others} more in the <Link href="/projects">project index</Link>, and a few I’m still writing up.</p>
+      <p className="more" data-reveal>{others} more in the <Link href="/projects">full list</Link>, and a few I haven’t written up yet.</p>
     </section>
 
     <section className="about-teaser" aria-labelledby="about-teaser-title">
       <h2 id="about-teaser-title" data-reveal>A little about me</h2>
       <div>
-        <p className="statement" data-reveal>I look after the technology for five dealerships and a body shop, and build the tools that make that work easier. Home is a farm in Southwestern Ontario.</p>
+        <p className="statement" data-reveal>By day I keep the computers, printers and logins working for five dealerships and a body shop, and build tools to make that job easier. Home is a farm in Southwestern Ontario.</p>
         <Link className="cta" href="/about" data-reveal>More about me <Arrow /></Link>
       </div>
     </section>
@@ -58,23 +67,50 @@ function About() {
     </div>
     <div className="prose">
       <h1 data-reveal>About</h1>
-      <p className="lede" data-reveal>I’m Micah, a developer and IT professional in Southwestern Ontario.</p>
-      <p data-reveal>By day I’m the IT specialist for five dealerships and a body shop, looking after about 210 people and the systems they rely on. Alongside that I’m building LotFlow, a workflow app that keeps vehicles from getting lost between reconditioning and delivery.</p>
-      <p data-reveal>I finished a Bachelor of Information Technology in Information Resource Management at Carleton in 2025, through its joint program with Algonquin College. Along the way I did co-ops in IT support at Bluewater Health and in information management at Agriculture and Agri-Food Canada.</p>
-      <p data-reveal>I start with the people doing the work, build something they can try, and keep refining it from what breaks. I use AI heavily to write code; setting the direction, understanding the changes, testing, and supporting the result are my job.</p>
-      <p data-reveal>I live on a farm. The name comes from <em>Sedes Sapientiae</em>, the Seat of Wisdom: the site is the seat, and the work is what it holds.</p>
+      <p className="lede" data-reveal>I’m Micah. I work in IT, write software, and live on a farm in Southwestern Ontario.</p>
+      <p data-reveal>During the week I’m the IT specialist for five dealerships and a body shop: about 210 people, and everything from logins and printers to the software they use. Alongside that I’m building LotFlow, a board that keeps track of vehicles between reconditioning and delivery.</p>
+      <p data-reveal>I finished my Bachelor of Information Technology at Carleton in 2025, in Information Resource Management, done jointly with Algonquin College. Along the way I did co-ops in IT support at Bluewater Health and in information management at Agriculture and Agri-Food Canada.</p>
+      <p data-reveal>How I work: talk to the people who’ll use the thing, build something they can try, then fix what breaks. AI writes a lot of my code. My job is knowing what to build, checking what it wrote, testing it, and sticking around to support it.</p>
+      <p data-reveal>The site’s name comes from <em>Sedes Sapientiae</em>, the Seat of Wisdom. The site is the seat, and the work is what it holds.</p>
       <Link className="cta" href="/projects" data-reveal>See the projects <Arrow /></Link>
     </div>
   </section>
 }
 
+const searchable = (project: Project) =>
+  [project.title, project.summary, project.type, project.stack, project.role, project.year, project.status].join(' ').toLowerCase()
+
 function Projects() {
+  const [category, setCategory] = useState<Category | 'All'>('All')
+  const [query, setQuery] = useState('')
+  const shown = useMemo(() => {
+    const words = query.toLowerCase().split(/\s+/).filter(Boolean)
+    return projects.filter(project =>
+      (category === 'All' || project.category === category) && words.every(word => searchable(project).includes(word)))
+  }, [category, query])
+
   return <>
     <header className="page-heading" data-reveal>
       <h1>Projects</h1>
       <p>Things I’ve built at work, on my own, and at university.</p>
     </header>
-    <WorkList items={projects} heading="h2" />
+    <div className="project-tools" data-reveal>
+      <div className="filters" role="group" aria-label="Show projects from">
+        {(['All', ...categories] as const).map(name => <button
+          key={name} type="button" aria-pressed={category === name} onClick={() => setCategory(name)}
+        >
+          {name} <span className="count">{name === 'All' ? projects.length : projects.filter(p => p.category === name).length}</span>
+        </button>)}
+      </div>
+      <label className="search">
+        <span className="visually-hidden">Search projects</span>
+        <input type="search" placeholder="Search" value={query} onChange={event => setQuery(event.target.value)} />
+      </label>
+    </div>
+    <p className="visually-hidden" aria-live="polite">{shown.length} of {projects.length} projects shown</p>
+    {shown.length
+      ? <WorkList items={shown} heading="h2" live />
+      : <p className="no-results">Nothing matches that. Try another word, or <button type="button" onClick={() => { setQuery(''); setCategory('All') }}>show everything</button>.</p>}
     <p className="more" data-reveal>University projects were team work. Each write-up says which parts were mine.</p>
   </>
 }
@@ -112,49 +148,17 @@ function ProjectPage({ project }: { project: Project }) {
   </article>
 }
 
-function Notes() {
-  return <>
-    <header className="page-heading" data-reveal>
-      <h1>Notes</h1>
-      <p>Short writing about what I’m making and how.</p>
-    </header>
-    <ul className="note-list">
-      <li data-reveal>
-        <time dateTime="2026-09-26">Sep 26, 2026</time>
-        <div>
-          <h2><Link href="/notes/sedes-principles">Sedes principles</Link></h2>
-          <p>Three things this site should be.</p>
-        </div>
-      </li>
-    </ul>
-  </>
-}
-
-function Principles() {
-  return <article className="note-page">
-    <header className="page-heading" data-reveal>
-      <p className="crumb"><Link href="/notes">Notes</Link> / <time dateTime="2026-09-26">Sep 26, 2026</time></p>
-      <h1>Sedes principles</h1>
-      <p>Three things this site should be: warm, reliable, and recognizably my own.</p>
-    </header>
-    <div className="prose">
-      {principles.map(principle => <section key={principle.title} data-reveal>
-        <h2>{principle.title}</h2>
-        <p>{principle.body}</p>
-      </section>)}
-    </div>
-  </article>
-}
-
 function Contact() {
   const phone = import.meta.env.VITE_CONTACT_PHONE?.trim()
   return <section className="contact">
     <div>
       <h1 data-reveal>Contact</h1>
-      <p className="lede" data-reveal>If something here is useful to you, or you’d like to work on something together, I’d be glad to hear from you.</p>
+      <p className="lede" data-reveal>Want to work together, or have a question about something here? Send me an email.</p>
       <p className="contact-email" data-reveal><a href={`mailto:${site.email}`}>{site.email}</a></p>
       <ul className="contact-other" data-reveal>
+        <li><a href={site.linkedin}>LinkedIn</a></li>
         <li><a href={site.github}>GitHub</a></li>
+        <li><a href={site.instagram}>Instagram</a></li>
         {phone && <li><a href={`tel:${phone.replace(/[^+\d]/g, '')}`}>{phone}</a></li>}
       </ul>
     </div>
@@ -172,9 +176,7 @@ export function PageRoute({ path }: { path: string }) {
   if (path === '/') return <Home />
   if (path === '/about') return <About />
   if (path === '/projects') return <Projects />
-  if (path === '/notes') return <Notes />
   if (path === '/contact') return <Contact />
-  if (path === '/notes/sedes-principles') return <Principles />
   const project = projects.find(item => path === projectHref(item))
   return project ? <ProjectPage project={project} /> : <NotFound />
 }

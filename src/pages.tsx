@@ -27,7 +27,10 @@ function WorkName({ project }: { project: Project }) {
       range.selectNodeContents(link)
       const lines = range.getClientRects()
       const last = lines[lines.length - 1]
-      if (last) element.style.setProperty('--line', `${last.right - element.getBoundingClientRect().left}px`)
+      const box = element.getBoundingClientRect()
+      // Rects are in screen pixels, so undo any scaling around it (Home's intro zooms the page).
+      const scale = box.width / element.offsetWidth || 1
+      if (last) element.style.setProperty('--line', `${(last.right - box.left) / scale}px`)
     }
     measure()
     const watch = new ResizeObserver(measure)

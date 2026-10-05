@@ -67,18 +67,20 @@ function startEffects(video: HTMLVideoElement | null, still: HTMLImageElement, s
     if (soft.width === softWidth && soft.height === height) return
     soft.width = softWidth
     soft.height = height
-    if (last) paint(last)
+    // Only the soft edge is redrawn; the glow keeps its colours until it's asked to change.
+    if (last) paint(last, false)
   }
   fit()
   const resize = 'ResizeObserver' in window ? new ResizeObserver(fit) : null
   resize?.observe(soft)
 
-  const paint = (source: HTMLVideoElement | HTMLImageElement) => {
+  const paint = (source: HTMLVideoElement | HTMLImageElement, withGlow = true) => {
     last = source
     const crop = cover(source, soft.width, soft.height)
     if (!crop) return
     try {
       softContext.drawImage(source, ...crop, 0, 0, soft.width, soft.height)
+      if (!withGlow) return
       sampleContext.drawImage(soft, 0, 0, glowWidth, glowHeight)
       const pixels = sampleContext.getImageData(0, 0, glowWidth, glowHeight).data
       for (let i = 0, j = 0; i < pixels.length; i += 4, j += 3) {
@@ -144,7 +146,35 @@ function startEffects(video: HTMLVideoElement | null, still: HTMLImageElement, s
 // Photos that open out of the middle of the still on hover or tap (About), one after another:
 // each is shown through a hole that grows from the centre while the frame grows to the photo's
 // own shape (up to most of the screen's height), with a softened copy at its edges.
-export interface Photo { src: string; alt: string; width: number; height: number; focus?: string }
+// `faces` are where the two faces are (fractions of the photo's width and height), and `face` how
+// big a face is (a fraction of its width): the photo's oval is fitted around them.
+export interface Photo { src: string; alt: string; width: number; height: number; faces: [[number, number], [number, number]]; face?: number }
+
+// A soft oval tilted along the line between the two faces, large enough that both sit in its
+// clear middle, drawn as an SVG mask in the photo's own proportions.
+function ovalFor(photo: Photo) {
+  const ratio = photo.height / photo.width
+  const [[x1, y1], [x2, y2]] = photo.faces.map(([x, y]) => [x * 100, y * 100 * ratio])
+  const face = (photo.face ?? 0.11) * 100
+  const cx = (x1 + x2) / 2
+  // A little below the middle of the faces, to take in shoulders and arms.
+  const cy = (y1 + y2) / 2 + face * 0.6
+  const half = Math.hypot(x2 - x1, y2 - y1) / 2
+  // The middle half of the oval is fully clear (the faces sit inside it, with room), and it
+  // feathers out slowly from there, like the field's own edge. Kept within the frame's sides.
+  const rx = Math.min((half + face * 1.6) / 0.5, 58)
+  const ry = Math.max((face * 2.2) / 0.5, rx * 0.84)
+  const angle = Math.atan2(y2 - y1, x2 - x1) * 180 / Math.PI
+  const height = (100 * ratio).toFixed(1)
+  const svg = `<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 100 ${height}" preserveAspectRatio="none">`
+    + `<radialGradient id="o"><stop offset=".5" stop-color="#fff"/><stop offset=".64" stop-color="#fff" stop-opacity=".84"/><stop offset=".77" stop-color="#fff" stop-opacity=".5"/><stop offset=".9" stop-color="#fff" stop-opacity=".16"/><stop offset="1" stop-color="#fff" stop-opacity="0"/></radialGradient>`
+    + `<ellipse cx="${cx.toFixed(1)}" cy="${cy.toFixed(1)}" rx="${rx.toFixed(1)}" ry="${ry.toFixed(1)}" transform="rotate(${angle.toFixed(1)} ${cx.toFixed(1)} ${cy.toFixed(1)})" fill="url(#o)"/></svg>`
+  return {
+    '--oval': `url("data:image/svg+xml,${encodeURIComponent(svg)}")`,
+    '--hole-x': `${cx.toFixed(1)}%`,
+    '--hole-y': `${(cy / ratio).toFixed(1)}%`,
+  } as React.CSSProperties
+}
 export interface Alternate { label: string; photos: Photo[] }
 
 // The centre of the picture is sharp; towards the edges it softens and takes on a wash of paper
@@ -174,19 +204,29 @@ export function Meadow({ still = false, alt, alternate }: { still?: boolean; alt
   const [shown, setShown] = useState(0)
   const advance = useRef(0)
   const photo = alternate?.photos[shown % alternate.photos.length]
-  // Closing moves on to the next photo for next time, once the hole has closed.
+  // A random photo each time, never the same one twice in a row. Only the chosen one is fetched
+  // (ahead of time, so it's ready when the picture is next opened).
+  const pickNext = () => {
+    if (!alternate) return
+    const count = alternate.photos.length
+    setShown(index => {
+      const next = (index + 1 + Math.floor(Math.random() * (count - 1))) % count
+      new Image().src = alternate.photos[next].src
+      return next
+    })
+  }
+  // Closing moves on to another photo for next time, once the hole has closed.
   const open = (value: boolean) => {
     window.clearTimeout(advance.current)
     setOpened(value)
-    if (!value) advance.current = window.setTimeout(() => setShown(index => index + 1), 1200)
+    if (!value) advance.current = window.setTimeout(pickNext, 1200)
   }
-  useEffect(() => () => window.clearTimeout(advance.current), [])
-  // The next photo is fetched while this one is open, so it's ready when its turn comes.
+  // The first one is picked once the page is running (the server can't pick at random).
   useEffect(() => {
-    if (!opened || !alternate) return
-    const next = alternate.photos[(shown + 1) % alternate.photos.length]
-    new Image().src = next.src
-  }, [opened, shown, alternate])
+    advance.current = window.setTimeout(pickNext, 0)
+    return () => window.clearTimeout(advance.current)
+  // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [])
   // Hover opens it with a mouse; a tap or the (keyboard-reachable) button toggles it.
   const lastPointer = useRef('mouse')
   const showVideo = !still && failed !== clip
@@ -308,20 +348,23 @@ export function Meadow({ still = false, alt, alternate }: { still?: boolean; alt
     return () => { effects.stop(); repaint.current = () => {} }
   }, [clip, quality, showVideo, still, stillTries])
 
-  // While the hole opens or closes, the glow is repainted from whichever picture is arriving.
+  // Once the photo has fully opened (or closed), the glow drifts over to its colours: it waits for
+  // the transition to finish, then eases across for about a second and a half.
   useEffect(() => {
     if (!alternate) return
     const source = opened ? second.current : image.current
     if (!source) return
     let frame = 0
-    let count = 0
-    const start = performance.now()
+    let last = 0
+    let start = 0
     const step = (time: number) => {
-      if (count++ % 3 === 0) repaint.current(source)
-      if (time - start < 1100) frame = requestAnimationFrame(step)
+      start ||= time
+      // About a dozen steps a second, each a third of the way there: a drift of most of a second.
+      if (time - last >= 80) { last = time; repaint.current(source) }
+      if (time - start < 1800) frame = requestAnimationFrame(step)
     }
-    frame = requestAnimationFrame(step)
-    return () => cancelAnimationFrame(frame)
+    const wait = window.setTimeout(() => { frame = requestAnimationFrame(step) }, opened ? 1150 : 1050)
+    return () => { window.clearTimeout(wait); cancelAnimationFrame(frame) }
   }, [opened, alternate])
 
   const hover = alternate ? {
@@ -346,13 +389,12 @@ export function Meadow({ still = false, alt, alternate }: { still?: boolean; alt
         <source src={source} type="video/mp4" />
       </video>}
       <canvas ref={soft} className="meadow-soft" aria-hidden="true" />
-      {photo && <div className="meadow-alternate" style={{ '--focus': photo.focus ?? '50% 40%' } as React.CSSProperties}>
-        <img ref={second} src={photo.src} alt={opened ? photo.alt : ''} aria-hidden={!opened} width={photo.width} height={photo.height} loading="lazy" decoding="async" />
-        <img className="meadow-alternate-soft" src={photo.src} alt="" aria-hidden="true" loading="lazy" decoding="async" />
-      </div>}
       <div className="tint" aria-hidden="true" />
       <div className="grain" aria-hidden="true" />
     </div>
+    {photo && <div className="meadow-alternate" style={ovalFor(photo)}>
+      <img ref={second} src={photo.src} alt={opened ? photo.alt : ''} aria-hidden={!opened} width={photo.width} height={photo.height} loading="lazy" decoding="async" />
+    </div>}
     {alternate && <button type="button" className="alternate-toggle" aria-pressed={opened} onClick={event => { event.stopPropagation(); open(!opened) }}>
       {alternate.label}
     </button>}

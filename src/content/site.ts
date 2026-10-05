@@ -7,6 +7,8 @@ export const site = {
   linkedin: 'https://www.linkedin.com/in/micah-vanewyk-1408681a3/',
   instagram: 'https://www.instagram.com/micah.vanewyk/',
   location: 'Southwestern Ontario, Canada',
+  // The music's composer, credited in the footer as he asks.
+  musicBy: { name: 'DM DOKURO', href: 'https://www.youtube.com/@DMDOKURO' },
 }
 
 export const navigation = [

@@ -63,7 +63,12 @@ export default function App({ initialPath = '/' }: { initialPath?: string }) {
       </main>
       <footer className="site-footer">
         <div className="footer-meta">
-          <span>© {new Date().getFullYear()} {site.name} <span className="alias">/ {site.alias}</span></span>
+          <span className="footer-credits">
+            <span>© {new Date().getFullYear()} {site.name} <span className="alias">/ {site.alias}</span></span>
+            <span className="music-credit">
+              Music by <a href={site.musicBy.href}>{site.musicBy.name}<span className="credit-note" aria-hidden="true">Go support him! ♪</span></a>
+            </span>
+          </span>
           <span className="footer-links">
             <a href={site.linkedin} aria-label="LinkedIn"><LinkedInIcon /></a>
             <a href={site.github} aria-label="GitHub"><GitHubIcon /></a>

@@ -813,6 +813,46 @@ video.meadow-source.is-playing {
   font-size: .88rem;
 }
 
+.footer-credits {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: baseline;
+  gap: 4px 0;
+}
+
+.music-credit::before {
+  content: '|';
+  margin: 0 .7em;
+  color: var(--rule);
+}
+
+.music-credit a {
+  position: relative;
+  color: var(--walnut);
+  text-decoration: none;
+  border-bottom: 1px solid currentColor;
+}
+
+/* A note that slides out beside his name on hover. */
+.credit-note {
+  position: absolute;
+  left: calc(100% + 10px);
+  bottom: 0;
+  white-space: nowrap;
+  color: var(--walnut);
+  font-style: italic;
+  opacity: 0;
+  translate: -6px 0;
+  pointer-events: none;
+  transition: opacity .25s ease, translate .35s var(--ease);
+}
+
+.music-credit a:hover .credit-note,
+.music-credit a:focus-visible .credit-note {
+  opacity: 1;
+  translate: 0 0;
+}
+
 .footer-meta .alias {
   margin: 0;
 }

@@ -98,11 +98,11 @@ const together: Photo[] = [
   { src: '/media/personal/doorway.jpg', width: 1204, height: 1400, faces: [[0.37, 0.43], [0.55, 0.24]], face: 0.09, alt: 'Micah and Jessie smiling in front of a wooden door in a stone wall' },
   { src: '/media/personal/selfie.jpg', width: 1050, height: 1400, faces: [[0.25, 0.66], [0.68, 0.25]], face: 0.15, alt: 'A selfie of Jessie and Micah under a grey sky, with autumn trees behind' },
   { src: '/media/personal/lift.jpg', width: 866, height: 1300, faces: [[0.37, 0.33], [0.55, 0.28]], oval: { cx: 0.5, cy: 0.5, rx: 0.8, ry: 0.56, angle: 90 }, alt: 'Micah lifting Jessie off her feet under yellow autumn leaves' },
-  { src: '/media/personal/oak.jpg', width: 1400, height: 1096, faces: [[0.28, 0.55], [0.53, 0.3]], face: 0.1, alt: 'Jessie and Micah smiling in front of a big oak tree in autumn' },
+  { src: '/media/personal/oak.jpg', frame: 1.08, width: 1400, height: 1096, faces: [[0.28, 0.55], [0.53, 0.3]], face: 0.1, alt: 'Jessie and Micah smiling in front of a big oak tree in autumn' },
   { src: '/media/personal/hug.jpg', width: 932, height: 1400, faces: [[0.62, 0.6], [0.62, 0.16]], face: 0.17, alt: 'Micah and Jessie hugging and laughing on a bright day' },
-  { src: '/media/personal/look.jpg', width: 1400, height: 1166, faces: [[0.42, 0.33], [0.56, 0.6]], face: 0.12, alt: 'Micah holding Jessie’s face as she smiles up at him, by a field of tall grass' },
-  { src: '/media/personal/forehead.jpg', width: 1400, height: 1166, faces: [[0.4, 0.45], [0.57, 0.52]], face: 0.15, alt: 'Micah and Jessie with their foreheads together, smiling, outside on a sunny day' },
-  { src: '/media/personal/door-wide.jpg', width: 1400, height: 1380, faces: [[0.37, 0.41], [0.6, 0.2]], face: 0.09, alt: 'Jessie and Micah standing arm in arm at a wooden door' },
+  { src: '/media/personal/look.jpg', frame: 1.1, width: 1400, height: 1166, faces: [[0.42, 0.33], [0.56, 0.6]], face: 0.12, alt: 'Micah holding Jessie’s face as she smiles up at him, by a field of tall grass' },
+  { src: '/media/personal/forehead.jpg', frame: 1.0, width: 1400, height: 1166, faces: [[0.4, 0.45], [0.57, 0.52]], face: 0.15, alt: 'Micah and Jessie with their foreheads together, smiling, outside on a sunny day' },
+  { src: '/media/personal/door-wide.jpg', frame: 1.15, width: 1400, height: 1380, faces: [[0.37, 0.41], [0.6, 0.2]], face: 0.09, alt: 'Jessie and Micah standing arm in arm at a wooden door' },
 ]
 
 function About() {

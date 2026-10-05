@@ -28,6 +28,9 @@ const softWidth = 256
 // How much of each new frame goes into the glow, so it drifts rather than flickers.
 const glowBlend = 0.35
 const glowSaturation = 1.35
+// The readable range for the glow's brightness (0–255), on light and on dark paper.
+const glowFloor = 150
+const glowCeiling = 96
 
 // The video is cropped like CSS object-fit: cover, at the same focus point as the <img> and <video>.
 function cover(source: CanvasImageSource, width: number, height: number) {
@@ -83,10 +86,14 @@ function startEffects(video: HTMLVideoElement | null, still: HTMLImageElement, s
       if (!withGlow) return
       sampleContext.drawImage(soft, 0, 0, glowWidth, glowHeight)
       const pixels = sampleContext.getImageData(0, 0, glowWidth, glowHeight).data
+      // The glow sits behind text, so it's kept to tones the text stays readable on: never darker
+      // than a mid tone on light paper, never lighter than one on dark paper.
+      const dark = document.documentElement.getAttribute('data-theme') === 'dark'
       for (let i = 0, j = 0; i < pixels.length; i += 4, j += 3) {
         const r = pixels[i], g = pixels[i + 1], b = pixels[i + 2]
         const light = 0.2126 * r + 0.7152 * g + 0.0722 * b
-        const rgb = [light + (r - light) * glowSaturation, light + (g - light) * glowSaturation, light + (b - light) * glowSaturation]
+        const shift = dark ? Math.min(0, glowCeiling - light) : Math.max(0, glowFloor - light)
+        const rgb = [light + (r - light) * glowSaturation + shift, light + (g - light) * glowSaturation + shift, light + (b - light) * glowSaturation + shift]
         for (let c = 0; c < 3; c++) mixed[j + c] = first ? rgb[c] : mixed[j + c] + (rgb[c] - mixed[j + c]) * blend
       }
       first = false
@@ -153,6 +160,20 @@ export interface Photo {
   src: string; alt: string; width: number; height: number
   faces: [[number, number], [number, number]]; face?: number
   oval?: { cx: number; cy: number; rx: number; ry: number; angle: number }
+  // A wide photo can be shown in a narrower, taller frame (height ÷ width); it's cropped at the
+  // sides, centred between the faces.
+  frame?: number
+}
+
+// The frame's proportions, and where the photo's sides are cropped to fit it (0 = left, 1 = right).
+function frameOf(photo: Photo) {
+  const ratio = photo.height / photo.width
+  const frame = Math.max(photo.frame ?? ratio, ratio)
+  const middle = (photo.faces[0][0] + photo.faces[1][0]) / 2
+  // How much wider than the frame the photo is drawn, and the share of that cropped on the left.
+  const drawn = frame / ratio
+  const focus = drawn > 1 ? Math.min(Math.max((middle * drawn - 0.5) / (drawn - 1), 0), 1) : 0.5
+  return { frame, drawn, focus }
 }
 
 // A soft oval tilted along the line between the two faces, large enough that both sit in its clear
@@ -160,22 +181,25 @@ export interface Photo {
 // flash unmasked), with the photo inside turned back the other way so it stays upright.
 // Everything is in percentages of the frame, which has the photo's proportions.
 function ovalFor(photo: Photo) {
-  const ratio = photo.height / photo.width
+  const { frame: ratio, drawn, focus } = frameOf(photo)
   const H = 100 * ratio
+  // Photo positions (fractions) to frame positions, after the side crop.
+  const toFrame = (x: number) => x * drawn - (drawn - 1) * focus
   let cx: number, cy: number, rx: number, ry: number, angle: number
   if (photo.oval) {
     ({ cx, cy, rx, ry, angle } = photo.oval)
-    cx *= 100; cy *= H; rx *= 100; ry *= 100
+    cx = toFrame(cx) * 100; cy *= H; rx *= 100; ry *= 100
   } else {
-    const [[x1, y1], [x2, y2]] = photo.faces.map(([x, y]) => [x * 100, y * H])
-    const face = (photo.face ?? 0.11) * 100
+    const [[x1, y1], [x2, y2]] = photo.faces.map(([x, y]) => [toFrame(x) * 100, y * H])
+    const face = (photo.face ?? 0.11) * drawn * 100
     cx = (x1 + x2) / 2
     // A little below the middle of the faces, to take in shoulders and arms.
     cy = (y1 + y2) / 2 + face * 0.6
     const half = Math.hypot(x2 - x1, y2 - y1) / 2
-    // The middle 60% of the oval is fully clear: both faces, with room around them.
-    rx = Math.min((half + face * 1.5) / 0.6, 72)
-    ry = Math.max((face * 2.4) / 0.6, rx * 0.8)
+    // The middle 62% of the oval is fully clear: both faces, with room around them. Generous, as
+    // the frame's own edges fade softly anyway.
+    rx = Math.min((half + face * 1.7) / 0.62, 86)
+    ry = Math.max((face * 2.6) / 0.62, rx * 0.84)
     angle = Math.atan2(y2 - y1, x2 - x1) * 180 / Math.PI
   }
   const pct = (value: number) => `${value.toFixed(2)}%`
@@ -186,6 +210,7 @@ function ovalFor(photo: Photo) {
       left: pct(-(cx - rx) / (2 * rx) * 100), top: pct(-(cy - ry) / (2 * ry) * 100),
       width: pct(100 / (2 * rx) * 100), height: pct(H / (2 * ry) * 100),
       transformOrigin: `${pct(cx)} ${pct(cy / H * 100)}`, rotate: `${(-angle).toFixed(1)}deg`,
+      objectPosition: `${pct(focus * 100)} 50%`,
     },
   }
 }
@@ -405,7 +430,7 @@ export function Meadow({ still = false, alt, alternate }: { still?: boolean; alt
   } : {}
   return <figure
     className={`meadow${alternate ? ' has-alternate' : ''}${opened ? ' is-opened' : ''}`}
-    style={photo ? { '--open-ratio': photo.height / photo.width } as React.CSSProperties : undefined}
+    style={photo ? { '--open-ratio': frameOf(photo).frame } as React.CSSProperties : undefined}
     {...hover}
   >
     <canvas ref={glow} className="meadow-ambient" width={glowWidth} height={glowHeight} aria-hidden="true" />

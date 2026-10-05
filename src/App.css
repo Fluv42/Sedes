@@ -380,10 +380,11 @@ video.meadow-source.is-playing {
   position: absolute;
   inset: -5%;
   --hole: -14%;
-  /* Three gradient masks, all needed: a fade towards each pair of edges (so no edge of the photo
-     ever shows as a line) and the hole that opens from the middle of the faces. */
-  -webkit-mask-image: linear-gradient(90deg, transparent, #000 11%, #000 89%, transparent), linear-gradient(transparent, #000 9%, #000 91%, transparent), radial-gradient(ellipse farthest-corner at var(--hole-x) var(--hole-y), #000 var(--hole), transparent calc(var(--hole) + 14%));
-  mask-image: linear-gradient(90deg, transparent, #000 11%, #000 89%, transparent), linear-gradient(transparent, #000 9%, #000 91%, transparent), radial-gradient(ellipse farthest-corner at var(--hole-x) var(--hole-y), #000 var(--hole), transparent calc(var(--hole) + 14%));
+  /* Four gradient masks, all needed: a fade towards each pair of edges (so no edge of the photo
+     ever shows as a line), a round one that softens the corners where those meet, and the hole
+     that opens from the middle of the faces. */
+  -webkit-mask-image: linear-gradient(90deg, transparent, #000 11%, #000 89%, transparent), linear-gradient(transparent, #000 9%, #000 91%, transparent), radial-gradient(ellipse 71% 71% at 50% 50%, #000 74%, rgb(0 0 0 / .5) 88%, transparent), radial-gradient(ellipse farthest-corner at var(--hole-x) var(--hole-y), #000 var(--hole), transparent calc(var(--hole) + 14%));
+  mask-image: linear-gradient(90deg, transparent, #000 11%, #000 89%, transparent), linear-gradient(transparent, #000 9%, #000 91%, transparent), radial-gradient(ellipse 71% 71% at 50% 50%, #000 74%, rgb(0 0 0 / .5) 88%, transparent), radial-gradient(ellipse farthest-corner at var(--hole-x) var(--hole-y), #000 var(--hole), transparent calc(var(--hole) + 14%));
   -webkit-mask-composite: source-in;
   mask-composite: intersect;
   transition: --hole .9s cubic-bezier(.5, 0, .25, 1);
@@ -410,14 +411,30 @@ video.meadow-source.is-playing {
   object-fit: cover;
 }
 
-/* The field steps back while a photo is open, so only the photo's own oval shows. */
+/* The field steps back quickly while a photo opens (so it never shows around the photo's oval),
+   and comes back as the photo closes. */
 .meadow.has-alternate .meadow-stage {
-  transition: opacity .9s ease;
+  transition: opacity .55s ease .5s;
 }
 
 .meadow.has-alternate.is-opened .meadow-stage {
   opacity: 0;
-  transition-duration: 1.1s;
+  transition: opacity .45s ease-out;
+}
+
+/* While a photo is open its colours reach further, behind the text beside it. */
+.meadow.has-alternate .meadow-ambient {
+  transition: opacity 1.2s ease;
+}
+
+.meadow.has-alternate.is-opened .meadow-ambient {
+  opacity: min(1, calc(var(--ambient) * 1.35));
+}
+
+@media (min-width: 901px) {
+  .about .meadow-ambient {
+    width: 380%;
+  }
 }
 
 /* The frame grows to the photo's own shape, up to most of the screen's height, and the page

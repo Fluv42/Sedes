@@ -9,7 +9,8 @@ import { usePath } from './lib/router'
 import { scrollToTop, startSmoothScroll, watchParallax, watchReveals } from './lib/motion'
 import { PageRoute } from './pages'
 import { nextSoundMode, setHomePage, soundLabel, startMusic, useSound } from './lib/music'
-import { toggleTheme, useTheme } from './lib/theme'
+import { followClock, toggleTheme, useTheme } from './lib/theme'
+import { checkDaypart, subscribeDaypart } from './lib/daypart'
 import { useQuality } from './lib/quality'
 import { getPageTitle } from './lib/routes'
 import './App.css'
@@ -34,6 +35,9 @@ export default function App({ initialPath = '/' }: { initialPath?: string }) {
   // The field sound plays under the home page's picture only; the song carries on everywhere.
   useEffect(() => setHomePage(path === '/'), [path])
   useEffect(() => startMusic(), [])
+  // A page left open moves on with the clock (lib/daypart.ts): check it on every page change too.
+  useEffect(() => subscribeDaypart(followClock), [])
+  useEffect(() => checkDaypart(), [path])
 
   useEffect(() => {
     document.title = `${title} | Sedes`

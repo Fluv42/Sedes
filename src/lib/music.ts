@@ -1,5 +1,5 @@
 import { useSyncExternalStore } from 'react'
-import { daypartNow } from './daypart'
+import { daypartNow, subscribeDaypart } from './daypart'
 import type { Daypart } from './daypart'
 
 // Background sound in two layers: the song, and under it a field recording that matches the
@@ -39,6 +39,7 @@ interface Layer {
   pause(): void
   silence(): void
   fadeTo(to: number, ms: number, then?: () => void): void
+  close?(): void
 }
 
 function songLayer(): Layer {
@@ -99,6 +100,7 @@ function fieldLayer(src: string, volume: number): Layer {
       })
     },
     pause() { running = false; clearTimeout(done); context.suspend() },
+    close() { running = false; clearTimeout(done); context.close().catch(() => {}) },
     ...(import.meta.env.DEV ? { context, gain } : {}),
     silence() { clearTimeout(done); gain.gain.cancelScheduledValues(context.currentTime); gain.gain.setValueAtTime(0, context.currentTime) },
     fadeTo(to, ms, then) {
@@ -123,6 +125,16 @@ function all() {
   if (!layers) {
     const daypart = daypartNow()
     layers = [fieldLayer(ambience[daypart], fieldLevel[daypart]), songLayer()]
+    // When the part of the day turns over, the old recording fades out and the new one fades in.
+    subscribeDaypart(() => {
+      const next = daypartNow()
+      const old = all()[0]
+      clearTimeout(old.timer)
+      all()[0] = fieldLayer(ambience[next], fieldLevel[next])
+      if (old.playing()) old.fadeTo(0, fadeOut * 2, () => old.close?.())
+      else old.close?.()
+      apply()
+    })
     document.addEventListener('visibilitychange', () => {
       if (document.hidden) all().forEach(layer => { clearTimeout(layer.timer); layer.pause() })
       else apply(true)

@@ -1,8 +1,8 @@
-import { useEffect, useRef, useState, useSyncExternalStore } from 'react'
+import { useEffect, useRef, useState } from 'react'
 import { nextSoundMode, soundLabel, useSound } from '../lib/music'
 import { toggleTheme, useTheme } from '../lib/theme'
 import { qualityLabel, stepDownQuality, toggleQuality, useQuality } from '../lib/quality'
-import { daypartNow } from '../lib/daypart'
+import { useDaypart } from '../lib/daypart'
 import type { Daypart } from '../lib/daypart'
 
 // Four fields, chosen by the visitor's own clock (lib/daypart.ts): a foggy sunrise, sun through
@@ -15,7 +15,6 @@ const clips: Record<Daypart, { video: string; poster: string; alt: string }> = {
   night: { video: '/media/field-night.mp4', poster: '/media/field-night.jpg', alt: 'Stars and drifting cloud over a field with fence posts and birch trees at night' },
 }
 type Clip = Daypart
-const noSubscription = () => () => {}
 const motionQuery = '(prefers-reduced-motion: reduce)'
 
 // The glow is worked out at 32 × 18 pixels and the soft edge at 256 pixels across; the browser
@@ -136,19 +135,22 @@ function startEffects(video: HTMLVideoElement | null, still: HTMLImageElement, s
 // The hero describes whichever field is showing; a still (About) can pass its own description.
 export function Meadow({ still = false, alt }: { still?: boolean; alt?: string }) {
   const [playing, setPlaying] = useState(false)
-  const [unavailable, setUnavailable] = useState(false)
+  // The clip whose video couldn't be loaded (the still shows instead), and how many times the
+  // still itself has been retried.
+  const [failed, setFailed] = useState<Clip | null>(null)
+  const [stillTries, setStillTries] = useState(0)
+  const stillTimer = useRef(0)
   const sound = useSound()
   const theme = useTheme()
   const quality = useQuality()
-  // The server can't know the visitor's time, so the page is built with the evening clip and
-  // switches during hydration to the one for their clock.
-  const clip = useSyncExternalStore(noSubscription, daypartNow, () => 'evening' as Clip)
+  // The visitor's own time of day (evening on the server), kept up to date while the page is open.
+  const clip = useDaypart()
   const { video: source, poster } = clips[clip]
   const video = useRef<HTMLVideoElement>(null)
   const image = useRef<HTMLImageElement>(null)
   const soft = useRef<HTMLCanvasElement>(null)
   const glow = useRef<HTMLCanvasElement>(null)
-  const showVideo = !still && !unavailable
+  const showVideo = !still && failed !== clip
 
   useEffect(() => {
     if (still) return
@@ -162,8 +164,9 @@ export function Meadow({ still = false, alt }: { still?: boolean; alt?: string }
 
   // Playback, with a watchdog. While the video should be playing (it's wanted, on screen and the
   // tab is open) it is checked every two seconds: paused by the browser → play again; stuck on one
-  // frame → ask for the data again, then reload it where it was; failing to load twice → keep the
-  // still picture. If the computer is dropping a lot of frames, Pretty steps down to Performance.
+  // frame → ask for the data again, then reload it where it was; failing to load → try again a
+  // little later, or as soon as the connection is back (a computer waking from sleep asks before
+  // its network is up); after three failures keep the still until the connection or tab returns. If the computer is dropping a lot of frames, Pretty steps down to Performance.
   useEffect(() => {
     const element = video.current
     if (!element) return
@@ -174,17 +177,24 @@ export function Meadow({ still = false, alt }: { still?: boolean; alt?: string }
     let lastTime = -1
     let lastQuality: VideoPlaybackQuality | undefined = element.getVideoPlaybackQuality?.()
     let struggling = 0
-    const give = () => { setUnavailable(true); setPlaying(false) }
+    let waiting = 0
+    const give = () => { setFailed(clip); setPlaying(false) }
     // An interrupted play() (a quick pause, or React re-running effects) is not a failure. A
     // refusal (iOS Low Power Mode won't autoplay) leaves the still and a Play button.
     const resume = () => element.play().catch((error: DOMException) => { if (error.name !== 'AbortError') setPlaying(false) })
     const wanted = () => inView && !document.hidden
     const reload = () => {
-      if (retries++ >= 2) return give()
-      const at = element.currentTime
-      element.load()
-      element.addEventListener('loadedmetadata', () => { element.currentTime = at }, { once: true })
-      resume()
+      if (waiting) return
+      if (!navigator.onLine) { window.addEventListener('online', reload, { once: true }); return }
+      if (retries++ >= 3) return give()
+      // Spaced out, so a short outage doesn't use up every try at once.
+      waiting = window.setTimeout(() => {
+        waiting = 0
+        const at = element.currentTime
+        element.load()
+        element.addEventListener('loadedmetadata', () => { element.currentTime = at }, { once: true })
+        resume()
+      }, 1500 * retries)
     }
     const update = () => { if (wanted()) { if (element.paused) resume() } else element.pause() }
     const check = () => {
@@ -221,6 +231,8 @@ export function Meadow({ still = false, alt }: { still?: boolean; alt?: string }
     if (figure) watcher?.observe(figure)
     return () => {
       window.clearInterval(timer)
+      window.clearTimeout(waiting)
+      window.removeEventListener('online', reload)
       watcher?.disconnect()
       element.removeEventListener('error', reload)
       sourceElement?.removeEventListener('error', reload)
@@ -228,15 +240,37 @@ export function Meadow({ still = false, alt }: { still?: boolean; alt?: string }
     }
   }, [playing, clip])
 
+  // After the video has given up, try it again once the connection or the tab comes back.
+  useEffect(() => {
+    if (failed !== clip) return
+    const retry = () => {
+      if (!navigator.onLine || document.hidden) return
+      setFailed(null)
+      setPlaying(!window.matchMedia(motionQuery).matches)
+    }
+    window.addEventListener('online', retry)
+    document.addEventListener('visibilitychange', retry)
+    return () => { window.removeEventListener('online', retry); document.removeEventListener('visibilitychange', retry) }
+  }, [failed, clip])
+
+  // The still retries too: a few seconds later, or when the connection is back.
+  const retryStill = () => {
+    window.clearTimeout(stillTimer.current)
+    const again = () => setStillTries(tries => tries + 1)
+    if (!navigator.onLine) window.addEventListener('online', again, { once: true })
+    else if (stillTries < 5) stillTimer.current = window.setTimeout(again, 3000)
+  }
+  useEffect(() => () => window.clearTimeout(stillTimer.current), [])
+
   useEffect(() => {
     if (quality === 'fast' || !image.current || !soft.current || !glow.current) return
     return startEffects(video.current, image.current, soft.current, glow.current)
-  }, [clip, quality, showVideo, still])
+  }, [clip, quality, showVideo, still, stillTries])
 
   return <figure className="meadow">
     <canvas ref={glow} className="meadow-ambient" width={glowWidth} height={glowHeight} aria-hidden="true" />
     <div className="meadow-stage">
-      <img ref={image} className="meadow-source" src={poster} alt={alt ?? clips[clip].alt} width="1280" height="720" fetchPriority="high" />
+      <img ref={image} className="meadow-source" src={stillTries ? `${poster}?try=${stillTries}` : poster} onError={retryStill} alt={alt ?? clips[clip].alt} width="1280" height="720" fetchPriority="high" />
       {showVideo && <video
         key={clip} ref={video} className={`meadow-source${playing ? ' is-playing' : ''}`}
         muted loop playsInline preload="metadata" poster={poster} aria-hidden="true"

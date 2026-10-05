@@ -1,7 +1,9 @@
 import { useSyncExternalStore } from 'react'
+import { daypartNow } from './daypart'
 
 // Light or dark. Set before paint by the script in index.html from the time of day (dark at
-// night, light otherwise) on every load; the Light/Dark button switches it until the next load.
+// night, light otherwise) on every load, and it moves with the clock if the page stays open
+// (followClock). The Light/Dark button switches it until the next load.
 export type Theme = 'light' | 'dark'
 const query = '(prefers-color-scheme: dark)'
 const listeners = new Set<() => void>()
@@ -24,9 +26,22 @@ let fading = 0
 // together. Element-by-element colour transitions drifted apart: anything that sets its own colour
 // only started its fade once the page's had finished. Browsers without view transitions fall back
 // to those (html.theme-fading in index.css); with reduced motion it simply switches.
+// Switched by hand during this visit: the clock no longer changes it.
+let chosen = false
+
 export function toggleTheme() {
+  chosen = true
+  switchTheme(current() === 'dark' ? 'light' : 'dark')
+}
+
+// Called when the part of the day changes while the page is open.
+export function followClock() {
+  const wanted: Theme = daypartNow() === 'night' ? 'dark' : 'light'
+  if (!chosen && wanted !== current()) switchTheme(wanted)
+}
+
+function switchTheme(next: Theme) {
   const root = document.documentElement
-  const next: Theme = current() === 'dark' ? 'light' : 'dark'
   const apply = () => {
     root.setAttribute('data-theme', next)
     paintThemeColor()

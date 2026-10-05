@@ -20,7 +20,7 @@ Goal: wireframe 1 (Home) done properly, and the "vibe-coded" feel removed.
 - **Current page** gets a hand-drawn rust underline that draws itself (`Squiggle.tsx`).
 - **Projects** use sun-print plates (`SunPrint.tsx`): pale botanical silhouettes on tea-toned paper, different tone per motif. Hover warms the plate and tilts it slightly.
 - **Footer** is a low line of grass that sways in four clumps (`Grass.tsx`), then © and GitHub · Email.
-- **Removed AI tells the brief bans:** uppercase mono eyebrows, numbered entries, "01 / Sedes" captions, cover labels, the colophon, the extra subtitles on every page. Plex Mono is no longer loaded.
+- **Removed AI tells the brief bans:** uppercase mono eyebrows, numbered entries, "01 / Sedes" captions, cover labels, the colophon, the extra subtitles on every page. The site now uses one typeface, Libron.
 - **Pages:** Projects index, project page (crumb, facts list, job/built/wrong/ended sections, next project), About (picture + short first-person prose), Notes, Contact (email large, GitHub, phone), 404.
 - **Code:** pages and App rewritten as readable JSX (the Codex version was one-line blobs); CSS rewritten from scratch (about 800 lines vs 1,100). Pre-rendered pages now hydrate instead of being thrown away and re-rendered.
 

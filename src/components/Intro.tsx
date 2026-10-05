@@ -64,8 +64,8 @@ export function Intro() {
     }
 
     const begin = () => { if (!cancelled) timers.push(window.setTimeout(pullBack, draw + hold)) }
-    // Start writing once the typeface is in, so the letters are drawn in IM Fell, not a fallback.
-    const fonts = document.fonts?.load('400 120px "IM Fell English"') ?? Promise.resolve()
+    // Start writing once the typeface is in, so the letters are drawn in Libron, not a fallback.
+    const fonts = document.fonts?.load('400 120px "Libron"') ?? Promise.resolve()
     Promise.race([fonts, new Promise(resolve => setTimeout(resolve, 700))]).then(() => {
       root.classList.add('intro-writing')
       begin()

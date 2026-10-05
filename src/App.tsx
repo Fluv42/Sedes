@@ -2,7 +2,7 @@ import { useEffect, useRef } from 'react'
 import { navigation, site } from './content/site'
 import { Link } from './components/Link'
 import { Stalk } from './components/Stalk'
-import { GitHubIcon, InstagramIcon, LinkedInIcon, MailIcon, MoonIcon, SunIcon } from './components/Icons'
+import { GitHubIcon, HeartIcon, InstagramIcon, LinkedInIcon, MailIcon, MoonIcon, SunIcon } from './components/Icons'
 import { Cursor } from './components/Cursor'
 import { Intro } from './components/Intro'
 import { usePath } from './lib/router'
@@ -86,7 +86,8 @@ export default function App({ initialPath = '/' }: { initialPath?: string }) {
             <span>© {new Date().getFullYear()} {site.name} <span className="alias">/ {site.alias}</span></span>
             <span className="music-credit">
               <button className="music-toggle" type="button" onClick={nextSoundMode} title={`Sound: ${soundLabel(sound)}`}>
-                <span aria-hidden="true">{sound.mode === 'off' ? '♪̸' : '♪'}</span><span className="visually-hidden">Sound: {soundLabel(sound)}</span>
+                {/* A heart for the music: filled while sound is on, outlined when muted. */}
+                <HeartIcon filled={sound.mode !== 'off'} /><span className="visually-hidden">Sound: {soundLabel(sound)}</span>
               </button>
               Music by <a href={site.musicBy.href}>{site.musicBy.name}</a>
               <a className="credit-note" href={site.musicBy.songHref} title={site.musicBy.original}>♪ {site.musicBy.song}</a>

@@ -1112,7 +1112,7 @@ video.meadow-source.is-playing {
 
 .music-credit::before {
   content: '|';
-  margin: 0 .7em;
+  margin: 0 .55em;
   color: var(--rule);
 }
 
@@ -1123,14 +1123,23 @@ video.meadow-source.is-playing {
 .music-toggle {
   display: inline-grid;
   place-items: center;
-  width: 1.5em;
-  margin-right: .35em;
+  /* The same space on either side: from the divider, and to "Music by". */
+  margin-right: .55em;
   padding: 0;
-  font: inherit;
-  font-size: .8rem;
   color: var(--walnut);
   background: none;
   border: 0;
+  vertical-align: -.1em;
+  transition: scale .2s var(--ease);
+}
+
+.music-toggle svg {
+  width: .8em;
+  height: .8em;
+}
+
+.music-toggle:hover {
+  scale: 1.15;
 }
 
 .music-credit a {

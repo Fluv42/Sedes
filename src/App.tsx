@@ -8,7 +8,7 @@ import { Intro } from './components/Intro'
 import { usePath } from './lib/router'
 import { scrollToTop, startSmoothScroll, watchParallax, watchReveals } from './lib/motion'
 import { PageRoute } from './pages'
-import { nextSoundMode, setHomePage, soundLabel, startMusic, useSound } from './lib/music'
+import { setHomePage, soundLabel, startMusic, toggleAllSound, useSound } from './lib/music'
 import { followClock, toggleTheme, useTheme } from './lib/theme'
 import { checkDaypart, subscribeDaypart } from './lib/daypart'
 import { useQuality } from './lib/quality'
@@ -85,7 +85,7 @@ export default function App({ initialPath = '/' }: { initialPath?: string }) {
           <span className="footer-credits">
             <span>© {new Date().getFullYear()} {site.name} <span className="alias">/ {site.alias}</span></span>
             <span className="music-credit">
-              <button className="music-toggle" type="button" onClick={nextSoundMode} title={`Sound: ${soundLabel(sound)}`}>
+              <button className="music-toggle" type="button" onClick={toggleAllSound} title={sound.mode === 'off' ? 'Sound off: turn it on' : 'Sound on: turn it off'}>
                 {/* A heart for the music: filled while sound is on, outlined when muted. */}
                 <HeartIcon filled={sound.mode !== 'off'} /><span className="visually-hidden">Sound: {soundLabel(sound)}</span>
               </button>

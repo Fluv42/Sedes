@@ -121,6 +121,10 @@ body {
   margin: 0;
   min-width: 320px;
   background: var(--paper);
+  /* The page reaches the screen's edges (viewport-fit=cover); in landscape on a phone, keep text
+     clear of the camera cut-out. */
+  padding-left: env(safe-area-inset-left);
+  padding-right: env(safe-area-inset-right);
 }
 
 /* Switching light/dark (src/lib/theme.ts): the page before and after dissolve into each other. */

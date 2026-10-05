@@ -1,7 +1,6 @@
 import { useEffect, useRef, useState } from 'react'
 import { stopSmoothScroll, resumeSmoothScroll } from '../lib/motion'
-import { nextSoundMode, soundLabel, useSound } from '../lib/music'
-import { qualityLabel, toggleQuality, useQuality } from '../lib/quality'
+import { QualityButton, SoundPill } from './Controls'
 
 // The home page opens on the meadow, filling the screen, while "Sedes" is written across it.
 // Then it waits: near the bottom is a down arrow, and under the name are the Sound and
@@ -19,9 +18,55 @@ const overscan = 1.28
 // The stage reaches past its frame by this much on every side (.meadow-stage inset in App.css).
 const bleed = 0.08
 
+// The height of the screen with the browser's bars hidden (100lvh), measured with a probe.
+function largeViewportHeight() {
+  const probe = document.createElement('div')
+  probe.style.cssText = 'position:fixed;top:0;height:100lvh;width:0;visibility:hidden;pointer-events:none'
+  document.body.append(probe)
+  const height = probe.getBoundingClientRect().height
+  probe.remove()
+  return height
+}
+
+// Where a phone's browser still paints its own colour around the page (above it, under the
+// status bar, and around its toolbar), match the picture's top and bottom edges while the intro
+// fills the screen, rather than leaving bands of paper. Undone when the page is shown.
+function tintEdges(image: HTMLImageElement | null) {
+  const meta = document.querySelector<HTMLMetaElement>('meta[name="theme-color"]')
+  const root = document.documentElement
+  const apply = () => {
+    if (!image?.naturalWidth) return
+    try {
+      const canvas = document.createElement('canvas')
+      canvas.width = 8
+      canvas.height = 8
+      const context = canvas.getContext('2d', { willReadFrequently: true })
+      if (!context) return
+      context.drawImage(image, 0, 0, 8, 8)
+      const average = (y: number) => {
+        const data = context.getImageData(0, y, 8, 1).data
+        const sum = [0, 0, 0]
+        for (let i = 0; i < data.length; i += 4) for (let c = 0; c < 3; c++) sum[c] += data[i + c]
+        return `rgb(${sum.map(value => Math.round(value / 8)).join(' ')})`
+      }
+      // Older Safari reads theme-color; newer Safari takes the colour of a fixed strip along the
+      // top edge, and of the page's background around its toolbar.
+      meta?.setAttribute('content', average(0))
+      root.style.setProperty('--edge-top', average(0))
+      root.style.backgroundColor = average(7)
+    } catch { /* leave the paper */ }
+  }
+  if (image?.complete) apply()
+  else image?.addEventListener('load', apply, { once: true })
+  return () => {
+    image?.removeEventListener('load', apply)
+    root.style.backgroundColor = ''
+    root.style.removeProperty('--edge-top')
+    meta?.setAttribute('content', getComputedStyle(root).getPropertyValue('--paper').trim())
+  }
+}
+
 export function Intro() {
-  const sound = useSound()
-  const quality = useQuality()
   // Set once the intro is actually running, so other pages don't carry its heading.
   const [live, setLive] = useState(false)
   const actions = useRef<HTMLDivElement>(null)
@@ -47,10 +92,14 @@ export function Intro() {
     const landings = ['.sound-control', '.quality-control'].map(name => document.querySelector<HTMLElement>(`.hero ${name}`))
     const width = box.width * (1 + 2 * bleed)
     const height = box.height * (1 + 2 * bleed)
-    const scale = overscan * Math.max(window.innerWidth / width, window.innerHeight / height)
+    // The whole screen, including what's behind Safari's bars on a phone (the large viewport),
+    // so the picture reaches under them rather than stopping at their edges.
+    const screenHeight = Math.max(window.innerHeight, largeViewportHeight())
+    const scale = overscan * Math.max(window.innerWidth / width, screenHeight / height)
     const cx = box.left + box.width / 2
     const cy = box.top + box.height / 2
-    const zoomedIn = `translate(${window.innerWidth / 2 - cx}px, ${window.innerHeight / 2 - cy}px) scale(${scale})`
+    const zoomedIn = `translate(${window.innerWidth / 2 - cx}px, ${screenHeight / 2 - cy}px) scale(${scale})`
+    const restoreEdges = tintEdges(frame.querySelector('img'))
     page.style.transformOrigin = `${cx}px ${cy}px`
     page.style.transform = zoomedIn
     // The page underneath can't be reached with Tab until it's shown.
@@ -70,6 +119,7 @@ export function Intro() {
       page.style.transform = ''
       page.style.transformOrigin = ''
       page.inert = false
+      restoreEdges()
       resumeSmoothScroll()
     }
 
@@ -84,7 +134,7 @@ export function Intro() {
       // Each intro button follows its hero button as the page moves: every frame it is placed a
       // growing share of the way from where it started to where that button is right now (and
       // scaled to its size), so at the end it sits exactly on top of it and the hand-over can't jump.
-      const buttons = [...(actions.current?.querySelectorAll('button') ?? [])]
+      const buttons = [...(actions.current?.children ?? [])] as HTMLElement[]
       const starts = buttons.map(button => button.getBoundingClientRect())
       const begin = performance.now()
       const follow = (now: number) => {
@@ -172,13 +222,8 @@ export function Intro() {
       <text x="320" y="160" textAnchor="middle" mask="url(#intro-hand)">Sedes</text>
     </svg>
     <div ref={actions} className="intro-actions">
-      <button type="button" className={sound.allowed && sound.mode === 'off' ? '' : 'is-on'} onClick={nextSoundMode}>
-        <span className="visually-hidden">Sound: </span>{soundLabel(sound)}
-      </button>
-      <button type="button" className={quality === 'pretty' ? 'is-on' : ''} onClick={toggleQuality}
-        title="Pretty: every effect. Performance: lighter on older phones and laptops.">
-        <span className="visually-hidden">Effects: </span>{qualityLabel(quality)}
-      </button>
+      <SoundPill />
+      <QualityButton />
     </div>
     <button ref={next} type="button" className="intro-next" aria-label="Enter the site">
       <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M12 5v13M6 12l6 6 6-6" /></svg>

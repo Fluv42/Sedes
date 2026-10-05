@@ -1,16 +1,18 @@
 import type React from 'react'
 import { useEffect, useRef, useState } from 'react'
-import { nextSoundMode, soundLabel, useSound } from '../lib/music'
 import { toggleTheme, useTheme } from '../lib/theme'
-import { qualityLabel, stepDownQuality, toggleQuality, useQuality } from '../lib/quality'
+import { stepDownQuality, useQuality } from '../lib/quality'
+import { ControlButton, QualityButton, SoundPill } from './Controls'
+import { MoonIcon, PauseIcon, PlayIcon, SunIcon } from './Icons'
 import { useDaypart } from '../lib/daypart'
 import type { Daypart } from '../lib/daypart'
 
 // Four fields, chosen by the visitor's own clock (lib/daypart.ts): a foggy sunrise, sun through
 // the trees onto green grass, wheat at sunset, and stars over a field at night. Each file's last
 // 2 s crossfade into its first frame, so the plain loop has no visible jump.
-const clips: Record<Daypart, { video: string; poster: string; alt: string }> = {
-  morning: { video: '/media/field-morning.mp4', poster: '/media/field-morning.jpg', alt: 'The sun rising over a green field, with low fog and a line of trees' },
+// `glow` strengthens one clip's glow: the morning's grey fog otherwise fades into the paper.
+const clips: Record<Daypart, { video: string; poster: string; alt: string; glow?: { saturation: number; strength: number } }> = {
+  morning: { video: '/media/field-morning.mp4', poster: '/media/field-morning.jpg', alt: 'The sun rising over a green field, with low fog and a line of trees', glow: { saturation: 1.9, strength: 1.3 } },
   day: { video: '/media/field-day.mp4', poster: '/media/field-day.jpg', alt: 'Low sun shining through birch trees onto long green grass' },
   evening: { video: '/media/field-sunset.mp4', poster: '/media/field-sunset.jpg', alt: 'Rows of green wheat under a soft sunset' },
   night: { video: '/media/field-night.mp4', poster: '/media/field-night.jpg', alt: 'Stars and drifting cloud over a field with fence posts and birch trees at night' },
@@ -46,7 +48,7 @@ function cover(source: CanvasImageSource, width: number, height: number) {
 // Pretty mode: the soft edge (a small copy of the frame, stretched, shown only towards the edges)
 // and the glow (an even smaller copy, saturated, smoothed and blended with the frames before it).
 // Both are redrawn once per video frame, and not at all while the picture is off screen or still.
-function startEffects(video: HTMLVideoElement | null, still: HTMLImageElement, soft: HTMLCanvasElement, glow: HTMLCanvasElement) {
+function startEffects(video: HTMLVideoElement | null, still: HTMLImageElement, soft: HTMLCanvasElement, glow: HTMLCanvasElement, saturation = glowSaturation) {
   const none = { stop: () => {}, paint: () => {} }
   const softContext = soft.getContext('2d', { alpha: false })
   const glowContext = glow.getContext('2d', { alpha: false })
@@ -93,7 +95,7 @@ function startEffects(video: HTMLVideoElement | null, still: HTMLImageElement, s
         const r = pixels[i], g = pixels[i + 1], b = pixels[i + 2]
         const light = 0.2126 * r + 0.7152 * g + 0.0722 * b
         const shift = dark ? Math.min(0, glowCeiling - light) : Math.max(0, glowFloor - light)
-        const rgb = [light + (r - light) * glowSaturation + shift, light + (g - light) * glowSaturation + shift, light + (b - light) * glowSaturation + shift]
+        const rgb = [light + (r - light) * saturation + shift, light + (g - light) * saturation + shift, light + (b - light) * saturation + shift]
         for (let c = 0; c < 3; c++) mixed[j + c] = first ? rgb[c] : mixed[j + c] + (rgb[c] - mixed[j + c]) * blend
       }
       first = false
@@ -228,7 +230,6 @@ export function Meadow({ still = false, alt, alternate }: { still?: boolean; alt
   const [failed, setFailed] = useState<Clip | null>(null)
   const [stillTries, setStillTries] = useState(0)
   const stillTimer = useRef(0)
-  const sound = useSound()
   const theme = useTheme()
   const quality = useQuality()
   // The visitor's own time of day (evening on the server), kept up to date while the page is open.
@@ -387,7 +388,7 @@ export function Meadow({ still = false, alt, alternate }: { still?: boolean; alt
 
   useEffect(() => {
     if (quality === 'fast' || !image.current || !soft.current || !glow.current) return
-    const effects = startEffects(video.current, image.current, soft.current, glow.current)
+    const effects = startEffects(video.current, image.current, soft.current, glow.current, still ? undefined : clips[clip].glow?.saturation)
     repaint.current = effects.paint
     return () => { effects.stop(); repaint.current = () => {} }
   }, [clip, quality, showVideo, still, stillTries])
@@ -433,7 +434,10 @@ export function Meadow({ still = false, alt, alternate }: { still?: boolean; alt
     style={photo ? { '--open-ratio': frameOf(photo).frame } as React.CSSProperties : undefined}
     {...hover}
   >
-    <canvas ref={glow} className="meadow-ambient" width={glowWidth} height={glowHeight} aria-hidden="true" />
+    <canvas
+      ref={glow} className="meadow-ambient" width={glowWidth} height={glowHeight} aria-hidden="true"
+      style={!still && clips[clip].glow ? { '--glow-strength': clips[clip].glow.strength } as React.CSSProperties : undefined}
+    />
     <div className="meadow-stage">
       <img ref={image} className="meadow-source" src={stillTries ? `${poster}?try=${stillTries}` : poster} onError={retryStill} alt={alt ?? clips[clip].alt} width="1280" height="720" fetchPriority="high" />
       {showVideo && <video
@@ -456,24 +460,14 @@ export function Meadow({ still = false, alt, alternate }: { still?: boolean; alt
       {alternate.label}
     </button>}
     {!still && <div className="motion-control">
-      {showVideo && <button type="button" onClick={() => setPlaying(value => !value)}>
-        {playing ? 'Pause' : 'Play'}<span className="visually-hidden"> the meadow video</span>
-      </button>}
-      <button
-        type="button" onClick={nextSoundMode} title="Sound on, music only, ambient only, or muted"
-        className={`sound-control ${sound.allowed ? `sound-${sound.mode}` : 'sound-waiting'}`}
-      >
-        <span className="visually-hidden">Sound: </span>{soundLabel(sound)}
-      </button>
-      <button type="button" onClick={toggleTheme} aria-label={theme === 'dark' ? 'Switch to light mode' : 'Switch to dark mode'}>
-        {theme === 'dark' ? 'Light' : 'Dark'}
-      </button>
-      <button
-        type="button" onClick={toggleQuality} title="Pretty: every effect. Performance: lighter on older phones and laptops."
-        className={`quality-control quality-${quality}`}
-      >
-        <span className="visually-hidden">Effects: </span>{qualityLabel(quality)}
-      </button>
+      {showVideo && <ControlButton label={playing ? 'Pause the video' : 'Play the video'} onClick={() => setPlaying(value => !value)}>
+        {playing ? <PauseIcon /> : <PlayIcon />}
+      </ControlButton>}
+      <SoundPill />
+      <ControlButton label={theme === 'dark' ? 'Dark mode: switch to light' : 'Light mode: switch to dark'} onClick={toggleTheme}>
+        {theme === 'dark' ? <MoonIcon /> : <SunIcon />}
+      </ControlButton>
+      <QualityButton />
     </div>}
   </figure>
 }

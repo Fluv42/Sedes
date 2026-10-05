@@ -14,9 +14,13 @@ function current(): Theme {
   return window.matchMedia(query).matches ? 'dark' : 'light'
 }
 
+// The browser's own colour around the page (Safari's bars). While the intro fills the screen it's
+// the picture's top edge (set by Intro.tsx as --edge-top); otherwise it's the paper.
 function paintThemeColor() {
-  const paper = getComputedStyle(document.documentElement).getPropertyValue('--paper').trim()
-  document.querySelector('meta[name="theme-color"]')?.setAttribute('content', paper)
+  const root = document.documentElement
+  const edge = root.classList.contains('intro') ? root.style.getPropertyValue('--edge-top') : ''
+  const paper = getComputedStyle(root).getPropertyValue('--paper').trim()
+  document.querySelector('meta[name="theme-color"]')?.setAttribute('content', edge || paper)
 }
 
 let fading = 0

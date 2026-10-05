@@ -224,6 +224,8 @@ a:hover .arrow {
 
 .hero-media {
   position: relative;
+  /* Room under the picture for the Pause / Sound buttons. */
+  padding-bottom: 56px;
 }
 
 .meadow {
@@ -321,7 +323,8 @@ video.meadow-source.is-playing {
 .motion-control {
   position: absolute;
   left: 50%;
-  bottom: 9%;
+  /* Below the picture, on the paper, where they can always be read. */
+  top: calc(100% + 14px);
   translate: -50% 0;
   z-index: 3;
   display: flex;
@@ -895,6 +898,30 @@ video.meadow-source.is-playing {
   text-decoration: underline;
 }
 
+.inline-icon {
+  display: inline-grid;
+  place-items: center;
+  width: 1.4em;
+  height: 1.4em;
+  margin-left: .3em;
+  vertical-align: -.25em;
+  color: var(--walnut);
+  border: 0;
+  text-decoration: none;
+  transition: color .2s, translate .2s var(--ease);
+}
+
+.inline-icon:hover {
+  color: var(--ink);
+  translate: 0 -1px;
+}
+
+.inline-icon svg {
+  width: 1em;
+  height: 1em;
+  fill: currentColor;
+}
+
 .footer-meta .alias {
   margin: 0;
 }
@@ -1123,7 +1150,7 @@ html.intro-writing .intro-title text {
   }
 
   .hero-copy {
-    margin-top: -16px;
+    margin-top: 6px;
     padding-left: 0;
   }
 

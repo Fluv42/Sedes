@@ -236,6 +236,37 @@ a:hover .arrow {
 .mark-sedes { background: #8c6a3e; color: #f3ead6; }
 .mark-sedes svg { stroke-width: 3; }
 
+/* The logo on the Sedes project page: paper, ink and walnut, in the logo's own proportions
+   (the line is a tenth of the type size, just under the baseline, spanning the word). */
+.sedes-logo {
+  background: var(--paper-deep);
+  color: var(--ink);
+  border: 1px solid var(--rule);
+  font-family: var(--heading);
+  font-size: clamp(3rem, 7vw, 4.6rem);
+}
+
+/* The word sets the width; the stalk stretches to match it. */
+.sedes-logo > span {
+  display: flex;
+  flex-direction: column;
+  gap: .08em;
+  line-height: 1;
+}
+
+.sedes-logo .stalk {
+  --stalk: .102em;
+  padding-left: .05em;
+}
+
+/* Not the plain tiles' icon styling. */
+.sedes-logo .stalk-ear {
+  width: auto;
+  height: calc(var(--stalk) * 16 / 4.5);
+  fill: var(--walnut);
+  stroke: none;
+}
+
 .mark-monogram {
   background: var(--paper-deep);
   color: var(--ink);
@@ -335,6 +366,78 @@ video.meadow-source.is-playing {
   height: 112%;
   -webkit-mask-image: radial-gradient(closest-side, transparent 46%, rgb(0 0 0 / .55) 64%, #000 84%);
   mask-image: radial-gradient(closest-side, transparent 46%, rgb(0 0 0 / .55) 64%, #000 84%);
+}
+
+/* About's second picture opens out of the middle of the first: a soft-edged hole that grows from
+   the centre (--hole, animated because it's registered), with its own softened copy at the edges. */
+@property --hole {
+  syntax: '<percentage>';
+  inherits: false;
+  initial-value: -14%;
+}
+
+.meadow-alternate {
+  position: absolute;
+  inset: -6%;
+  --hole: -14%;
+  -webkit-mask-image: radial-gradient(ellipse farthest-corner at 50% 48%, #000 var(--hole), transparent calc(var(--hole) + 14%));
+  mask-image: radial-gradient(ellipse farthest-corner at 50% 48%, #000 var(--hole), transparent calc(var(--hole) + 14%));
+  transition: --hole .9s cubic-bezier(.5, 0, .25, 1);
+  pointer-events: none;
+}
+
+.meadow.is-opened .meadow-alternate {
+  --hole: 100%;
+  transition-duration: 1.1s;
+  transition-timing-function: cubic-bezier(.3, 0, .2, 1);
+}
+
+.meadow-alternate img {
+  position: absolute;
+  max-width: none;
+  object-fit: cover;
+}
+
+/* A portrait photo in a wide frame: the sharp copy is narrower than the frame so it shows more
+   of the photo's height (both faces), fading out at its sides into a blurred copy that fills the
+   frame. Both are still, so their blur and masks are drawn once. */
+.meadow-alternate-soft {
+  inset: 0;
+  width: 100%;
+  height: 100%;
+  object-position: var(--focus, 50% 50%);
+  filter: blur(14px) saturate(1.1);
+  scale: 1.1;
+}
+
+.meadow-alternate-sharp {
+  top: 0;
+  left: 22%;
+  width: 56%;
+  height: 100%;
+  object-position: var(--focus, 50% 50%);
+  -webkit-mask-image: linear-gradient(90deg, transparent, #000 22%, #000 78%, transparent);
+  mask-image: linear-gradient(90deg, transparent, #000 22%, #000 78%, transparent);
+}
+
+html[data-quality='fast'] .meadow-alternate-soft {
+  display: none;
+}
+
+/* Reachable by keyboard; shown as a ring around the picture rather than as a button. */
+.alternate-toggle {
+  position: absolute;
+  width: 1px;
+  height: 1px;
+  overflow: hidden;
+  clip-path: inset(50%);
+  white-space: nowrap;
+}
+
+.meadow.has-alternate:has(.alternate-toggle:focus-visible) {
+  outline: 2px solid var(--walnut);
+  outline-offset: 4px;
+  border-radius: 50%;
 }
 
 /* Tint: a wash of paper that only starts outside the centre and is full at the edges. */

@@ -35,6 +35,8 @@ dist-ssr
 public/resume/
 # The music is credited on the site but not re-posted in a public repo
 public/media/music/
+# Personal photos (other people are in them) go on the site but not in the public repo
+public/media/personal/
 
 # Private working notes (applications etc.), not part of the site
 notes/

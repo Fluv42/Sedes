@@ -18,6 +18,9 @@ for (const path of [...paths, '/404']) {
     .replace(/(<meta property="og:description" content=")[^"]*/, `$1${description}`)
     .replace(/(<meta property="og:url" content=")[^"]*/, `$1${url}`)
     .replace(/(<link rel="canonical" href=")[^"]*/, `$1${url}`)
+    // Each page's own preview card (npm run og draws them); the 404 page uses the home page's.
+    .replace(/(<meta property="og:image" content=")[^"]*/, `$1https://sedes.ca/og/${rendered.card.file === '404' ? 'home' : rendered.card.file}.jpg`)
+    .replace(/(<meta property="og:image:alt" content=")[^"]*/, `$1${escape(`${rendered.card.title}, on Sedes: the Sedes logo beside a wheat field at sunset`)}`)
   const destination = path === '/' ? resolve(root, 'index.html') : path === '/404' ? resolve(root, '404.html') : resolve(root, path.slice(1), 'index.html')
   await mkdir(resolve(destination, '..'), { recursive: true })
   await writeFile(destination, html)

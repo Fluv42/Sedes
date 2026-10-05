@@ -94,7 +94,12 @@ function ResumeMenu() {
 function About() {
   return <section className="split-page about">
     <div className="split-media" data-reveal>
-      <Meadow still />
+      <Meadow still alternate={{
+        src: '/media/personal/micah-and-jessie.jpg',
+        alt: 'Micah and Jessie hugging outside on a bright day, both laughing',
+        label: 'Show a photo of Micah and Jessie',
+        position: '50% 22%',
+      }} />
     </div>
     <div className="prose">
       <h1 data-reveal>About</h1>

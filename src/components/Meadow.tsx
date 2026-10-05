@@ -1,3 +1,4 @@
+import type React from 'react'
 import { useEffect, useRef, useState } from 'react'
 import { nextSoundMode, soundLabel, useSound } from '../lib/music'
 import { toggleTheme, useTheme } from '../lib/theme'
@@ -43,13 +44,14 @@ function cover(source: CanvasImageSource, width: number, height: number) {
 // and the glow (an even smaller copy, saturated, smoothed and blended with the frames before it).
 // Both are redrawn once per video frame, and not at all while the picture is off screen or still.
 function startEffects(video: HTMLVideoElement | null, still: HTMLImageElement, soft: HTMLCanvasElement, glow: HTMLCanvasElement) {
+  const none = { stop: () => {}, paint: () => {} }
   const softContext = soft.getContext('2d', { alpha: false })
   const glowContext = glow.getContext('2d', { alpha: false })
   const sample = document.createElement('canvas')
   sample.width = glowWidth
   sample.height = glowHeight
   const sampleContext = sample.getContext('2d', { willReadFrequently: true })
-  if (!softContext || !glowContext || !sampleContext) return () => {}
+  if (!softContext || !glowContext || !sampleContext) return none
   const output = glowContext.createImageData(glowWidth, glowHeight)
   const mixed = new Float32Array(glowWidth * glowHeight * 3)
   const smoothed = new Float32Array(mixed.length)
@@ -120,20 +122,28 @@ function startEffects(video: HTMLVideoElement | null, still: HTMLImageElement, s
   if (still.complete) paint(still)
   else still.addEventListener('load', () => { if (!showing()) paint(still) }, { once: true })
   if (video) loop()
-  return () => {
-    stopped = true
-    watcher?.disconnect()
-    resize?.disconnect()
-    if (video && 'cancelVideoFrameCallback' in video) video.cancelVideoFrameCallback(handle)
-    else window.clearTimeout(handle)
+  return {
+    stop() {
+      stopped = true
+      watcher?.disconnect()
+      resize?.disconnect()
+      if (video && 'cancelVideoFrameCallback' in video) video.cancelVideoFrameCallback(handle)
+      else window.clearTimeout(handle)
+    },
+    // For a picture laid over the still (About's photo): the glow drifts over to its colours.
+    paint: (source: HTMLImageElement) => { if (!stopped && source.complete) paint(source) },
   }
 }
+
+// A second picture that opens out of the middle of the first on hover (About): its own sharp and
+// softened copies, shown through a hole that grows from the centre.
+export interface Alternate { src: string; alt: string; label: string; position: string }
 
 // The centre of the picture is sharp; towards the edges it softens and takes on a wash of paper
 // until it becomes the page (like Monocle or Arc), and its colours glow out around it (like
 // YouTube's ambient mode). Strengths come from --tint, --grain and --ambient in index.css.
 // The hero describes whichever field is showing; a still (About) can pass its own description.
-export function Meadow({ still = false, alt }: { still?: boolean; alt?: string }) {
+export function Meadow({ still = false, alt, alternate }: { still?: boolean; alt?: string; alternate?: Alternate }) {
   const [playing, setPlaying] = useState(false)
   // The clip whose video couldn't be loaded (the still shows instead), and how many times the
   // still itself has been retried.
@@ -150,6 +160,11 @@ export function Meadow({ still = false, alt }: { still?: boolean; alt?: string }
   const image = useRef<HTMLImageElement>(null)
   const soft = useRef<HTMLCanvasElement>(null)
   const glow = useRef<HTMLCanvasElement>(null)
+  const second = useRef<HTMLImageElement>(null)
+  const repaint = useRef<(source: HTMLImageElement) => void>(() => {})
+  const [opened, setOpened] = useState(false)
+  // Hover opens it with a mouse; a tap or the (keyboard-reachable) button toggles it.
+  const lastPointer = useRef('mouse')
   const showVideo = !still && failed !== clip
 
   useEffect(() => {
@@ -264,10 +279,34 @@ export function Meadow({ still = false, alt }: { still?: boolean; alt?: string }
 
   useEffect(() => {
     if (quality === 'fast' || !image.current || !soft.current || !glow.current) return
-    return startEffects(video.current, image.current, soft.current, glow.current)
+    const effects = startEffects(video.current, image.current, soft.current, glow.current)
+    repaint.current = effects.paint
+    return () => { effects.stop(); repaint.current = () => {} }
   }, [clip, quality, showVideo, still, stillTries])
 
-  return <figure className="meadow">
+  // While the hole opens or closes, the glow is repainted from whichever picture is arriving.
+  useEffect(() => {
+    if (!alternate) return
+    const source = opened ? second.current : image.current
+    if (!source) return
+    let frame = 0
+    let count = 0
+    const start = performance.now()
+    const step = (time: number) => {
+      if (count++ % 3 === 0) repaint.current(source)
+      if (time - start < 1100) frame = requestAnimationFrame(step)
+    }
+    frame = requestAnimationFrame(step)
+    return () => cancelAnimationFrame(frame)
+  }, [opened, alternate])
+
+  const hover = alternate ? {
+    onPointerDown: (event: React.PointerEvent) => { lastPointer.current = event.pointerType },
+    onPointerEnter: (event: React.PointerEvent) => { if (event.pointerType === 'mouse') setOpened(true) },
+    onPointerLeave: (event: React.PointerEvent) => { if (event.pointerType === 'mouse') setOpened(false) },
+    onClick: () => { if (lastPointer.current !== 'mouse') setOpened(value => !value) },
+  } : {}
+  return <figure className={`meadow${alternate ? ' has-alternate' : ''}${opened ? ' is-opened' : ''}`} {...hover}>
     <canvas ref={glow} className="meadow-ambient" width={glowWidth} height={glowHeight} aria-hidden="true" />
     <div className="meadow-stage">
       <img ref={image} className="meadow-source" src={stillTries ? `${poster}?try=${stillTries}` : poster} onError={retryStill} alt={alt ?? clips[clip].alt} width="1280" height="720" fetchPriority="high" />
@@ -278,9 +317,16 @@ export function Meadow({ still = false, alt }: { still?: boolean; alt?: string }
         <source src={source} type="video/mp4" />
       </video>}
       <canvas ref={soft} className="meadow-soft" aria-hidden="true" />
+      {alternate && <div className="meadow-alternate" style={{ '--focus': alternate.position } as React.CSSProperties}>
+        <img className="meadow-alternate-soft" src={alternate.src} alt="" aria-hidden="true" loading="lazy" decoding="async" />
+        <img ref={second} className="meadow-alternate-sharp" src={alternate.src} alt={opened ? alternate.alt : ''} aria-hidden={!opened} loading="lazy" decoding="async" />
+      </div>}
       <div className="tint" aria-hidden="true" />
       <div className="grain" aria-hidden="true" />
     </div>
+    {alternate && <button type="button" className="alternate-toggle" aria-pressed={opened} onClick={event => { event.stopPropagation(); setOpened(value => !value) }}>
+      {alternate.label}
+    </button>}
     {!still && <div className="motion-control">
       {showVideo && <button type="button" onClick={() => setPlaying(value => !value)}>
         {playing ? 'Pause' : 'Play'}<span className="visually-hidden"> the meadow video</span>

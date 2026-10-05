@@ -10,6 +10,7 @@
     "test": "node --test scripts/check-build.test.mjs",
     "check": "npm run lint && npm run build && npm test",
     "preview": "vite preview",
+    "og": "npm run build && node scripts/og-cards.mjs",
     "deploy": "npm run build && wrangler deploy"
   },
   "dependencies": {

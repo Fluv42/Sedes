@@ -75,15 +75,20 @@ test('contact links work without a form service and private phone data is not ha
 
 test('every page has its own link-preview title, description, address and image', async () => {
   const descriptions = new Set()
+  const images = new Set()
   for (const { path, html } of pages) {
     const url = `https://sedes.ca${path === '/' ? '/' : path}`
     assert.match(html, new RegExp(`<link rel="canonical" href="${url}"`), `${path}: canonical`)
     assert.match(html, new RegExp(`<meta property="og:url" content="${url}"`), `${path}: og:url`)
     assert.match(html, /<meta property="og:title" content="[^"]+\| Sedes"/, `${path}: og:title`)
-    assert.match(html, /<meta property="og:image" content="https:\/\/sedes\.ca\/og-image\.jpg"/, `${path}: og:image`)
+    const image = html.match(/<meta property="og:image" content="https:\/\/sedes\.ca\/(og\/[a-z-]+\.jpg)"/)
+    assert.ok(image, `${path}: og:image`)
+    await assert.doesNotReject(access(resolve(root, image[1])), `${path}: ${image[1]} exists`)
+    images.add(image[1])
     descriptions.add(html.match(/<meta name="description" content="([^"]+)"/)[1])
   }
   assert.equal(descriptions.size, pages.length, 'each page describes itself')
+  assert.equal(images.size, pages.length, 'each page has its own preview card')
   for (const file of ['og-image.jpg', 'apple-touch-icon.png']) await assert.doesNotReject(access(resolve(root, file)))
 })
 

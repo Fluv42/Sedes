@@ -21,3 +21,12 @@ export function getPageDescription(path: string) {
 export function getPageTitle(path: string) {
   return titles[path] ?? projects.find(project => path === `/projects/${project.slug}`)?.title ?? 'Page not found'
 }
+
+// The link-preview card for each page (public/og/<file>.jpg, drawn by `npm run og`).
+export function getPageCard(path: string) {
+  const file = path === '/' ? 'home' : path.slice(1).replace(/\//g, '-')
+  if (path === '/') return { file, title: site.name, kicker: 'IT specialist and developer', description: 'In Southwestern Ontario. What I’ve made, a bit about me, and how to get in touch.' }
+  const project = projects.find(item => path === `/projects/${item.slug}`)
+  if (project) return { file, title: project.title, kicker: `${project.type} by ${site.name}` }
+  return { file, title: getPageTitle(path), kicker: site.name }
+}

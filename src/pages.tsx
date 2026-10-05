@@ -166,7 +166,6 @@ function Projects() {
     {shown.length
       ? <WorkList items={shown} heading="h2" live />
       : <p className="no-results">Nothing matches that. Try another word, or <button type="button" onClick={() => { setQuery(''); setCategory('All') }}>show everything</button>.</p>}
-    <p className="more" data-reveal>University projects were team work. Each write-up says which parts were mine.</p>
   </>
 }
 

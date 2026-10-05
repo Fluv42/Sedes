@@ -1,6 +1,7 @@
 # Asset credits
 
-- Hero videos and posters, both under the Pexels License (free to use, no credit required), 720p, trimmed to 25 s and re-encoded so the last 2 s crossfade into the start (ffmpeg `xfade`), giving a 23 s seamless loop; posters taken at 1 s. Untrimmed originals are on Pexels. Chosen by the visitor's clock: 6:00–17:00 shows the day clip, otherwise the evening one. Stock footage, not Micah's own farm; replace with his own footage when available and don't describe it as a personal photograph.
+- Hero videos and posters, both under the Pexels License (free to use, no credit required), 720p, trimmed to 25 s and re-encoded so the last 2 s crossfade into the start (ffmpeg `xfade`), giving a 23 s seamless loop; posters taken at 1 s. Untrimmed originals are on Pexels. Chosen by the visitor's clock: 5:00–10:00 morning, 10:00–17:00 day, otherwise evening. Stock footage, not Micah's own farm; replace with his own footage when available and don't describe it as a personal photograph.
+  - Morning: `field-morning.mp4`, [A sunrise over a field with fog, Pexels #27247582](https://www.pexels.com/video/a-sunrise-over-a-field-with-fog-27247582/)
   - Day: `field-barn.mp4`, [A view of a farm and sky at sunset, Pexels #27496045](https://www.pexels.com/video/a-view-of-a-farm-and-sky-at-sunset-27496045/)
   - Evening: `field-sunset.mp4`, [Vibrant sunset over lush wheat field landscape, Pexels #32548262](https://www.pexels.com/video/vibrant-sunset-over-lush-wheat-field-landscape-32548262/)
 - LiteReview screenshot: original `screenshots/homepage-logged-out.png`, preserved locally and published in the team repository README. Used to document the team course project, with team attribution in the case study.

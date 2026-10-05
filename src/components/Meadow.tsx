@@ -1,15 +1,21 @@
 import { useEffect, useRef, useState } from 'react'
 import { toggleMusic, useMusic } from '../lib/music'
 
-// Two fields, chosen by the visitor's own clock: green farmland under a big sky through the day,
-// and wheat at sunset in the evening and overnight. Each file's last 2 s crossfade into its
+// Three fields, chosen by the visitor's own clock: a foggy sunrise in the morning, green farmland
+// under a big sky through the day, and wheat at sunset in the evening and overnight. Each file's last 2 s crossfade into its
 // first frame, so the plain loop has no visible jump.
 const clips = {
+  morning: { video: '/media/field-morning.mp4', poster: '/media/field-morning.jpg' },
   day: { video: '/media/field-barn.mp4', poster: '/media/field-barn.jpg' },
   evening: { video: '/media/field-sunset.mp4', poster: '/media/field-sunset.jpg' },
 }
 type Clip = keyof typeof clips
-const clipForNow = (): Clip => { const hour = new Date().getHours(); return hour >= 6 && hour < 17 ? 'day' : 'evening' }
+const clipForNow = (): Clip => {
+  const hour = new Date().getHours()
+  if (hour >= 5 && hour < 10) return 'morning'
+  if (hour >= 10 && hour < 17) return 'day'
+  return 'evening'
+}
 const motionQuery = '(prefers-reduced-motion: reduce)'
 
 // The centre of the picture is sharp; towards the edges blur, tint and grain build until it

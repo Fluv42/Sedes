@@ -89,7 +89,9 @@ export function Intro() {
     })
 
     const nudge = (event: Event) => {
-      if (event instanceof KeyboardEvent && ['Tab', 'Shift', 'Alt', 'Meta', 'Control'].includes(event.key)) return
+      // Any key but a lone modifier, including Tab, so keyboard users never move focus onto the
+      // page while it is still hidden behind the intro.
+      if (event instanceof KeyboardEvent && ['Shift', 'Alt', 'Meta', 'Control'].includes(event.key)) return
       pullBack()
     }
     const events = ['wheel', 'touchmove', 'keydown', 'pointerdown'] as const

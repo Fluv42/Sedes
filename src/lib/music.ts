@@ -10,7 +10,8 @@ import type { Daypart } from './daypart'
 // Sound starts as soon as the browser allows it: straight away if it already does, otherwise on
 // the visitor's first click, tap or key press (no site can start sound before that). The field
 // sound fades in first and the song rises in over it. Both loop, fade rather than cut, and go
-// quiet while the tab is hidden. The chosen mode is remembered in this browser.
+// quiet while the tab is hidden. A changed mode lasts for this visit (every new visit starts
+// with both), so a mute from last time can't leave the site silent.
 export type SoundMode = 'both' | 'music' | 'ambient' | 'off'
 const order: SoundMode[] = ['both', 'music', 'ambient', 'off']
 const key = 'sedes:sound'
@@ -23,7 +24,8 @@ const ambience: Record<Daypart, string> = {
   evening: '/media/ambience/evening.m4a',
   night: '/media/ambience/night.m4a',
 }
-const field = { volume: 0.175, fadeIn: 2500, delay: 0 }
+// Evening and night recordings sit a quarter lower than morning and day.
+const fieldLevel: Record<Daypart, number> = { morning: 0.175, day: 0.175, evening: 0.13, night: 0.13 }
 const fadeOut = 1200
 
 type Layer = {
@@ -45,7 +47,7 @@ const notify = () => listeners.forEach(listener => listener())
 
 function savedMode(): SoundMode {
   try {
-    const saved = localStorage.getItem(key) as SoundMode | null
+    const saved = sessionStorage.getItem(key) as SoundMode | null
     if (saved && order.includes(saved)) return saved
   } catch { /* no storage: start with both */ }
   return 'both'
@@ -61,7 +63,11 @@ function makeLayer(name: Layer['name'], src: string, settings: { volume: number;
 
 function all() {
   if (!layers) {
-    layers = [makeLayer('field', ambience[daypartNow()], field), makeLayer('song', song.src, song)]
+    const daypart = daypartNow()
+    layers = [
+      makeLayer('field', ambience[daypart], { volume: fieldLevel[daypart], fadeIn: 2500, delay: 0 }),
+      makeLayer('song', song.src, song),
+    ]
     document.addEventListener('visibilitychange', () => {
       if (document.hidden) all().forEach(layer => { clearTimeout(layer.timer); layer.audio.pause() })
       else apply(true)
@@ -135,23 +141,25 @@ function tryStart() {
   })
 }
 
-const gestures = ['pointerdown', 'keydown', 'touchend'] as const
+// Browsers differ in which events count as "the visitor asked for it" (Safari wants click or
+// touchend, Chrome also takes pointerdown and keydown), so listen for all of them and keep
+// listening until one of them actually starts the sound.
+const gestures = ['pointerdown', 'mousedown', 'click', 'keydown', 'touchend'] as const
+const waitForGesture = () => gestures.forEach(name => window.addEventListener(name, startOnGesture, { capture: true, passive: true }))
 const stopWaiting = () => gestures.forEach(name => window.removeEventListener(name, startOnGesture, true))
-function startOnGesture() { stopWaiting(); tryStart().catch(() => {}) }
+let starting: Promise<void> | null = null
+function startOnGesture() {
+  if (allowed || starting) return
+  starting = tryStart().then(stopWaiting, () => {}).finally(() => { starting = null })
+}
 
 // Called once when the site loads.
 export function startMusic() {
   if (allowed) return
   mode = savedMode()
   notify()
-  if (mode === 'off') {
-    // Nothing to play yet, but unlock on the first interaction so changing the mode is instant.
-    gestures.forEach(name => window.addEventListener(name, startOnGesture, { capture: true, passive: true }))
-    return
-  }
-  tryStart().catch(() => {
-    gestures.forEach(name => window.addEventListener(name, startOnGesture, { capture: true, passive: true }))
-  })
+  waitForGesture()
+  if (mode !== 'off') tryStart().then(stopWaiting, () => {})
 }
 
 // Called by the app whenever the page changes: the field sound belongs to the home page.
@@ -161,13 +169,16 @@ export function setHomePage(home: boolean) {
   apply()
 }
 
+// The Sound button. If sound hasn't been able to start yet, the first press just starts it in
+// the current mode rather than skipping ahead to the next one.
 export function nextSoundMode() {
+  if (!allowed && mode !== 'off') return
   setSoundMode(order[(order.indexOf(mode) + 1) % order.length])
 }
 
 export function setSoundMode(next: SoundMode) {
   mode = next
-  try { localStorage.setItem(key, mode) } catch { /* just this visit */ }
+  try { sessionStorage.setItem(key, mode) } catch { /* no storage: this page only */ }
   notify()
   if (allowed) apply()
   else if (mode !== 'off') tryStart().catch(() => {})

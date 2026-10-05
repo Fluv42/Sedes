@@ -1,7 +1,7 @@
 import { useSyncExternalStore } from 'react'
 
-// Light or dark. Follows the device until the visitor picks one; the pick is remembered in
-// this browser and applied before paint by the script in index.html.
+// Light or dark. Set before paint by the script in index.html from the time of day (dark at
+// night, light otherwise); the Light/Dark button switches it for the rest of this visit only.
 export type Theme = 'light' | 'dark'
 const key = 'sedes:theme'
 const query = '(prefers-color-scheme: dark)'
@@ -21,7 +21,7 @@ function paintThemeColor() {
 export function toggleTheme() {
   const next: Theme = current() === 'dark' ? 'light' : 'dark'
   document.documentElement.setAttribute('data-theme', next)
-  try { localStorage.setItem(key, next) } catch { /* private window: just this visit */ }
+  try { sessionStorage.setItem(key, next) } catch { /* no storage: this page only */ }
   paintThemeColor()
   listeners.forEach(listener => listener())
 }

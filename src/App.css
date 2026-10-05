@@ -319,13 +319,20 @@ video.meadow-source.is-playing {
 
 .motion-control {
   position: absolute;
-  left: 50%;
-  /* Below the picture, on the paper, where they can always be read. */
+  /* Below the picture, on the paper, where they can always be read. Centred with flexbox, not a
+     translate, because the intro animates translate on its way in. */
+  left: 0;
+  right: 0;
   top: calc(100% + 26px);
-  translate: -50% 0;
   z-index: 3;
   display: flex;
+  justify-content: center;
   gap: 10px;
+  pointer-events: none;
+}
+
+.motion-control > * {
+  pointer-events: auto;
 }
 
 /* Small frosted pills, so they read over any part of the picture. */
@@ -342,6 +349,11 @@ video.meadow-source.is-playing {
   -webkit-backdrop-filter: blur(6px);
   backdrop-filter: blur(6px);
   transition: background-color .2s, color .2s;
+}
+
+.motion-control button:focus-visible {
+  outline: 2px solid var(--walnut);
+  outline-offset: 3px;
 }
 
 .motion-control button:hover {
@@ -560,6 +572,12 @@ video.meadow-source.is-playing {
 
 .search input:focus {
   border-bottom-color: var(--ink);
+}
+
+/* Keyboard focus gets a clear walnut underline, not just a colour change. */
+.search input:focus-visible {
+  border-bottom-color: var(--walnut);
+  box-shadow: 0 2px 0 var(--walnut);
 }
 
 .search input::placeholder {
@@ -972,6 +990,12 @@ html.has-cursor, html.has-cursor * {
   cursor: none !important;
 }
 
+/* High-contrast (forced colours) modes get the system pointer back. */
+@media (forced-colors: active) {
+  html.has-cursor, html.has-cursor * { cursor: auto !important; }
+  html.has-cursor .cursor-dot { display: none; }
+}
+
 html.has-cursor .cursor-dot {
   position: fixed;
   top: 0;
@@ -1113,14 +1137,21 @@ html.intro.intro-out .intro-title {
 .intro-title text {
   font-family: var(--heading);
   font-size: 168px;
-  fill: var(--ink);
+  /* Always the opposite of the picture behind it, whatever the theme: dark ink over the bright
+     morning, day and evening fields, pale over the night sky. */
+  fill: #2d2b24;
   fill-opacity: 0;
-  stroke: var(--ink);
+  stroke: #2d2b24;
   stroke-width: 1.4;
   stroke-dasharray: 700;
   stroke-dashoffset: 700;
-  /* Dark ink like the rest of the text; a soft paper glow keeps it readable over the video. */
-  filter: drop-shadow(0 0 18px rgb(var(--paper-rgb) / .55));
+  filter: drop-shadow(0 0 18px rgb(246 242 231 / .55));
+}
+
+html[data-daypart='night'] .intro-title text {
+  fill: #f4efe2;
+  stroke: #f4efe2;
+  filter: drop-shadow(0 0 18px rgb(10 10 8 / .6));
 }
 
 /* The hand: a soft-edged wipe moving left to right while the strokes trace and fill. */

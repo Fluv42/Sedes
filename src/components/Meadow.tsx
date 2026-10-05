@@ -11,8 +11,9 @@ import type { Daypart } from '../lib/daypart'
 // day in turn. Each file's last 2 s (3 s for the drifting evening clouds) crossfade into its first
 // frame, so the plain loop has no visible jump.
 // `glow` strengthens a clip's glow: grey morning fog otherwise fades into the paper.
-interface Field { video: string; poster: string; alt: string; glow?: { saturation: number; strength: number } }
-const field = (name: string, alt: string, glow?: Field['glow']): Field => ({ video: `/media/${name}.mp4`, poster: `/media/${name}.jpg`, alt, glow })
+// `fireflies` for the dusk and night fields with grass or trees near the camera.
+interface Field { video: string; poster: string; alt: string; glow?: { saturation: number; strength: number }; fireflies?: boolean }
+const field = (name: string, alt: string, glow?: Field['glow'], fireflies = false): Field => ({ video: `/media/${name}.mp4`, poster: `/media/${name}.jpg`, alt, glow, fireflies })
 const fog = { saturation: 1.9, strength: 1.3 }
 const clips: Record<Daypart, Field[]> = {
   morning: [
@@ -26,13 +27,13 @@ const clips: Record<Daypart, Field[]> = {
     field('field-day-3', 'A wide green meadow with a line of trees and drifting clouds'),
   ],
   evening: [
-    field('field-sunset', 'Rows of green wheat under a soft sunset'),
-    field('field-sunset-2', 'Wild grasses in silhouette against a pale sun setting over a field'),
+    field('field-sunset', 'Rows of green wheat under a soft sunset', undefined, true),
+    field('field-sunset-2', 'Wild grasses in silhouette against a pale sun setting over a field', undefined, true),
     field('field-sunset-3', 'Grey clouds over green fields and a farmhouse, with the sunset low on the horizon'),
   ],
   night: [
-    field('field-night', 'Stars and drifting cloud over a field with fence posts and birch trees at night'),
-    field('field-night-2', 'Stars and passing cloud over tall trees, looking up from below'),
+    field('field-night', 'Stars and drifting cloud over a field with fence posts and birch trees at night', undefined, true),
+    field('field-night-2', 'Stars and passing cloud over tall trees, looking up from below', undefined, true),
     field('field-night-3', 'The Milky Way drifting across a starry sky'),
   ],
 }
@@ -43,6 +44,23 @@ function fieldFor(choice: string) {
   return options[Number(turn)] ?? options[0]
 }
 type Clip = string
+
+// Fireflies over the dusk and night fields: a dozen warm points that wander and blink low in the
+// picture. Plain CSS animations (compositor-only), placed by a fixed scatter so the server and the
+// browser agree. Pretty mode only, and not with reduced motion (App.css).
+const fireflies = Array.from({ length: 12 }, (_, i) => {
+  // Whole-number arithmetic, so every browser lands on the same scatter as the server.
+  const r = (n: number) => {
+    let h = Math.imul(i * 374761393 + n * 668265263, 1274126177)
+    h = Math.imul(h ^ h >>> 13, 1103515245)
+    return ((h ^ h >>> 16) >>> 0) / 4294967296
+  }
+  return {
+    left: `${6 + r(1) * 88}%`, top: `${48 + r(2) * 44}%`,
+    '--wander': `${9 + r(3) * 9}s`, '--blink': `${2.6 + r(4) * 3}s`, '--delay': `${-r(5) * 18}s`,
+    '--dx': `${(r(6) - 0.5) * 90}px`, '--dy': `${(r(7) - 0.6) * 60}px`,
+  } as React.CSSProperties
+})
 const motionQuery = '(prefers-reduced-motion: reduce)'
 
 // The glow is worked out at 32 × 18 pixels and the soft edge at 256 pixels across; the browser
@@ -523,6 +541,9 @@ export function Meadow({ still = false, alt, alternate }: { still?: boolean; alt
       <canvas ref={soft} className="meadow-soft" aria-hidden="true" />
       <div className="tint" aria-hidden="true" />
       <div className="grain" aria-hidden="true" />
+      {chosen.fireflies && !still && !alternate && <div className={`fireflies${playing ? '' : ' is-paused'}`} aria-hidden="true">
+        {fireflies.map((style, i) => <span key={i} style={style} />)}
+      </div>}
     </div>
     {photo && shape && <div className="meadow-alternate" style={shape.layer}>
       <div className="meadow-oval" style={shape.oval}>

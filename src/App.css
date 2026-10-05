@@ -326,6 +326,44 @@ a:hover .arrow {
   pointer-events: none;
 }
 
+/* Fireflies (Meadow.tsx): each wanders on one animation and blinks on another. */
+.fireflies {
+  position: absolute;
+  inset: 0;
+  pointer-events: none;
+}
+
+.fireflies span {
+  position: absolute;
+  width: 4px;
+  height: 4px;
+  border-radius: 50%;
+  background: #fff3b0;
+  box-shadow: 0 0 6px 2px rgb(255 220 120 / .7), 0 0 18px 6px rgb(255 200 90 / .25);
+  opacity: 0;
+  animation: firefly-wander var(--wander) ease-in-out var(--delay) infinite alternate, firefly-blink var(--blink) ease-in-out var(--delay) infinite;
+}
+
+.fireflies.is-paused span { animation-play-state: paused; }
+
+@keyframes firefly-wander {
+  33% { translate: calc(var(--dx) * .6) calc(var(--dy) * -.4); }
+  66% { translate: calc(var(--dx) * -.3) calc(var(--dy) * .7); }
+  100% { translate: var(--dx) var(--dy); }
+}
+
+@keyframes firefly-blink {
+  0%, 35%, 100% { opacity: 0; }
+  55% { opacity: .95; }
+  70% { opacity: .5; }
+}
+
+html[data-quality='fast'] .fireflies { display: none; }
+
+@media (prefers-reduced-motion: reduce) {
+  .fireflies { display: none; }
+}
+
 /* The stage fades to nothing at its edges, so the picture becomes the page.
    It reaches 8% past its frame so the fade has room to be long and gentle. */
 .meadow-stage {

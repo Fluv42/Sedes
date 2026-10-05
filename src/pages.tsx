@@ -33,7 +33,7 @@ function Home() {
   return <>
     <section className="hero" aria-labelledby="home-title">
       <div className="hero-media" data-cursor="scroll">
-        <Meadow alt="Long grass and wildflowers under old trees at the edge of a field" />
+        <Meadow alt="The sun setting low behind a field of wheat, with a line of trees on the horizon" />
       </div>
       <div className="hero-copy" data-speed="-0.06">
         <p className="hello">Hello, I’m</p>
@@ -80,7 +80,7 @@ function About() {
   const resume = useDismiss()
   return <section className="split-page about">
     <div className="split-media" data-reveal>
-      <Meadow still alt="Sunlight across a quiet meadow" />
+      <Meadow still alt="Evening sun over a wheat field" />
     </div>
     <div className="prose">
       <h1 data-reveal>About</h1>

@@ -227,10 +227,11 @@ a:hover .arrow {
 /* Ambient light: the picture's own colours, blurred far past its edges and up the page. */
 .meadow-ambient {
   position: absolute;
-  top: -100%;
-  left: -60%;
-  width: 330%;
-  height: 235%;
+  /* Centred on the picture so the colour spreads evenly in every direction. */
+  top: -65%;
+  left: -85%;
+  width: 270%;
+  height: 230%;
   max-width: none;
   opacity: .5;
   filter: blur(90px) saturate(1.3);

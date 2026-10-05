@@ -1477,15 +1477,15 @@ html.has-cursor .cursor-dot.is-link {
 }
 
 html.intro {
-  overflow: hidden;
+  /* clip rather than hidden: Safari 26 stops reading its bar colours from the page (the edge
+     strips in Intro.tsx) when the root is overflow: hidden. */
+  overflow: clip;
 }
 
 /* The zoomed-in page is far wider than the screen; clip it here, or phone browsers widen the
    whole view to fit it and the intro shows up shrunk into a corner. */
 html.intro body {
   overflow: clip;
-  /* Let the root's colour (matched to the picture's edges in Intro.tsx) show at the very edges. */
-  background: transparent;
   /* The full screen, including behind Safari's bars, so the picture reaches under them. */
   height: 100lvh;
 }
@@ -1631,6 +1631,35 @@ html .intro-actions .control.is-on {
   outline: 2px solid var(--walnut);
   outline-offset: 3px;
 }
+
+/* Safari's bars take their colour from these (Intro.tsx). Each is opaque, as Safari needs, and
+   fades into the picture beside it. */
+.edge-strip {
+  position: fixed;
+  left: 0;
+  right: 0;
+  /* Above everything, the page's grain included: Safari passes over a strip with anything on top. */
+  z-index: 450;
+  height: 12px;
+  background-color: var(--edge);
+  /* No pointer-events: none here: Safari passes over an element that can't be touched. */
+  transition: opacity .7s ease;
+}
+
+.edge-strip::after {
+  content: '';
+  position: absolute;
+  pointer-events: none;
+  left: 0;
+  right: 0;
+  height: 40px;
+}
+
+.edge-strip.top { top: 0; }
+.edge-strip.top::after { top: 100%; background: linear-gradient(var(--edge), transparent); }
+.edge-strip.bottom { bottom: 0; }
+.edge-strip.bottom::after { bottom: 100%; background: linear-gradient(transparent, var(--edge)); }
+.edge-strip.is-gone { opacity: 0; pointer-events: none; }
 
 /* A down arrow near the bottom, nudging gently: the way in. */
 .intro-next {

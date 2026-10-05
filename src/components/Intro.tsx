@@ -28,41 +28,69 @@ function largeViewportHeight() {
   return height
 }
 
-// Where a phone's browser still paints its own colour around the page (above it, under the
-// status bar, and around its toolbar), match the picture's top and bottom edges while the intro
-// fills the screen, rather than leaving bands of paper. Undone when the page is shown.
-function tintEdges(image: HTMLImageElement | null) {
+// A phone's browser keeps the strips above and below the page (Safari's status bar, and around
+// its toolbar) for itself, and paints them a colour it picks from the page: on Safari 26, from an
+// opaque fixed element along that edge (theme-color is ignored, and an invisible one doesn't
+// count). While the intro fills the screen, two thin strips along the top and bottom carry the
+// colour of the picture's very edge there, read from the playing video a few times a second, and
+// fade into it, so the picture seems to run on under the bars. Undone when the page is shown.
+function tintEdges(frame: HTMLElement) {
   const meta = document.querySelector<HTMLMetaElement>('meta[name="theme-color"]')
   const root = document.documentElement
+  const strips = (['top', 'bottom'] as const).map(side => {
+    const strip = document.createElement('div')
+    strip.className = `edge-strip ${side}`
+    strip.setAttribute('aria-hidden', 'true')
+    return strip
+  })
+  const canvas = document.createElement('canvas')
+  canvas.width = 24
+  canvas.height = 1
+  const context = canvas.getContext('2d', { willReadFrequently: true })
+  // The average colour of a band of the screen, from whichever of the picture's sources is showing.
+  const band = (source: HTMLVideoElement | HTMLImageElement, top: number, height: number) => {
+    const box = source.getBoundingClientRect()
+    const width = source instanceof HTMLVideoElement ? source.videoWidth : source.naturalWidth
+    const tall = source instanceof HTMLVideoElement ? source.videoHeight : source.naturalHeight
+    if (!context || !box.width || !width) return null
+    const sx = Math.max(0, -box.left / box.width * width)
+    const sw = Math.min(width - sx, window.innerWidth / box.width * width)
+    const sy = Math.min(tall - 1, Math.max(0, (top - box.top) / box.height * tall))
+    const sh = Math.max(1, Math.min(tall - sy, height / box.height * tall))
+    context.drawImage(source, sx, sy, sw, sh, 0, 0, canvas.width, 1)
+    const data = context.getImageData(0, 0, canvas.width, 1).data
+    const sum = [0, 0, 0]
+    for (let i = 0; i < data.length; i += 4) for (let c = 0; c < 3; c++) sum[c] += data[i + c]
+    return `rgb(${sum.map(value => Math.round(value / canvas.width)).join(' ')})`
+  }
   const apply = () => {
-    if (!image?.naturalWidth) return
+    const video = frame.querySelector<HTMLVideoElement>('video.is-playing')
+    const image = frame.querySelector<HTMLImageElement>('img.meadow-source')
+    const source = video && video.readyState >= 2 ? video : image?.naturalWidth ? image : null
+    if (!source) return
     try {
-      const canvas = document.createElement('canvas')
-      canvas.width = 8
-      canvas.height = 8
-      const context = canvas.getContext('2d', { willReadFrequently: true })
-      if (!context) return
-      context.drawImage(image, 0, 0, 8, 8)
-      const average = (y: number) => {
-        const data = context.getImageData(0, y, 8, 1).data
-        const sum = [0, 0, 0]
-        for (let i = 0; i < data.length; i += 4) for (let c = 0; c < 3; c++) sum[c] += data[i + c]
-        return `rgb(${sum.map(value => Math.round(value / 8)).join(' ')})`
-      }
-      // Older Safari reads theme-color; newer Safari takes the colour of a fixed strip along the
-      // top edge, and of the page's background around its toolbar.
-      meta?.setAttribute('content', average(0))
-      root.style.setProperty('--edge-top', average(0))
-      root.style.backgroundColor = average(7)
+      const top = band(source, 0, 10)
+      const bottom = band(source, window.innerHeight - 10, 10)
+      if (!top || !bottom) return
+      strips[0].style.setProperty('--edge', top)
+      strips[1].style.setProperty('--edge', bottom)
+      if (!strips[0].isConnected) document.body.append(...strips)
+      // Older Safari reads theme-color; the root's colour shows if the strips are ever skipped.
+      meta?.setAttribute('content', top)
+      root.style.setProperty('--edge-top', top)
     } catch { /* leave the paper */ }
   }
-  if (image?.complete) apply()
-  else image?.addEventListener('load', apply, { once: true })
-  return () => {
-    image?.removeEventListener('load', apply)
-    root.style.backgroundColor = ''
-    root.style.removeProperty('--edge-top')
-    meta?.setAttribute('content', getComputedStyle(root).getPropertyValue('--paper').trim())
+  apply()
+  const timer = window.setInterval(apply, 400)
+  return {
+    // As the page comes back, the strips fade and the bars take the page's own colour.
+    fade: () => { window.clearInterval(timer); strips.forEach(strip => strip.classList.add('is-gone')) },
+    restore: () => {
+      window.clearInterval(timer)
+      strips.forEach(strip => strip.remove())
+      root.style.removeProperty('--edge-top')
+      meta?.setAttribute('content', getComputedStyle(root).getPropertyValue('--paper').trim())
+    },
   }
 }
 
@@ -99,7 +127,7 @@ export function Intro() {
     const cx = box.left + box.width / 2
     const cy = box.top + box.height / 2
     const zoomedIn = `translate(${window.innerWidth / 2 - cx}px, ${screenHeight / 2 - cy}px) scale(${scale})`
-    const restoreEdges = tintEdges(frame.querySelector('img'))
+    const edges = tintEdges(frame)
     page.style.transformOrigin = `${cx}px ${cy}px`
     page.style.transform = zoomedIn
     // The page underneath can't be reached with Tab until it's shown.
@@ -119,7 +147,7 @@ export function Intro() {
       page.style.transform = ''
       page.style.transformOrigin = ''
       page.inert = false
-      restoreEdges()
+      edges.restore()
       resumeSmoothScroll()
     }
 
@@ -128,6 +156,7 @@ export function Intro() {
       started = true
       root.classList.add('intro-out')
       page.inert = false
+      edges.fade()
       const timing = { duration: zoom, easing: ease, fill: 'forwards' as const }
       const zoomOut = page.animate([{ transform: zoomedIn }, { transform: 'translate(0px, 0px) scale(1)' }], timing)
       animations.push(zoomOut)
@@ -200,6 +229,8 @@ export function Intro() {
       window.removeEventListener('keydown', key)
       arrow?.removeEventListener('click', pullBack)
       if (started && !finished) finish()
+      // A re-run makes its own strips.
+      else if (!started) edges.restore()
     }
   }, [])
 

@@ -23,6 +23,8 @@ let glowEdge = ''
 export function setGlowEdge(color: string) {
   if (color === glowEdge) return
   glowEdge = color
+  if (color) document.documentElement.style.setProperty('--glow-top', color)
+  else document.documentElement.style.removeProperty('--glow-top')
   paintThemeColor()
 }
 

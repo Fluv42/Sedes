@@ -119,7 +119,11 @@ function topEdge(glow: HTMLCanvasElement, colours: Float32Array) {
   const x = Math.min(glowWidth - 1, Math.max(0, Math.floor(u * glowWidth)))
   const y = Math.min(glowHeight - 1, Math.max(0, Math.floor(v * glowHeight)))
   const k = (y * glowWidth + x) * 3
-  const hex = [0, 1, 2].map(c => Math.round(paper[c] + (colours[k + c] - paper[c]) * strength).toString(16).padStart(2, '0'))
+  // The page's grain (body::after) darkens light paper a touch and lifts dark paper; the bar has
+  // no grain, so the same shift is made here (measured on an iPhone).
+  const dark = document.documentElement.getAttribute('data-theme') === 'dark'
+  const grain = (value: number) => dark ? value + (255 - value) * 0.025 : value * 0.967
+  const hex = [0, 1, 2].map(c => Math.round(grain(paper[c] + (colours[k + c] - paper[c]) * strength)).toString(16).padStart(2, '0'))
   return '#' + hex.join('')
 }
 

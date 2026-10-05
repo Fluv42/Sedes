@@ -32,6 +32,8 @@
 
 :root {
   --paper: #f6f2e7;
+  /* The paper as it looks under the page's grain, for Safari's bars (which have none). */
+  --bar-paper: color-mix(in srgb, var(--paper), black 3.3%);
   --paper-deep: #e9e3d3;
   --ink: #2d2b24;
   --muted: #6a6556;
@@ -59,7 +61,11 @@
   font-family: var(--body);
   font-size: 17px;
   color: var(--ink);
-  background: var(--paper);
+  /* Safari 26 colours its status bar and toolbar from the page's own background (theme-color is
+     ignored), so the root and body carry the colour that belongs there: the picture's top edge
+     during the intro (Intro.tsx), the glow at the top of the page (Meadow.tsx), or the paper. The
+     page itself sits on .site-frame's paper, so this only shows around it. */
+  background: var(--edge-top, var(--glow-top, var(--bar-paper)));
   font-synthesis: none;
   text-rendering: optimizeLegibility;
   -webkit-font-smoothing: antialiased;
@@ -71,6 +77,7 @@
    with the Light / Dark button (stored as data-theme on <html> before the page paints). */
 :root[data-theme='dark'] {
   --paper: #1a1915;
+  --bar-paper: color-mix(in srgb, var(--paper), white 2.5%);
   --paper-deep: #24221c;
   --ink: #ebe5d5;
   --muted: #a49d8a;
@@ -91,6 +98,7 @@
 @media (prefers-color-scheme: dark) {
   :root:not([data-theme='light']) {
     --paper: #1a1915;
+  --bar-paper: color-mix(in srgb, var(--paper), white 2.5%);
     --paper-deep: #24221c;
     --ink: #ebe5d5;
     --muted: #a49d8a;
@@ -120,7 +128,7 @@ html {
 body {
   margin: 0;
   min-width: 320px;
-  background: var(--paper);
+  background: var(--edge-top, var(--glow-top, var(--bar-paper)));
   /* The page reaches the screen's edges (viewport-fit=cover); in landscape on a phone, keep text
      clear of the camera cut-out. */
   padding-left: env(safe-area-inset-left);

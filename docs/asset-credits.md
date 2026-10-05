@@ -34,4 +34,16 @@ All from Pixabay under the Pixabay Content License (free to use, no credit requi
 - Evening, `evening.m4a`: [Evening Crickets with Birds, Soft Wind and Insects by Eryliaa](https://pixabay.com/sound-effects/nature-evening-crickets-with-birds-soft-wind-and-insects-445149/), from 0:30
 - Night, `night.m4a`: [Night, insects, not too thick, distant cars, NOTL 01](https://pixabay.com/sound-effects/nature-night-insects-not-too-thick-distant-cars-notl-01-17134/) (Niagara-on-the-Lake), from 0:30
 
+One more for each of the extra hero clips (October 2026), chosen to sound like the picture, same
+licence and treatment; the short ones loop sooner (25–35 s):
+
+- Morning 2 (mist and sunbeams through trees), `morning-2.m4a`: [Avon dawn chorus](https://pixabay.com/sound-effects/avon-dawn-chorus-26592/)
+- Morning 3 (sunrise over a misty field), `morning-3.m4a`: [Morning breeze and birds](https://pixabay.com/sound-effects/morning-breeze-and-birds-35105/)
+- Day 2 (a sunny lawn and trees), `day-2.m4a`: [Birds, insects, breeze by DBSound](https://pixabay.com/sound-effects/birds-insects-breeze-596116/), from 0:20
+- Day 3 (a wide meadow), `day-3.m4a`: [Wind rustling grass by Dragon Studio](https://pixabay.com/sound-effects/wind-rustling-grass-339094/)
+- Evening 2 (grasses against the setting sun), `evening-2.m4a`: [Evening crickets and birds with cuckoo, part 1, by Eryliaa](https://pixabay.com/sound-effects/evening-crickets-and-birds-with-cuckoo-part-1-445151/), from 0:30
+- Evening 3 (clouds over farm fields), `evening-3.m4a`: [Blackbird evening](https://pixabay.com/sound-effects/blackbird-evening-64822/)
+- Night 2 (moonlit trees), `night-2.m4a`: [Countryside night ambience by Alex Jauk](https://pixabay.com/sound-effects/countryside-night-ambience-234022/)
+- Night 3 (the Milky Way), `night-3.m4a`: [Night atmosphere with crickets by Schorsch1964](https://pixabay.com/sound-effects/night-atmosphere-with-crickets-374652/), from 0:10
+
 Unlike the song, these are committed: their licence allows redistribution.

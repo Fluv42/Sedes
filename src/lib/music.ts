@@ -1,9 +1,9 @@
 import { useSyncExternalStore } from 'react'
-import { daypartNow, subscribeDaypart } from './daypart'
+import { daypartNow, rotationNow, subscribeDaypart } from './daypart'
 import type { Daypart } from './daypart'
 
 // Background sound in two layers: the song, and under it a field recording that matches the
-// time of day (the same clock that picks the hero video). The Sound button steps through
+// hero video showing (the same clock picks both). The Sound button steps through
 // Music and field sound are switched on and off separately (toggleLayer), and the footer's heart
 // switches both. The field sound plays only on the home page, under its picture; the song carries
 // on from page to page. Every visit starts with both on.
@@ -17,12 +17,15 @@ import type { Daypart } from './daypart'
 // because <audio loop> leaves a short gap at the loop point and Web Audio loops seamlessly.
 export type SoundMode = 'both' | 'music' | 'ambient' | 'off'
 
-const ambience: Record<Daypart, string> = {
-  morning: '/media/ambience/morning.m4a',
-  day: '/media/ambience/day.m4a',
-  evening: '/media/ambience/evening.m4a',
-  night: '/media/ambience/night.m4a',
+// One recording for each of the hero's clips (the same three a day in turn, components/Meadow.tsx),
+// chosen to sound like what's in the picture.
+const ambience: Record<Daypart, string[]> = {
+  morning: ['morning', 'morning-2', 'morning-3'],
+  day: ['day', 'day-2', 'day-3'],
+  evening: ['evening', 'evening-2', 'evening-3'],
+  night: ['night', 'night-2', 'night-3'],
 }
+const recording = (daypart: Daypart, turn: number) => `/media/ambience/${ambience[daypart][turn] ?? ambience[daypart][0]}.m4a`
 // The recordings are levelled to the same loudness (docs/asset-credits.md); evening and night
 // sit a quarter lower than morning and day.
 const fieldLevel: Record<Daypart, number> = { morning: 0.175, day: 0.175, evening: 0.13, night: 0.13 }
@@ -124,16 +127,18 @@ const notify = () => listeners.forEach(listener => listener())
 function all() {
   if (!layers) {
     const daypart = daypartNow()
-    layers = [fieldLayer(ambience[daypart], fieldLevel[daypart]), songLayer()]
-    // When the part of the day turns over, the old recording fades out and the new one fades in.
-    let playingFor = daypart
+    let playingFor = recording(daypart, rotationNow())
+    layers = [fieldLayer(playingFor, fieldLevel[daypart]), songLayer()]
+    // When the part of the day (and with it the clip) turns over, the old recording fades out and
+    // the new one fades in.
     subscribeDaypart(() => {
       const next = daypartNow()
-      if (next === playingFor) return
-      playingFor = next
+      const file = recording(next, rotationNow())
+      if (file === playingFor) return
+      playingFor = file
       const old = all()[0]
       clearTimeout(old.timer)
-      all()[0] = fieldLayer(ambience[next], fieldLevel[next])
+      all()[0] = fieldLayer(file, fieldLevel[next])
       if (old.playing()) old.fadeTo(0, fadeOut * 2, () => old.close?.())
       else old.close?.()
       apply()

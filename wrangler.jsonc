@@ -1,0 +1,18 @@
+{
+  // Sedes is a static site: Cloudflare serves the built files in dist/ directly, no server code.
+  // Deploy with `npm run deploy` (builds first). Headers come from public/_headers.
+  "name": "sedes",
+  "compatibility_date": "2026-10-01",
+  "assets": {
+    "directory": "./dist",
+    "not_found_handling": "404-page",
+    "html_handling": "drop-trailing-slash"
+  },
+  // sedes.ca and www.sedes.ca are on Cloudflare, so these create their DNS records and certificates.
+  "routes": [
+    { "pattern": "sedes.ca", "custom_domain": true },
+    { "pattern": "www.sedes.ca", "custom_domain": true }
+  ],
+  "workers_dev": true,
+  "preview_urls": false
+}

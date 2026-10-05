@@ -53,8 +53,10 @@ export function watchParallax(root: ParentNode) {
 
 // The current page fades out before the next one is shown.
 export function leaveThen(go: () => void) {
-  if (reduced()) return go()
+  if (reduced()) { document.documentElement.classList.remove('intro-played'); return go() }
   const root = document.documentElement
+  // After the home intro, the first page skipped its arrival animation; later pages should have it.
+  root.classList.remove('intro-played')
   root.classList.add('is-leaving')
   window.setTimeout(() => { go(); root.classList.remove('is-leaving') }, 280)
 }

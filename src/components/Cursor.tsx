@@ -24,7 +24,9 @@ export function Cursor() {
       const ease = still ? 1 : 0.22
       position.x += (target.x - position.x) * ease
       position.y += (target.y - position.y) * ease
-      element.style.transform = `translate3d(${position.x}px, ${position.y}px, 0)`
+      // Position goes on `translate`, so the press `scale` shrinks the dot in place rather than
+      // scaling its distance from the corner (which flung it towards the top left).
+      element.style.translate = `${position.x}px ${position.y}px`
       frame = requestAnimationFrame(tick)
     }
     const show = () => { if (!visible) { position.x = target.x; position.y = target.y; visible = true; element.classList.add('is-visible') } }

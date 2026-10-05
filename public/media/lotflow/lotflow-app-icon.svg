@@ -1,0 +1,11 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 120 120" role="img" aria-label="LotFlow">
+  <rect width="120" height="120" rx="28" fill="#c2410c"/>
+  <g fill="none" stroke="#ffffff" stroke-width="6" opacity="0.42">
+    <rect x="16" y="22" width="24" height="76" rx="8"/>
+    <rect x="48" y="22" width="24" height="76" rx="8"/>
+    <rect x="80" y="22" width="24" height="76" rx="8"/>
+  </g>
+  <rect x="16" y="26" width="24" height="20" rx="7" fill="#ffffff" opacity="0.55"/>
+  <rect x="16" y="50" width="24" height="20" rx="7" fill="#ffffff" opacity="0.55"/>
+  <rect x="48" y="26" width="24" height="24" rx="8" fill="#ffffff"/>
+</svg>

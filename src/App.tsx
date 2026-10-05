@@ -31,6 +31,8 @@ export default function App({ initialPath = '/' }: { initialPath?: string }) {
   useEffect(() => {
     document.title = `${title} | Sedes`
     if (previousPath.current !== path) {
+      // Back/forward skips Link's fade-out, so release the intro's hold here as well.
+      document.documentElement.classList.remove('intro-played')
       scrollToTop()
       main.current?.focus({ preventScroll: true })
       previousPath.current = path

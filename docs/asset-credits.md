@@ -6,3 +6,5 @@
 - Libron v0.25 by Nico Verbruggen (github.com/nicoverbruggen/libron), derived from Readerly and Newsreader. SIL Open Font License 1.1; the licence is kept at `public/fonts/libron-LICENSE.txt`. Web (WOFF2) files from the official release.
 
 No remote font service, analytics, external image runtime, generated social card or paid asset service is required.
+
+- LotFlow app icon and logo: Micah's own LotFlow logo pack (October 2026), `public/media/lotflow/`.

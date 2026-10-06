@@ -133,7 +133,6 @@ const together: Photo[] = [
   { src: '/media/personal/look.jpg', frame: 1.1, width: 1400, height: 1166, faces: [[0.42, 0.33], [0.56, 0.6]], face: 0.12, alt: 'Micah holding Jessie’s face as she smiles up at him, by a field of tall grass' },
   { src: '/media/personal/forehead.jpg', frame: 1.15, grow: 1.25, width: 2000, height: 1333, faces: [[0.46, 0.4], [0.51, 0.64]], face: 0.12, alt: 'Micah and Jessie with their foreheads together, smiling, outside on a sunny day' },
   { src: '/media/personal/door-wide.jpg', frame: 1.15, grow: 1.35, width: 1400, height: 1380, faces: [[0.37, 0.41], [0.6, 0.2]], face: 0.09, alt: 'Jessie and Micah standing arm in arm at a wooden door' },
-  { src: '/media/personal/kiss.jpg', frame: 1.2, grow: 1.45, width: 2000, height: 1333, faces: [[0.34, 0.32], [0.56, 0.3]], face: 0.13, alt: 'Micah kissing Jessie by a tree trunk, her curls and his red hair in the sun' },
 ]
 
 function About() {

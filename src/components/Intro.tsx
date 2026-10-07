@@ -118,8 +118,9 @@ export function Intro() {
     // Measure unzoomed: in development React runs this twice, and the first run has zoomed it.
     page.style.transform = ''
     const box = frame.getBoundingClientRect()
-    // The hero's own buttons, which the intro's buttons travel to during the pull-back.
-    const landings = ['.sound-control', '.quality-control'].map(name => document.querySelector<HTMLElement>(`.hero ${name}`))
+    // The hero's own buttons, which the intro's buttons travel to during the pull-back. Looked up
+    // each frame, not kept: pressing Play swaps the hero's sound button for a new element.
+    const landing = (index: number) => document.querySelector<HTMLElement>(`.hero ${['.sound-control', '.quality-control'][index]}`)
     const width = box.width * (1 + 2 * bleed)
     const height = box.height * (1 + 2 * bleed)
     // The whole screen, including what's behind Safari's bars on a phone (the large viewport),
@@ -165,22 +166,23 @@ export function Intro() {
       // Each intro button follows its hero button as the page moves: every frame it is placed a
       // growing share of the way from where it started to where that button is right now (and
       // scaled to its size), so at the end it sits exactly on top of it and the hand-over can't jump.
-      const buttons = [...(actions.current?.children ?? [])] as HTMLElement[]
-      const starts = buttons.map(button => button.getBoundingClientRect())
+      // Also looked up each frame, as pressing Play swaps the intro's sound button too.
+      const introButtons = () => [...(actions.current?.children ?? [])] as HTMLElement[]
+      const starts = introButtons().map(button => button.getBoundingClientRect())
       const begin = performance.now()
       const follow = (now: number) => {
         if (finished || cancelled) return
         const t = Math.min((now - begin) / zoom, 1)
         // Close to the pull-back's own curve, cubic-bezier(.6, 0, .2, 1).
         const share = t < 0.5 ? 4 * t * t * t : 1 - (-2 * t + 2) ** 3 / 2
-        buttons.forEach((button, index) => {
-          const to = landings[index]?.getBoundingClientRect()
+        introButtons().forEach((button, index) => {
+          const to = landing(index)?.getBoundingClientRect()
           const from = starts[index]
-          if (!to || !from.width) return
+          if (!to?.width || !from.width) return
           const x = (to.left + to.width / 2 - (from.left + from.width / 2)) * share
           const y = (to.top + to.height / 2 - (from.top + from.height / 2)) * share
           button.style.translate = `${x.toFixed(2)}px ${y.toFixed(2)}px`
-          button.style.scale = String(1 + (to.width / from.width - 1) * share)
+          button.style.scale = String(1 + (to.width / (button.offsetWidth || from.width) - 1) * share)
         })
         if (t < 1) requestAnimationFrame(follow)
       }

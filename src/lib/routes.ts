@@ -10,7 +10,7 @@ const titles: Record<string, string> = {
 // What each page is about, for search results and link previews (LinkedIn, Slack, messages).
 const descriptions: Record<string, string> = {
   '/': 'Micah VanEwyk is an IT specialist and developer in Southwestern Ontario. Projects, a bit about him, and how to get in touch.',
-  '/about': 'Micah VanEwyk: IT specialist for a group of car dealerships, building LotFlow, with a B.I.T. from Carleton University. Résumé in PDF and Word.',
+  '/about': 'Micah VanEwyk: IT specialist for a group of car dealerships, with a B.I.T. from Carleton University. Résumé in PDF and Word.',
   '/projects': 'Things Micah VanEwyk has built at work, on his own, and at university.',
   '/contact': 'How to reach Micah VanEwyk: email, LinkedIn and GitHub.',
 }

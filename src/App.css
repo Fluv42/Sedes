@@ -235,6 +235,8 @@ a:hover .arrow {
 }
 
 .mark-lotflow img { width: 100%; height: 100%; }
+.mark-wellspring { background: #f3f8f9; border: 1px solid var(--rule); }
+.project-mark.mark-wellspring img { width: 56%; height: 56%; object-fit: contain; border: 0; }
 .mark-server { background: #3f4a3b; color: #f3ead6; }
 .mark-sedes { background: #8c6a3e; color: #f3ead6; }
 .mark-sedes svg { stroke-width: 3; }

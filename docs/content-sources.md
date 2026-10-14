@@ -4,14 +4,15 @@ Use current facts when editing; do not turn plans into shipped outcomes.
 
 | Project | Evidence | Limits |
 | --- | --- | --- |
-| LotFlow | Master Resume v8; Sedes project notes; latest October 2 conversation about the delayed rollout | In development. Do not claim an October rollout, public availability, a live pilot at a named store, or a current test count. No production data or internal URLs. |
+| LotFlow | Master Resume v8; Sedes project notes; latest October 2 conversation about the delayed rollout; the user, October 14, 2026: shelved, like PMRTool | Shelved October 2026, never rolled out. Do not claim a rollout, public availability, a live pilot at a named store, or a test count. No production data or internal URLs. |
+| Wellspring Counselling | The user, October 14, 2026 (Micah's mom's practice); `../WellspringWebsite` README, `docs/DECISIONS.md` (D-005 to D-019) and `docs/CONTENT_REVIEW.md` | In progress, not yet public; in review with Lauren. No clinical claims, credentials, fees or contact details beyond what the site will show. Don't link the preview (wellspring.sedes.ca) or its review page. Logo is Lauren's own (`public/media/wellspring/`). |
 | Litigation Server Cleanup Tool (résumé: "File Disposition Application") | Master Resume v8; prior Sedes cleanup write-up | Résumé says about 1.7 TB initially and 2.2 TB total. Keep approved review/disposition explicit. Older text's 1.8 TB initial figure was superseded. No government files or original sensitive material. |
 | Sedes | User's October 2–5 instructions; supplied wireframe; earlier Sedes brief and principles | Live at sedes.ca since October 4, 2026, hosted on Cloudflare. Omit the developer's day. |
 | BeFarmWell | Master Resume v8; July 21 development/handoff history | Landing page prototype, separate from the mobile app. Later history removed Android UI; use iOS-only wording rather than stale résumé copy. Do not claim responsibility for subsequent WordPress deployment. |
 | TagMe | Public team repository `jessicadpo/capstone`; `tagme/models.py`; locally preserved about template; December 2024 debugging history | Team credit. Source supports Library of Congress items, public/private tags, comments, pinning, points/rewards, tag reporting. History supports interface/database debugging, not sole authorship. |
 | LiteReview | Public team repository `jessicadpo/LiteReview`; README and public sprint screenshot; March 2024 interface/database history | IRM 3004, Git/Scrum team project. README includes unfinished work; do not present all planned features as completed. The embedded screenshot is the original logged-out course screenshot. Jira backlog with user stories estimated in story points: per the user, October 5, 2026. |
 | BookMarks | Local BookMarks coursework; March–April 2024 history; user identifies IRM 3007 | Django library/rewards prototype, designed around OPL reading incentives. Do not claim an actual Ottawa Public Library integration or deployment. |
-| PMRTool | Earlier Sedes write-up and project history | Retired predecessor to LotFlow. Minimal historical entry; no invented performance claims. |
+| PMRTool | Earlier Sedes write-up and project history | Retired predecessor to LotFlow (itself shelved, October 2026). Minimal historical entry; no invented performance claims. |
 
 ## Identity and contact
 

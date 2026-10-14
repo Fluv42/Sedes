@@ -87,7 +87,7 @@ function Home() {
     <section className="about-teaser" aria-labelledby="about-teaser-title">
       <h2 id="about-teaser-title" data-reveal>A little about me</h2>
       <div>
-        <p className="statement" data-reveal>I’m the IT specialist for a group of car dealerships. Right now I’m building LotFlow, an app that tracks their vehicles from reconditioning to delivery. I live on a farm in Southwestern Ontario.</p>
+        <p className="statement" data-reveal>I’m the IT specialist for a group of car dealerships. Right now I’m building a new website for my mom’s counselling practice. I live on a farm in Southwestern Ontario.</p>
         <Link className="cta" href="/about" data-reveal>More about me <Arrow /></Link>
       </div>
     </section>
@@ -146,7 +146,7 @@ function About() {
         <ResumeMenu />
       </div>
       <p className="lede" data-reveal>I’m Micah, an IT specialist and developer. I live on a farm in Southwestern Ontario.</p>
-      <p data-reveal>I’m the IT specialist for five dealerships and a body shop, about 210 people. Day to day that means logins, printers, VPN access and software, sorted in person, over Teams or on the phone, and working with our outside IT providers when something is bigger. I’m also building <Link href="/projects/lotflow">LotFlow</Link>, an app that tracks their vehicles from reconditioning to delivery.</p>
+      <p data-reveal>I’m the IT specialist for five dealerships and a body shop, about 210 people. Day to day that means logins, printers, VPN access and software, sorted in person, over Teams or on the phone, and working with our outside IT providers when something is bigger. I also built <Link href="/projects/lotflow">LotFlow</Link>, an app for tracking their vehicles from reconditioning to delivery, which has since been shelved. Right now I’m building <Link href="/projects/wellspring">a new website</Link> for my mom’s counselling practice.</p>
       <p data-reveal>I finished my Bachelor of Information Technology at Carleton in 2025, in Information Resource Management, done jointly with Algonquin College. Along the way I did a co-op in IT support at Bluewater Health, and worked as an information management assistant at Agriculture and Agri-Food Canada, where I built the <Link href="/projects/server-cleanup">server cleanup tool</Link>.</p>
       <dl className="toolkit" data-reveal>
         <div><dt>Support</dt><dd>Windows and macOS, Microsoft 365 and Teams, VPN and network printers, Cloudflare DNS, NAS setup, Cherwell</dd></div>

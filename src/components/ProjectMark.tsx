@@ -8,6 +8,10 @@ export function ProjectMark({ project, size = 'small' }: { project: Project; siz
   if (project.mark === 'lotflow') {
     return <div className={className} aria-hidden="true"><img src="/media/lotflow/lotflow-app-icon.svg" alt="" /></div>
   }
+  // Wellspring's own mark, Lauren's mountain and waterfall (from public/brand in that project).
+  if (project.mark === 'wellspring') {
+    return <div className={className} aria-hidden="true"><img src="/media/wellspring/wellspring-mark.svg" alt="" /></div>
+  }
   // This site's own logo: the word, and the walnut line ending in an ear of wheat, which grows in.
   if (project.mark === 'sedes' && size === 'large') {
     return <div className={`${className} sedes-logo`} aria-hidden="true"><span><span>Sedes</span><Stalk data-reveal /></span></div>

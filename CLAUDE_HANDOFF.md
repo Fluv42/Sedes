@@ -1,6 +1,6 @@
 # Sedes handoff
 
-Updated October 5, 2026 (Claude). Replaces the October 4 notes.
+Updated October 14, 2026 (Claude). LotFlow is shelved (like PMRTool); the Wellspring Counselling site (`../WellspringWebsite`, Micah's mom's practice) takes its place as the current project on Home and About.
 
 ## Where things are
 

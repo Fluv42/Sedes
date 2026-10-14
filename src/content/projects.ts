@@ -1,4 +1,4 @@
-export type Mark = 'lotflow' | 'server' | 'sedes' | 'screenshot' | 'monogram'
+export type Mark = 'lotflow' | 'wellspring' | 'server' | 'sedes' | 'screenshot' | 'monogram'
 export type Category = 'Work' | 'Personal' | 'University'
 export type Project = {
   slug: string
@@ -20,16 +20,28 @@ export type Project = {
 // Written plainly, the way I'd explain it out loud. Facts are checked in docs/content-sources.md.
 export const projects: Project[] = [
   {
-    slug: 'lotflow', title: 'LotFlow', type: 'Web app', year: '2025–present',
-    status: 'In development', category: 'Work', mark: 'lotflow',
-    summary: 'A shared board that shows where every vehicle is between reconditioning and delivery, and who has it.',
+    slug: 'wellspring', title: 'Wellspring Counselling', type: 'Website', year: '2026–present',
+    status: 'In progress', category: 'Personal', mark: 'wellspring',
+    summary: 'A new website for my mom’s counselling practice: calm, easy to find your way around, and clear about where to get help.',
+    stack: 'React · TypeScript · Vite · Cloudflare Workers', role: 'Design and building it, with my mom approving every word',
+    sections: [
+      { title: 'The job', paragraphs: ['My mom, Lauren Van Ewyk, runs Wellspring Counselling Services near Courtright, Ontario. Her old site had gone out of date, and she liked how this one looked, so I built hers on the same code with its own identity.', 'The people visiting it are often looking for help, so it had to feel calm, be easy to get around, and never make anyone work to find what they need.'] },
+      { title: 'What I built', paragraphs: ['Five pages: Home, Counselling, Speaking, About and Contact. It keeps her original mountain-and-waterfall logo, in cool whites and deep-well blue, with soft footage of far-off waterfalls running beside the words. Each visit shows the next waterfall, with its own verse.', 'Crisis numbers, 9-8-8 and 9-1-1, are on every page and never hidden behind an animation. There’s no sound and no intro to get through, and a pause button on the video.', 'The contact form works without JavaScript and goes to her by email through a small Cloudflare Worker. Nothing is stored, it asks people not to include health details, and it has spam and rate limits built in.'] },
+      { title: 'Working with her', paragraphs: ['I started with six visual directions for her to react to, then built the one that fit. Anything about her credentials, services or privacy waits for her to confirm it, through a review page where she answers the open questions herself.'] },
+      { title: 'Where it stands', paragraphs: ['The first pass is built and in review with her. Once she’s happy with the words, it goes live at wscounselling.com.'] },
+    ],
+  },
+  {
+    slug: 'lotflow', title: 'LotFlow', type: 'Web app', year: '2025–2026',
+    status: 'Shelved', category: 'Work', mark: 'lotflow',
+    summary: 'A shared board that showed where every vehicle was between reconditioning and delivery, and who had it.',
     stack: 'React · TypeScript · Express · SQLite',
-    role: 'I plan it, design it, test it and write the guides',
+    role: 'I planned it, designed it, tested it and wrote the guides',
     sections: [
       { title: 'The job', paragraphs: ['Before a car can be sold or handed over, it goes through a few departments. Somewhere along the way it gets hard to tell where it is, what it still needs, and who has it. I wanted one place anyone could look and know.'] },
-      { title: 'What I built', paragraphs: ['There’s a Recon board and a Delivery board. Each vehicle has its details, its tasks, who it’s assigned to, and a history of what’s happened to it. People only see the stores and tools their job needs, and there are notifications, a way to send feedback, and some reporting.', 'I work out how it should work and look, read through every change and test it. I also write the guides, built a practice mode for new people, and set up backups.'] },
-      { title: 'What I’m learning', paragraphs: ['A board only helps if it matches how people already work. Most of my time goes into making handoffs obvious, keeping it usable on a phone, and making it simple enough that nobody needs a training session to get started.'] },
-      { title: 'Where it stands', paragraphs: ['Still in development. Before a pilot I’m checking it against real roles, real devices and real data. A wider rollout hasn’t been decided.'] },
+      { title: 'What I built', paragraphs: ['There’s a Recon board and a Delivery board. Each vehicle has its details, its tasks, who it’s assigned to, and a history of what’s happened to it. People only see the stores and tools their job needs, and there are notifications, a way to send feedback, and some reporting.', 'I worked out how it should work and look, read through every change and tested it. I also wrote the guides, built a practice mode for new people, and set up backups.'] },
+      { title: 'What I learned', paragraphs: ['A board only helps if it matches how people already work. Most of my time went into making handoffs obvious, keeping it usable on a phone, and making it simple enough that nobody would need a training session to get started.'] },
+      { title: 'Where it stands', paragraphs: ['Shelved in October 2026, before it was rolled out, much like PMRTool before it. The code, the guides and the backups are saved, so it can be picked up again if the time comes.'] },
     ],
   },
   {
@@ -117,7 +129,7 @@ export const projects: Project[] = [
     stack: 'React · TypeScript', role: 'Built for use inside the company',
     sections: [
       { title: 'The project', paragraphs: ['Before LotFlow, I worked on PMRTool, a tool for appraising vehicles at work.'] },
-      { title: 'What came next', paragraphs: ['It was retired. These days that time goes into LotFlow.'] },
+      { title: 'What came next', paragraphs: ['It was retired, and that time went into LotFlow, which has since been shelved too.'] },
       { title: 'Why it’s here', paragraphs: ['It’s part of how I got here, so it keeps a spot on the list, even though it isn’t in use.'] },
     ],
   },
@@ -125,6 +137,6 @@ export const projects: Project[] = [
 
 export const categories: Category[] = ['Work', 'Personal', 'University']
 
-export const featuredProjects = ['lotflow', 'server-cleanup', 'sedes'].map(
+export const featuredProjects = ['wellspring', 'server-cleanup', 'sedes'].map(
   slug => projects.find(project => project.slug === slug)!,
 )

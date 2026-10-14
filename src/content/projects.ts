@@ -41,7 +41,7 @@ export const projects: Project[] = [
       { title: 'The job', paragraphs: ['Before a car can be sold or handed over, it goes through a few departments. Somewhere along the way it gets hard to tell where it is, what it still needs, and who has it. I wanted one place anyone could look and know.'] },
       { title: 'What I built', paragraphs: ['There’s a Recon board and a Delivery board. Each vehicle has its details, its tasks, who it’s assigned to, and a history of what’s happened to it. People only see the stores and tools their job needs, and there are notifications, a way to send feedback, and some reporting.', 'I worked out how it should work and look, read through every change and tested it. I also wrote the guides, built a practice mode for new people, and set up backups.'] },
       { title: 'What I learned', paragraphs: ['A board only helps if it matches how people already work. Most of my time went into making handoffs obvious, keeping it usable on a phone, and making it simple enough that nobody would need a training session to get started.'] },
-      { title: 'Where it stands', paragraphs: ['Shelved in October 2026, before it was rolled out, much like PMRTool before it. The code, the guides and the backups are saved, so it can be picked up again if the time comes.'] },
+      { title: 'Where it stands', paragraphs: ['Shelved in October 2026, before it was rolled out. The code, the guides and the backups are saved, so it can be picked up again if the time comes.'] },
     ],
   },
   {
@@ -129,7 +129,7 @@ export const projects: Project[] = [
     stack: 'React · TypeScript', role: 'Built for use inside the company',
     sections: [
       { title: 'The project', paragraphs: ['Before LotFlow, I worked on PMRTool, a tool for appraising vehicles at work.'] },
-      { title: 'What came next', paragraphs: ['It was retired, and that time went into LotFlow, which has since been shelved too.'] },
+      { title: 'What came next', paragraphs: ['It was retired, and that time went into LotFlow.'] },
       { title: 'Why it’s here', paragraphs: ['It’s part of how I got here, so it keeps a spot on the list, even though it isn’t in use.'] },
     ],
   },
